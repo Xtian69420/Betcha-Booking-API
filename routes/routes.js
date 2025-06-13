@@ -4,6 +4,7 @@ const testController = require('../controllers/testController');
 
 // Status check
 router.get('/', testController.run);
+router.get('/hi', testController.greet);
 
 // CRUD routes for test controllers
 router.post('/test', testController.createTest);

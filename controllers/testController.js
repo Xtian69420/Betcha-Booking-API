@@ -1,6 +1,5 @@
 const Test = require('../models/testModels');
 
-// ✅ Create
 exports.createTest = async (req, res) => {
     try {
         const test = new Test({ name: req.body.name });
@@ -11,7 +10,6 @@ exports.createTest = async (req, res) => {
     }
 };
 
-// ✅ Read All
 exports.getAllTests = async (req, res) => {
     try {
         const tests = await Test.find();
@@ -21,7 +19,6 @@ exports.getAllTests = async (req, res) => {
     }
 };
 
-// ✅ Read One
 exports.getTestById = async (req, res) => {
     try {
         const test = await Test.findById(req.params.id);
@@ -32,7 +29,6 @@ exports.getTestById = async (req, res) => {
     }
 };
 
-// ✅ Update
 exports.updateTest = async (req, res) => {
     try {
         const updated = await Test.findByIdAndUpdate(
@@ -47,7 +43,6 @@ exports.updateTest = async (req, res) => {
     }
 };
 
-// ✅ Delete
 exports.deleteTest = async (req, res) => {
     try {
         const deleted = await Test.findByIdAndDelete(req.params.id);
@@ -58,7 +53,10 @@ exports.deleteTest = async (req, res) => {
     }
 };
 
-// ✅ Server Test Route
 exports.run = (req, res) => {
     res.json({ message: 'Server Route Is Working...' });
 };
+
+exports.greet = (req, res) => {
+    res.json({ message: 'Hi, Briana!'});
+}
