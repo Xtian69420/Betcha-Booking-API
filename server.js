@@ -3,14 +3,12 @@ const express = require('express');
 const mongoose = require('mongoose');
 const app = express();
 const cors = require('cors');
+const fs = require('fs');
+const path = require('path');
 
 app.use(cors());
 app.use(express.json()); 
 app.use(express.urlencoded({ extended: true }));
-
-// initializing
-const fs = require('fs');
-const path = require('path');
 
 const uploadDir = path.join(__dirname, 'uploads');
 if (!fs.existsSync(uploadDir)) {
