@@ -33,5 +33,7 @@ router.get('/guest/display', guestController.getAllGuests);
 router.put('/guest/archive/:id', guestController.archiveGuest);
 router.put('/guest/update/:id', guestController.updateGuest);
 router.put('/guest/update/pfp/:id', upload.single('pfp'), guestController.updateGuestPfp);
+router.put('/guest/unarchive/:id', guestController.unarchiveGuest);
+
 
 module.exports = router;

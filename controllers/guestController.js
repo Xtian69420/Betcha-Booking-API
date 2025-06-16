@@ -245,3 +245,26 @@ exports.updateGuestPfp = async (req, res) => {
     res.status(500).json({ message: 'Failed to update profile picture' });
   }
 };
+
+exports.unarchiveGuest = async (req, res) => {
+  try {
+    const guestId = req.params.id;
+
+    const guestUser = await guest.findById(guestId);
+    if (!guestUser) {
+      return res.status(404).json({ message: 'Guest not found' });
+    }
+
+    if (!guestUser.archived) {
+      return res.status(400).json({ message: 'Guest is already active' });
+    }
+
+    guestUser.archived = false;
+    await guestUser.save();
+
+    res.status(200).json({ message: 'Guest unarchived successfully', guest: guestUser });
+  } catch (error) {
+    console.error('Unarchive Guest Error:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+};
