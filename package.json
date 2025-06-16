@@ -9,11 +9,14 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "bcrypt": "^6.0.0",
     "cors": "^2.8.5",
     "express": "^5.1.0",
+    "googleapis": "^150.0.1",
     "install": "^0.13.0",
     "mongodb": "^6.17.0",
     "mongoose": "^8.15.2",
+    "multer": "^2.0.1",
     "npm": "^11.4.2"
   },
   "devDependencies": {

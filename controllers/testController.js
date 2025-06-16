@@ -58,5 +58,5 @@ exports.run = (req, res) => {
 };
 
 exports.greet = (req, res) => {
-    res.json({ message: 'Hi, Briana!'});
+    res.json({ message: 'Hi!'});
 }
