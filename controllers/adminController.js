@@ -89,3 +89,122 @@ exports.createAdmin = async (req, res) => {
   }
 };
 
+exports.updateAdmin = async (req, res) =>{
+    try{
+        const { id } = req.params;
+        const updateFields = req.body;
+
+        if (!id) {
+            return res.status(400).json({ message: 'Admin ID is required in request!' });
+        }
+        if (!updateFields || Object.keys(updateFields).length === 0) {
+            return res.status(400).json({ message: 'No information provided to update' });
+        }
+
+        const updatedAdmin = await admin.findByIdAndUpdate(
+            id,
+            { $set: updateFields },
+            { new: true }
+        );
+        if (!updatedAdmin) {
+            return res.status(404).json({ message: 'Admin not found' });
+        }
+    
+        res.status(200).json({ message: 'Admin updated successfully', admin: updatedAdmin });
+    } catch (error) {
+    console.error('Update Admin Error:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+}
+
+exports.getAllAdmin = async (req, res) => {
+  try {
+    const admins = await admin.find();
+
+    if (admins.length === 0) {
+      return res.status(404).json({ message: 'No admin accounts found' });
+    }
+
+    res.status(200).json(admins);
+  } catch (error) {
+    console.error('Get All Admin Error:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+};
+
+exports.updateAdminPfp = async (req, res) =>{
+    try {
+        const adminId = req.params.id;
+        if (!req.file) return res.status(400).json({ message: 'No profile picture uploaded' });
+
+        const adminUser = await admin.findById(adminId);
+        if (!adminUser) return res.status(404).json({ message: 'Admin not found' });
+
+        const fileMetadata = {
+            name: `${Date.now()}-${req.file.originalname}`,
+            parents: [folderId],
+        };
+    
+        const media = {
+            mimeType: req.file.mimetype,
+            body: fs.createReadStream(req.file.path),
+        };
+    
+        const file = await drive.files.create({
+            resource: fileMetadata,
+            media,
+            fields: 'id',
+        });
+    
+        const fileId = file.data.id;
+    
+        await drive.permissions.create({
+            fileId,
+            requestBody: {
+            role: 'reader',
+            type: 'anyone',
+            },
+        });
+    
+        const pfplink = `https://drive.google.com/thumbnail?id=${fileId}&sz=w1920-h1080`;
+
+        adminUser.pfplink = pfplink;
+        await adminUser.save();
+
+        fs.unlinkSync(req.file.path);
+    
+        res.status(200).json({
+            message: 'Profile picture updated successfully',
+            pfplink,
+        });
+
+    } catch (error) {
+        console.error('Update Admin PFP Error:', error);
+        res.status(500).json({ message: 'Failed to update profile picture' });
+    }
+}
+
+exports.deleteAdmin = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    if (!id) {
+      return res.status(400).json({ message: 'Admin ID is required' });
+    }
+
+    const deletedAdmin = await admin.findByIdAndDelete(id);
+
+    if (!deletedAdmin) {
+      return res.status(404).json({ message: 'Admin not found' });
+    }
+
+    res.status(200).json({
+      message: 'Admin account deleted successfully',
+      admin: deletedAdmin
+    });
+
+  } catch (error) {
+    console.error('Delete Admin Error:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+};
