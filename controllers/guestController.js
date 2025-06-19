@@ -1,4 +1,5 @@
 const guest = require('../models/guestModel');
+const admin = require('../models/adminModel');
 const bcrypt = require('bcrypt');
 const { google } = require('googleapis');
 const fs = require('fs');
@@ -28,16 +29,14 @@ exports.createGuest = async (req, res) => {
       sex
     } = req.body;
 
-    // Check if email is already registered
+    const existingAdmin = await admin.findOne({ email });
     const existingGuest = await guest.findOne({ email });
-    if (existingGuest) {
+    if (existingAdmin || existingGuest) {
       return res.status(400).json({ message: 'Email already in use' });
     }
 
-    // Hash password securely
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Upload profile picture to Google Drive
     let pfplink = '';
     if (req.file) {
       try {
@@ -58,7 +57,6 @@ exports.createGuest = async (req, res) => {
 
         const fileId = file.data.id;
 
-        // Make the uploaded file public
         await drive.permissions.create({
           fileId,
           requestBody: {
@@ -67,10 +65,8 @@ exports.createGuest = async (req, res) => {
           }
         });
 
-        // Get thumbnail link
         pfplink = `https://drive.google.com/thumbnail?id=${fileId}&sz=w1920-h1080`;
 
-        // Delete local file after upload
         fs.unlinkSync(req.file.path);
       } catch (uploadErr) {
         console.error('Google Drive Upload Error:', uploadErr);
@@ -78,7 +74,6 @@ exports.createGuest = async (req, res) => {
       }
     }
 
-    // Create and save guest
     const newGuest = new guest({
       firstname,
       minitial,
@@ -86,14 +81,13 @@ exports.createGuest = async (req, res) => {
       email,
       password: hashedPassword,
       phoneNumber,
-      birthday: new Date(birthday), // Ensure birthday is a Date object
+      birthday: new Date(birthday), 
       sex,
       pfplink
     });
 
     await newGuest.save();
 
-    // Exclude password in response
     const { password: _, ...safeGuest } = newGuest.toObject();
 
     res.status(201).json({
@@ -138,11 +132,10 @@ exports.updateGuest = async (req, res) => {
 };
 
 
-exports.guestDisplay = async (req, res) => {
+exports.displayGuest = async (req, res) => {
   try {
     const guestId = req.params.id;
 
-    // Find guest by ID
     const guestData = await guest.findById(guestId);
 
     if (!guestData) {
@@ -228,11 +221,9 @@ exports.updateGuestPfp = async (req, res) => {
 
     const pfplink = `https://drive.google.com/thumbnail?id=${fileId}&sz=w1920-h1080`;
 
-    // Update DB
     guestUser.pfplink = pfplink;
     await guestUser.save();
 
-    // Clean up local file
     fs.unlinkSync(req.file.path);
 
     res.status(200).json({

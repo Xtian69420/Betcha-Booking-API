@@ -1,7 +1,10 @@
 const express = require('express');
 const router = express.Router();
+
 const testController = require('../controllers/testController');
 const guestController = require('../controllers/guestController');
+const adminController = require('../controllers/adminController');
+
 const multer = require('multer');
 const path = require('path');
 
@@ -28,11 +31,14 @@ router.delete('/test/:id', testController.deleteTest);
 
 // Guest User level
 router.post('/guest/create', upload.single('pfp'), guestController.createGuest);
-router.get('/guest/display/:id', guestController.guestDisplay);
+router.get('/guest/display/:id', guestController.displayGuest);
 router.get('/guest/display', guestController.getAllGuests);
 router.put('/guest/archive/:id', guestController.archiveGuest);
 router.put('/guest/update/:id', guestController.updateGuest);
 router.put('/guest/update/pfp/:id', upload.single('pfp'), guestController.updateGuestPfp);
 router.put('/guest/unarchive/:id', guestController.unarchiveGuest);
+
+// Admin User level
+router.post('/admin/create', upload.single('pfp'), adminController.createAdmin);
 
 module.exports = router;
