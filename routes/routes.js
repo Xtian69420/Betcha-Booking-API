@@ -1,7 +1,6 @@
 const express = require('express');
 const router = express.Router();
 
-const testController = require('../controllers/testController');
 const guestController = require('../controllers/guestController');
 const adminController = require('../controllers/adminController');
 const employeeController = require ('../controllers/employeeController');
@@ -21,15 +20,6 @@ const storage = multer.diskStorage({
 });
 const upload = multer({ storage });
 
-router.get('/', testController.run);
-router.get('/hi', testController.greet);
-
-// CRUD routes for test controllers
-router.post('/test', testController.createTest);
-router.get('/test', testController.getAllTests);
-router.get('/test/:id', testController.getTestById);
-router.put('/test/:id', testController.updateTest);
-router.delete('/test/:id', testController.deleteTest);
 
 // Guest User level
 router.post('/guest/create', upload.single('pfp'), guestController.createGuest);
