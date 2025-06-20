@@ -7,8 +7,13 @@ const employeeSchema = new mongoose.Schema({
     email: { type: String, required: true, unique: true },
     password: { type: String, required: true },
     pfplink: { type: String },
-    role: { type: string },
+    role: {
+        type: [String],
+        required: true,
+        default: ['default']
+    },
     userType: { type: String, default: 'employee' },
+    status: { type: String, default: 'active' }
 }, {
   collection: 'employee_tb',
   timestamps: true

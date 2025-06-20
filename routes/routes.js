@@ -4,6 +4,7 @@ const router = express.Router();
 const testController = require('../controllers/testController');
 const guestController = require('../controllers/guestController');
 const adminController = require('../controllers/adminController');
+const employeeController = require ('../controllers/employeeController');
 
 const multer = require('multer');
 const path = require('path');
@@ -44,5 +45,16 @@ router.get('/admin/display', adminController.getAllAdmin);
 router.put('/admin/update/:id', adminController.updateAdmin);
 router.put('/admin/update/pfp/:id', upload.single('pfp'), adminController.updateAdminPfp);
 router.delete('/admin/delete/:id', adminController.deleteAdmin);
+
+// Employee User level
+router.post('/employee/create', upload.single('pfp'), employeeController.createEmployee);
+router.get('/employee/display', employeeController.getAllEmployees);
+router.get('/employee/display/:id', employeeController.getEmployeeById);
+router.put('/employee/update/:id', employeeController.updateEmployee);
+router.put('/employee/update/pfp/:id', upload.single('pfp'), employeeController.updateEmployeePfp);
+router.put('/employee/archive/:id', employeeController.archiveEmployee);
+router.put('/employee/unarchive/:id', employeeController.unarchiveEmployee);
+router.delete('/employee/delete/:id', employeeController.deleteEmployee);
+router.get('/employee/search', employeeController.searchEmployees);
 
 module.exports = router;
