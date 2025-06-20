@@ -11,5 +11,4 @@ const rolesSchema = new mongoose.Schema({
     collection: 'roles_tb',
     timestamps: true
 })
-
 module.exports = mongoose.model('roles', rolesSchema)

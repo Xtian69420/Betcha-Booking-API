@@ -20,7 +20,7 @@ const folderId = '1sL-VBECK9rMbBnJqxtL52IObJTrwysno';
 // Create Employee
 exports.createEmployee = async (req, res) => {
   try {
-    const { firstname, minitial, lastname, email, password, role } = req.body;
+    const { firstname, minitial, lastname, email, password, role, properties } = req.body;
 
     const existingAdmin = await admin.findOne({ email });
     const existingGuest = await guest.findOne({ email });
@@ -69,7 +69,8 @@ exports.createEmployee = async (req, res) => {
       email,
       password: hashedPassword,
       pfplink,
-      role
+      role: Array.isArray(role) ? role : [role],
+      Properties: Array.isArray(Properties) ? Properties : [Properties]
     });
 
     await newEmployee.save();
@@ -286,6 +287,7 @@ exports.searchEmployees = async (req, res) => {
         { email: searchRegex },
         { role: searchRegex },
         { userType: searchRegex },
+        { properties: searchRegex},
         { status: searchRegex }
       ]
     });
