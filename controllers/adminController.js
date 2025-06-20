@@ -1,5 +1,6 @@
 const admin = require('../models/adminModel');
 const guest = require('../models/guestModel')
+const employee = require ('../models/employeeModel');
 const bcrypt = require('bcrypt');
 const { google } = require('googleapis');
 const fs = require('fs');
@@ -22,7 +23,8 @@ exports.createAdmin = async (req, res) => {
 
     const existingAdmin = await admin.findOne({ email });
     const existingGuest = await guest.findOne({ email });
-    if (existingAdmin || existingGuest) {
+    const existingEmployee = await employee.findOne( { email });
+    if (existingAdmin || existingGuest || existingEmployee) {
       return res.status(400).json({ message: 'Email already in use' });
     }
 
@@ -99,6 +101,16 @@ exports.updateAdmin = async (req, res) =>{
         }
         if (!updateFields || Object.keys(updateFields).length === 0) {
             return res.status(400).json({ message: 'No information provided to update' });
+        }
+
+        if (updateFields.email) {
+          const existingAdmin = await admin.findOne({ email: updateFields.email });
+          const existingGuest = await guest.findOne({ email: updateFields.email, _id: { $ne: id } });
+          const existingEmployee = await employee.findOne({ email: updateFields.email });
+    
+          if (existingAdmin || existingGuest || existingEmployee) {
+            return res.status(400).json({ message: 'Email already in use' });
+          }
         }
 
         const updatedAdmin = await admin.findByIdAndUpdate(
