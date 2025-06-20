@@ -12,6 +12,10 @@ const employeeSchema = new mongoose.Schema({
         required: true,
         default: ['default']
     },
+    Properties: {
+        type: [String],
+        default: ['default']
+    },
     userType: { type: String, default: 'employee' },
     status: { type: String, default: 'active' }
 }, {
