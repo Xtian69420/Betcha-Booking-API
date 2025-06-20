@@ -1,6 +1,7 @@
 const employee = require('../models/employeeModel');
 const admin = require('../models/adminModel');
 const guest = require('../models/guestModel');
+const role = require('../models/rolesModel');
 const bcrypt = require('bcrypt');
 const { google } = require('googleapis');
 const fs = require('fs');
@@ -126,11 +127,16 @@ exports.updateEmployee = async (req, res) => {
   }
 };
 
-// Get All Employees
+
 exports.getAllEmployees = async (req, res) => {
   try {
-    const employees = await employee.find();
-    if (employees.length === 0) return res.status(404).json({ message: 'No employee accounts found' });
+    const employees = await employee
+      .find()
+      .populate('role')         
+      //.populate('properties');  
+
+    if (employees.length === 0)
+      return res.status(404).json({ message: 'No employee accounts found' });
 
     res.status(200).json(employees);
   } catch (error) {
@@ -138,6 +144,8 @@ exports.getAllEmployees = async (req, res) => {
     res.status(500).json({ message: 'Internal server error' });
   }
 };
+
+
 
 // Update Employee Profile Picture
 exports.updateEmployeePfp = async (req, res) => {
@@ -215,7 +223,11 @@ exports.deleteEmployee = async (req, res) => {
 exports.getEmployeeById = async (req, res) => {
   try {
     const { id } = req.params;
-    const employeeUser = await employee.findById(id);
+
+    const employeeUser = await employee
+      .findById(id)
+      .populate('role')         
+      //.populate('properties');  
 
     if (!employeeUser) {
       return res.status(404).json({ message: 'Employee not found' });

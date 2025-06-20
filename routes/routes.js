@@ -5,6 +5,7 @@ const testController = require('../controllers/testController');
 const guestController = require('../controllers/guestController');
 const adminController = require('../controllers/adminController');
 const employeeController = require ('../controllers/employeeController');
+const rolesController = require('../controllers/roleController');
 
 const multer = require('multer');
 const path = require('path');
@@ -56,5 +57,14 @@ router.put('/employee/archive/:id', employeeController.archiveEmployee);
 router.put('/employee/unarchive/:id', employeeController.unarchiveEmployee);
 router.delete('/employee/delete/:id', employeeController.deleteEmployee);
 router.get('/employee/search', employeeController.searchEmployees);
+
+// Role routes
+router.post('/roles/create', rolesController.createRoles);
+router.put('/roles/update/:id', rolesController.updateRoles);
+router.delete('/roles/delete/:id', rolesController.deleteRoles);
+router.get('/roles/employees/:name', rolesController.displayEmployeeByRoles);
+router.get('/roles/display', rolesController.getAllRoles);
+router.get('/roles/display/:id', rolesController.getRoleById);
+
 
 module.exports = router;

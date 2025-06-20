@@ -7,13 +7,14 @@ const employeeSchema = new mongoose.Schema({
     email: { type: String, required: true, unique: true },
     password: { type: String, required: true },
     pfplink: { type: String },
-    role: {
-        type: [String],
-        required: true,
-        default: ['default']
-    },
+    role: [{
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'roles',
+      required: true
+    }],
     properties: {
         type: [String],
+        ref: 'properties',
         default: ['default']
     },
     userType: { type: String, default: 'employee' },
