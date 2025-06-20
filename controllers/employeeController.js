@@ -25,6 +25,7 @@ exports.createEmployee = async (req, res) => {
     const existingAdmin = await admin.findOne({ email });
     const existingGuest = await guest.findOne({ email });
     const existingEmployee = await employee.findOne({ email });
+
     if (existingAdmin || existingGuest || existingEmployee) {
       return res.status(400).json({ message: 'Email already in use' });
     }
@@ -70,7 +71,7 @@ exports.createEmployee = async (req, res) => {
       password: hashedPassword,
       pfplink,
       role: Array.isArray(role) ? role : [role],
-      Properties: Array.isArray(Properties) ? Properties : [Properties]
+      properties: Array.isArray(properties) ? properties : [properties]
     });
 
     await newEmployee.save();

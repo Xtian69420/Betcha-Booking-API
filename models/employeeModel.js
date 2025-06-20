@@ -12,7 +12,7 @@ const employeeSchema = new mongoose.Schema({
         required: true,
         default: ['default']
     },
-    Properties: {
+    properties: {
         type: [String],
         default: ['default']
     },
