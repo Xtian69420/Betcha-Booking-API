@@ -5,6 +5,8 @@ const guestController = require('../controllers/guestController');
 const adminController = require('../controllers/adminController');
 const employeeController = require ('../controllers/employeeController');
 const rolesController = require('../controllers/roleController');
+const otpController = require('../controllers/otpController');
+const authenticationController = require('../controllers/authenticationController');
 
 const multer = require('multer');
 const path = require('path');
@@ -56,5 +58,14 @@ router.get('/roles/employees/:name', rolesController.displayEmployeeByRoles);
 router.get('/roles/display', rolesController.getAllRoles);
 router.get('/roles/display/:id', rolesController.getRoleById);
 
+// OTP routes
+router.post('/otp/register', otpController.sendOtpRegistration);
+router.post('/otp/forgot-password', otpController.sendOtpForgotPassword);
+router.post('/otp/verify', otpController.verifyOtp);
+router.post('/otp/resend', otpController.resendOtp);
+
+// Auth routes
+router.post('/auth/login', authenticationController.Login);
+router.put('/auth/update-password', authenticationController.updatePassword);
 
 module.exports = router;
