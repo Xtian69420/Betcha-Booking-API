@@ -17,7 +17,7 @@ if (!fs.existsSync(uploadDir)) {
 
 // db
 const dburl = process.env.DATABASE_URL;
-mongoose.connect(dburl, { useNewUrlParser: true, useUnifiedTopology: true });
+mongoose.connect(dburl);
 const db = mongoose.connection;
 db.on('error', (error) => console.error(error));
 db.once('open', () => console.log('Connected to MongoDB'));
