@@ -12,7 +12,7 @@ const propertyController = require ('../controllers/propertyController');
 const multer = require('multer');
 const path = require('path');
 
-// upload setup
+// upload setup (REUSABLE)
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     cb(null, 'uploads/');
