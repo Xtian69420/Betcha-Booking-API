@@ -75,11 +75,11 @@ router.get('/property/display', propertyController.displayAllProperty);
 router.get('/property/display/:id', propertyController.displayByIdProperty);
 router.put('/property/update/:id', upload.none(), propertyController.updateProperty);
 router.put('/property/update/photos/:id', upload.array('photos', 10), propertyController.updatePhotoProperty);
+router.patch('/property/update/status/:id', propertyController.editPropertyStatus);
 
 // Property reports
 router.post('/property/:propertyId/report', propertyController.createReport);
 router.patch('/property/:propertyId/report/edit-status', propertyController.editReportStatus);
 router.delete('/property/:propertyId/report/delete', propertyController.deleteReport);
-
 
 module.exports = router;

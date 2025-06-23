@@ -344,3 +344,29 @@ exports.deleteReport = async (req, res) => {
     res.status(500).json({ error: 'Internal server error.' });
   }
 };
+
+exports.editPropertyStatus = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { status } = req.body;
+
+    if (!status) {
+      return res.status(400).json({ error: 'Status is required.' });
+    }
+
+    const updatedProperty = await Property.findByIdAndUpdate(
+      id,
+      { status },
+      { new: true, runValidators: true }
+    );
+
+    if (!updatedProperty) {
+      return res.status(404).json({ error: 'Property not found.' });
+    }
+
+    res.status(200).json({ message: 'Property status updated successfully.', property: updatedProperty });
+  } catch (err) {
+    console.error('Error updating property status:', err);
+    res.status(500).json({ error: 'Internal server error.' });
+  }
+};
