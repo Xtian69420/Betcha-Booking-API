@@ -7,6 +7,7 @@ const employeeController = require ('../controllers/employeeController');
 const rolesController = require('../controllers/roleController');
 const otpController = require('../controllers/otpController');
 const authenticationController = require('../controllers/authenticationController');
+const propertyController = require ('../controllers/propertyController');
 
 const multer = require('multer');
 const path = require('path');
@@ -67,5 +68,18 @@ router.post('/otp/resend', otpController.resendOtp);
 // Auth routes
 router.post('/auth/login', authenticationController.Login);
 router.put('/auth/update-password', authenticationController.updatePassword);
+
+// Property routes
+router.post('/property/create', upload.array('photo', 10), propertyController.createProperty);
+router.get('/property/display', propertyController.displayAllProperty);
+router.get('/property/display/:id', propertyController.displayByIdProperty);
+router.put('/property/update/:id', upload.none(), propertyController.updateProperty);
+router.put('/property/update/photos/:id', upload.array('photos', 10), propertyController.updatePhotoProperty);
+
+// Property reports
+router.post('/property/:propertyId/report', propertyController.createReport);
+router.patch('/property/:propertyId/report/edit-status', propertyController.editReportStatus);
+router.delete('/property/:propertyId/report/delete', propertyController.deleteReport);
+
 
 module.exports = router;

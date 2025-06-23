@@ -1,27 +1,27 @@
 const mongoose = require('mongoose');
 
 const reportSchema = new mongoose.Schema({
+    id : { type: Number },
     sender: { type: String, required: true },
     category: { type: String, required: true },
-    status: { type: String, required: true },
+    status: { type: String, default: 'Unsolved' },
     date: { type: Date, required: true },
     transNo: { type: String, required: true },
     message: { type: String, required: true }
 }, { _id: false });
 
-
 const propertySchema = new mongoose.Schema({
-    status : { type: String, default : 'Active' },
+    status : { type: String,  enum: ['Active', 'Inactive', 'Archived'], default : 'Active'},
     name : { type: String, required : true },
     address : { type: String, required : true},
     mapLink : { type : String, required : true },
     city : { type : String, required : true },
     description : { type: String, required : true },
-    category : { type : String, default : 'default' },
+    category : { type : String, enum: ['Barkada', 'Couple', 'Family', 'Other'], default : 'Other' },
     packageCapacity : {type: Number, required : true},
     maxCapacity : { type : Number, required : true },
-    timeIn: { type: String, required: true, match: /^([0-1]\d|2[0-3]):([0-5]\d)$/ },
-    timeOut: { type: String, required: true, match: /^([0-1]\d|2[0-3]):([0-5]\d)$/ },
+    timeIn: { type: String, required: true, },
+    timeOut: { type: String, required: true, },
     packagePrice : { type : Number, required : true },
     reservationFee : { type : Number, required : true },
     additionalPax : { type : Number, required : true },
@@ -36,12 +36,17 @@ const propertySchema = new mongoose.Schema({
     discount : { type : Number, default : 0},
     rating : { type: Number, default : 0 },
     reports: {
-        unsolved: [reportSchema],
-        solved: [reportSchema]
+        unsolved: { type: [reportSchema], default: [] },
+        solved: { type: [reportSchema], default: [] }
     },
-    photoLinks : {
+    photoLinks: {
         type: [String],
-        required: true
+        required: true,
+        default: []
+    },
+    calendarListId : {
+        type: [String],
+        default : []
     }
 },{
     collection: 'property_tb',
