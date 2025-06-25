@@ -78,6 +78,10 @@ router.put('/property/update/:id', upload.none(), propertyController.updatePrope
 router.put('/property/update/photos/:id', upload.array('photos', 10), propertyController.updatePhotoProperty);
 router.patch('/property/update/status/:id', propertyController.editPropertyStatus);
 
+// adding maintenance
+router.post('/property/:id/maintenance/create', propertyController.createMaintenanceById);
+
+
 // Property reports
 router.post('/property/:propertyId/report', propertyController.createReport);
 router.patch('/property/:propertyId/report/edit-status', propertyController.editReportStatus);

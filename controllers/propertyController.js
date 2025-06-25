@@ -409,3 +409,47 @@ exports.searchPropertyAdmin = async (req, res) => {
     res.status(500).json({ message: 'Internal server error' });
   }
 };
+
+exports.createMaintenanceById = async (req, res) => {
+  try {
+    const { id } = req.params;
+    let { dates, status } = req.body;
+
+    if (!dates) {
+      return res.status(400).json({ message: 'Dates are required.' });
+    }
+
+    if (!Array.isArray(dates)) {
+      dates = [dates];
+    }
+
+    const validStatuses = ['Active', 'Deactivated'];
+    if (status && !validStatuses.includes(status)) {
+      return res.status(400).json({ message: 'Invalid status value.' });
+    }
+
+    const newMaintenance = {
+      dates,
+      status: status || 'Active'
+    };
+
+    const updatedProperty = await Property.findByIdAndUpdate(
+      id,
+      { $push: { maintenance: newMaintenance } },
+      { new: true }
+    );
+
+    if (!updatedProperty) {
+      return res.status(404).json({ message: 'Property not found.' });
+    }
+
+    res.status(200).json({
+      message: 'Maintenance dates added successfully.',
+      maintenance: updatedProperty.maintenance
+    });
+
+  } catch (err) {
+    console.error('Error adding maintenance:', err);
+    res.status(500).json({ message: 'Server error while adding maintenance.' });
+  }
+};
