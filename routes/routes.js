@@ -8,6 +8,7 @@ const rolesController = require('../controllers/roleController');
 const otpController = require('../controllers/otpController');
 const authenticationController = require('../controllers/authenticationController');
 const propertyController = require ('../controllers/propertyController');
+const paymentController = require ('../controllers/paymentController');
 
 const multer = require('multer');
 const path = require('path');
@@ -22,7 +23,6 @@ const storage = multer.diskStorage({
   }
 });
 const upload = multer({ storage });
-
 
 // Guest User level
 router.post('/guest/create', upload.single('pfp'), guestController.createGuest);
@@ -71,6 +71,7 @@ router.put('/auth/update-password', authenticationController.updatePassword);
 
 // Property routes
 router.post('/property/create', upload.array('photo', 10), propertyController.createProperty);
+router.get('/property/search', propertyController.searchPropertyAdmin);
 router.get('/property/display', propertyController.displayAllProperty);
 router.get('/property/display/:id', propertyController.displayByIdProperty);
 router.put('/property/update/:id', upload.none(), propertyController.updateProperty);
@@ -81,5 +82,11 @@ router.patch('/property/update/status/:id', propertyController.editPropertyStatu
 router.post('/property/:propertyId/report', propertyController.createReport);
 router.patch('/property/:propertyId/report/edit-status', propertyController.editReportStatus);
 router.delete('/property/:propertyId/report/delete', propertyController.deleteReport);
+
+// Payment method routes
+router.post('/paymentPlatform/create', upload.single('qrPicture'), paymentController.createPayment);
+router.get('/payments/display', paymentController.displayAllPayment);
+router.get('/payments/display/:id', paymentController.displayByIdPayment);
+router.put('/payments/update/:id', upload.single('qrPicture'),paymentController.updatePayment);
 
 module.exports = router;

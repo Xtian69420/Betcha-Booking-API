@@ -88,7 +88,7 @@ exports.createProperty = async (req, res) => {
       amenities: processedAmenities,
       otherAmenities: processedOtherAmenities,
       photoLinks,
-      calendarListId: calendarList // <-- fixed
+      calendarListId: calendarList 
     });
 
     const savedProperty = await newProperty.save();
@@ -368,5 +368,44 @@ exports.editPropertyStatus = async (req, res) => {
   } catch (err) {
     console.error('Error updating property status:', err);
     res.status(500).json({ error: 'Internal server error.' });
+  }
+};
+
+exports.searchPropertyAdmin = async (req, res) => {
+  try {
+    const { query } = req.query;
+
+    if (!query || query.trim() === '') {
+      return res.status(400).json({ message: 'Search query is required' });
+    }
+
+    const searchRegex = new RegExp(query, 'i');
+    const numberQuery = Number(query);
+
+    const conditions = [
+      { name: searchRegex },
+      { status: searchRegex },
+      { city: searchRegex },
+      { address: searchRegex },
+      { category: searchRegex },
+      { amenities: searchRegex },
+      { otherAmenities: searchRegex }
+    ];
+
+    // Only add price search if the query is a valid number
+    if (!isNaN(numberQuery)) {
+      conditions.push({ packagePrice: numberQuery });
+    }
+
+    const results = await Property.find({ $or: conditions });
+
+    if (results.length === 0) {
+      return res.status(404).json({ message: 'No matching Property found' });
+    }
+
+    res.status(200).json(results);
+  } catch (error) {
+    console.error('Search Property Error:', error);
+    res.status(500).json({ message: 'Internal server error' });
   }
 };

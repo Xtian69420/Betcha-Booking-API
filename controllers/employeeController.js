@@ -290,7 +290,7 @@ exports.searchEmployees = async (req, res) => {
       return res.status(400).json({ message: 'Search query is required' });
     }
 
-    const searchRegex = new RegExp(query, 'i'); // case-insensitive match
+    const searchRegex = new RegExp(query, 'i'); 
 
     const results = await employee.find({
       $or: [
