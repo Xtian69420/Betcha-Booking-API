@@ -428,24 +428,35 @@ exports.createMaintenanceById = async (req, res) => {
       return res.status(400).json({ message: 'Invalid status value.' });
     }
 
+    const incomingDates = dates.map(date => new Date(date).toISOString().split('T')[0]);
+
+    const property = await Property.findById(id);
+    if (!property) {
+      return res.status(404).json({ message: 'Property not found.' });
+    }
+
+    const existingDates = property.maintenance
+      .flatMap(entry => entry.dates.map(d => new Date(d).toISOString().split('T')[0]));
+
+    const duplicateDates = incomingDates.filter(date => existingDates.includes(date));
+    if (duplicateDates.length > 0) {
+      return res.status(400).json({
+        message: 'One or more of the dates already exist in maintenance.',
+        duplicateDates
+      });
+    }
+
     const newMaintenance = {
       dates,
       status: status || 'Active'
     };
 
-    const updatedProperty = await Property.findByIdAndUpdate(
-      id,
-      { $push: { maintenance: newMaintenance } },
-      { new: true }
-    );
-
-    if (!updatedProperty) {
-      return res.status(404).json({ message: 'Property not found.' });
-    }
+    property.maintenance.push(newMaintenance);
+    await property.save();
 
     res.status(200).json({
       message: 'Maintenance dates added successfully.',
-      maintenance: updatedProperty.maintenance
+      maintenance: property.maintenance
     });
 
   } catch (err) {
