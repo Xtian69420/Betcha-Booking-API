@@ -66,7 +66,7 @@ exports.sendOtpRegistration = async (req, res) => {
                         </tr>
                         <tr>
                             <td style="padding: 20px; text-align: center; background-color: #f4f7fa; border-top: 2px solid #f0f0f0;">
-                                <p style="font-size: 12px; color: #777777; margin: 0;">Betcha Booking © 2024</p>
+                                <p style="font-size: 12px; color: #777777; margin: 0;">Betcha Booking © 2025</p>
                             </td>
                         </tr>
                     </table>
@@ -128,7 +128,7 @@ exports.sendOtpForgotPassword = async (req, res) => {
                         </tr>
                         <tr>
                             <td style="padding: 20px; text-align: center; background-color: #f4f7fa; border-top: 2px solid #f0f0f0;">
-                                <p style="font-size: 12px; color: #777777; margin: 0;">Betcha Booking © 2024</p>
+                                <p style="font-size: 12px; color: #777777; margin: 0;">Betcha Booking © 2025</p>
                             </td>
                         </tr>
                     </table>
@@ -248,7 +248,7 @@ exports.verifyOtp = async (req, res) => {
                         <p>Best regards,</p>
                         <p>The Betcha Team</p>
                         <p id="footer-links"><a href="https://beta-betcha-booking.netlify.app/">Visit Our Website</a> | <a href="mailto:support@betcha.com">Contact Support</a></p>
-                        <p>&copy; 2024 Betcha by Homie House Booking, All Rights Reserved.</p>
+                        <p>&copy; 2025 Betcha by Homie House Booking, All Rights Reserved.</p>
                     </div>
                 </div>
             </body>
@@ -301,7 +301,7 @@ exports.resendOtp = async (req, res) => {
                         </tr>
                         <tr>
                             <td style="padding: 20px; text-align: center; background-color: #f4f7fa; border-top: 2px solid #f0f0f0;">
-                                <p style="font-size: 12px; color: #777777; margin: 0;">Betcha Booking © 2024</p>
+                                <p style="font-size: 12px; color: #777777; margin: 0;">Betcha Booking © 2025</p>
                             </td>
                         </tr>
                     </table>
@@ -373,7 +373,7 @@ exports.BookingMessage = async (req, res) => {
                             </tr>
                             <tr>
                                 <td style="padding: 20px; text-align: center; background-color: #f4f7fa; border-top: 2px solid #f0f0f0;">
-                                    <p style="font-size: 12px; color: #777777; margin: 0;">Betcha Booking © 2024</p>
+                                    <p style="font-size: 12px; color: #777777; margin: 0;">Betcha Booking © 2025</p>
                                     <p style="font-size: 12px; color: #777777; margin: 0;">Visit us at <a href="https://beta-betcha-booking.netlify.app/" style="color: #4CAF50;">Betcha by Homie House</a></p>
                                 </td>
                             </tr>
@@ -390,4 +390,77 @@ exports.BookingMessage = async (req, res) => {
         console.error('Error sending booking confirmation:', error);
         res.status(500).send({ error: 'Failed to send booking confirmation email', details: error.message });
     }
+};
+
+exports.cancellationMessage = async (req, res) => {
+  const { email, unitName, checkIn, checkOut, message, amount } = req.body;
+
+  if (!email || !unitName || !checkIn || !checkOut || !message || !amount) {
+    return res.status(400).json({ message: 'Missing required fields.' });
+  }
+
+  try {
+    await sgMail.send({
+      to: email,
+      from: {
+        name: 'Betcha Booking',
+        email: 'betcha.booking@outlook.com'
+      },
+      subject: 'Booking Cancellation Notice - Betcha by Homie House',
+      html: `
+        <html>
+          <body style="font-family: Arial, sans-serif; background-color: #f4f7fa; margin: 0; padding: 0;">
+            <table role="presentation" style="width: 100%; max-width: 600px; margin: 30px auto; background-color: #ffffff; padding: 20px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+              <tr>
+                <td style="text-align: center; padding-bottom: 20px; border-bottom: 2px solid #f0f0f0;">
+                  <h2 style="font-size: 24px; color: #e63946;">Booking Cancelled</h2>
+                  <p style="font-size: 16px; color: #555;">We regret to inform you that your booking has been cancelled.</p>
+                </td>
+              </tr>
+              <tr>
+                <td style="padding: 20px;">
+                  <p style="font-size: 16px; color: #333;">Dear Valued Guest,</p>
+                  <p style="font-size: 16px; color: #333;">
+                    Your booking for <strong>${unitName}</strong> has been cancelled. Below are your booking details:
+                  </p>
+
+                  <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
+                    <tr>
+                      <td style="padding: 10px; border: 1px solid #ddd;">Check-In:</td>
+                      <td style="padding: 10px; border: 1px solid #ddd;"><strong>${checkIn}</strong></td>
+                    </tr>
+                    <tr>
+                      <td style="padding: 10px; border: 1px solid #ddd;">Check-Out:</td>
+                      <td style="padding: 10px; border: 1px solid #ddd;"><strong>${checkOut}</strong></td>
+                    </tr>
+                    <tr>
+                      <td style="padding: 10px; border: 1px solid #ddd;">Refund Amount:</td>
+                      <td style="padding: 10px; border: 1px solid #ddd;"><strong>₱${amount}</strong></td>
+                    </tr>
+                  </table>
+
+                  <p style="font-size: 16px; color: #333;"><strong>Reason:</strong> ${message}</p>
+
+                  <p style="font-size: 16px; color: #333;">
+                    The refund of <strong>₱${amount}</strong> will be processed within 24 to 48 hours. If you have any questions, feel free to contact our support team.
+                  </p>
+                </td>
+              </tr>
+              <tr>
+                <td style="padding: 20px; text-align: center; background-color: #f4f7fa; border-top: 2px solid #f0f0f0;">
+                  <p style="font-size: 12px; color: #777;">Betcha Booking © 2025</p>
+                  <p style="font-size: 12px; color: #777;">Visit us at <a href="https://beta-betcha-booking.netlify.app/" style="color: #2a9d8f;">Betcha by Homie House</a></p>
+                </td>
+              </tr>
+            </table>
+          </body>
+        </html>
+      `
+    });
+
+    res.status(200).json({ message: 'Cancellation email sent successfully!' });
+  } catch (error) {
+    console.error('Error sending cancellation message:', error);
+    res.status(500).json({ error: 'Failed to send cancellation email', details: error.message });
+  }
 };
