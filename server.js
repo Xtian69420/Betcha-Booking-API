@@ -8,19 +8,39 @@ const path = require('path');
 const app = express();
 
 app.use(cors());
-app.use(express.json()); 
-app.use(express.urlencoded({ extended: true })); 
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
+// Ensure upload directory exists
 const uploadDir = path.join(__dirname, 'uploads');
 if (!fs.existsSync(uploadDir)) {
   fs.mkdirSync(uploadDir);
 }
 
+// Connect to MongoDB
 const dburl = process.env.DATABASE_URL;
-mongoose.connect(dburl);
+mongoose.connect(dburl, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+});
 const db = mongoose.connection;
 db.on('error', (error) => console.error(error));
-db.once('open', () => console.log('Connected to MongoDB'));
+db.once('open', async () => {
+  console.log('Connected to MongoDB');
+
+  const Counter = require('./models/counterModel'); 
+  try {
+    const existing = await Counter.findOne({ name: 'booking' });
+    if (!existing) {
+      await new Counter({ name: 'booking', value: 0 }).save();
+      console.log('Booking counter initialized.');
+    } else {
+      console.log('Booking counter already exists.');
+    }
+  } catch (err) {
+    console.error('Error initializing booking counter:', err);
+  }
+});
 
 const routes = require('./routes/routes');
 app.use('/', routes);

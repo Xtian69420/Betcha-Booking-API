@@ -9,6 +9,7 @@ const otpController = require('../controllers/otpController');
 const authenticationController = require('../controllers/authenticationController');
 const propertyController = require ('../controllers/propertyController');
 const paymentController = require ('../controllers/paymentController');
+const bookingController = require('../controllers/bookingController');
 
 const multer = require('multer');
 const path = require('path');
@@ -92,5 +93,8 @@ router.post('/paymentPlatform/create', upload.single('qrPicture'), paymentContro
 router.get('/payments/display', paymentController.displayAllPayment);
 router.get('/payments/display/:id', paymentController.displayByIdPayment);
 router.put('/payments/update/:id', upload.single('qrPicture'),paymentController.updatePayment);
+
+// booking routes
+router.post('/booking/create', bookingController.createBooking);
 
 module.exports = router;
