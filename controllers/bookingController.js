@@ -206,10 +206,11 @@ exports.getBookingsByPropertyId = async (req, res) => {
 };
 
 const guest = require('../models/guestModel');
+
 exports.reservationPayment = async (req, res) => {
   try {
     const { id } = req.params;
-    const { modeOfPayment, paymentNo, status } = req.body;
+    const { modeOfPayment, paymentNo, status, numberBankEwallets } = req.body;
 
     if (!modeOfPayment || !paymentNo || !status) {
       return res.status(400).json({ message: 'All reservation fields are required.' });
@@ -222,6 +223,7 @@ exports.reservationPayment = async (req, res) => {
           'reservation.modeOfPayment': modeOfPayment,
           'reservation.paymentNo': paymentNo,
           'reservation.status': status,
+          numberBankEwallets: numberBankEwallets || 'N/A',
           status: status === 'Reserved' ? 'Reserved' : 'Pending Payment'
         }
       },
@@ -246,6 +248,7 @@ exports.reservationPayment = async (req, res) => {
     res.status(500).json({ message: 'Internal server error.' });
   }
 };
+
 
 exports.packagePayment = async (req, res) => {
   try {
@@ -291,7 +294,7 @@ exports.packagePayment = async (req, res) => {
 exports.fullPayment = async (req, res) => {
   try {
     const { id } = req.params;
-    const { modeOfPayment, paymentNo, status } = req.body;
+    const { modeOfPayment, paymentNo, status, numberBankEwallets } = req.body;
 
     if (!modeOfPayment || !paymentNo || !status) {
       return res.status(400).json({ message: 'modeOfPayment, paymentNo, and status are required.' });
@@ -307,6 +310,7 @@ exports.fullPayment = async (req, res) => {
           'package.modeOfPayment': modeOfPayment,
           'package.paymentNo': paymentNo,
           'package.status': status,
+          numberBankEwallets: numberBankEwallets || 'N/A',
           status: status === 'Fully-Paid' ? 'Fully-Paid' : 'Reserved'
         }
       },
@@ -331,4 +335,3 @@ exports.fullPayment = async (req, res) => {
     res.status(500).json({ message: 'Internal server error.' });
   }
 };
-

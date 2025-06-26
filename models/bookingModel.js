@@ -27,7 +27,7 @@ const bookingSchema = new mongoose.Schema({
     paymentNo: { type: String, default: 'Pending' },
     status: {type: String, default: 'Pending'}
   },
-
+  numberBankEwallets: {type: String, default: 'N/A'},
   datesOfBooking: { type: [Date], required: true },
   totalFee: { type: Number, required: true },
   numOfDays: { type: Number, default: 0 },
