@@ -10,6 +10,7 @@ const authenticationController = require('../controllers/authenticationControlle
 const propertyController = require ('../controllers/propertyController');
 const paymentController = require ('../controllers/paymentController');
 const bookingController = require('../controllers/bookingController');
+const notificationController = require('../controllers/notificationController');
 
 const multer = require('multer');
 const path = require('path');
@@ -114,5 +115,12 @@ router.patch('/booking/payment/full/:id', bookingController.fullPayment);
 
 // email generator
 router.post('/email/bookingmessage', otpController.BookingMessage);
+
+// notification routes
+router.post('/notify/message', notificationController.messageNotification);
+router.post('/notify/cancellation', notificationController.cancellationNotification);
+router.patch('/notify/seen/:id', notificationController.updateSeen);
+router.get('/notify/to/:toId', notificationController.getAllNotificationByToId);
+router.delete('/notify/:id', notificationController.deleteNotificationById);
 
 module.exports = router;

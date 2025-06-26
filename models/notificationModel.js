@@ -7,24 +7,24 @@ const notificationSchema = new mongoose.Schema({
         role : { type: String, enum: ['admin', 'employee', 'guest'], required: true }
     },
     to : { 
-        fromId : { type: String, required: true },
+        toId : { type: String, required: true }, 
         name: { type: String, required: true },
         role : { type: String, enum: ['admin', 'employee', 'guest'], required: true }
     },
     seen : { type: Boolean, default: false },
-    dateTime : { type: Date },
-    category : { type: String, enum: ['Cancellation Request', 'Message'], default: 'Message'},
+    dateTime : { type: Date, default: Date.now }, 
+    category : { type: String, enum: ['Cancellation Request', 'Message'], default: 'Message' },
     message : { type: String, required: true },
 
-    // for cancellation optional
+    // Optional cancellation fields
     approveCancel : { type: Boolean, default: false },
-    transNo : { type: String},
+    transNo : { type: String },
     amountRefund : { type: Number },
-    reasonToGuest : { type: String }
-
-},{
+    reasonToGuest : { type: String },
+    numberEwalletBank : { type: String }
+}, {
     collection: 'notification_tb',
     timestamps: true
-})
+});
 
-module.exports = mongoose.model('notification', notificationSchema)
+module.exports = mongoose.model('notification', notificationSchema); 
