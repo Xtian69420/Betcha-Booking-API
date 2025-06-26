@@ -85,6 +85,8 @@ router.patch('/property/update/status/:id', propertyController.editPropertyStatu
 
 // adding maintenance
 router.post('/property/:id/maintenance/create', propertyController.createMaintenanceById);
+router.put('/property/:propertyId/maintenance/update-by-dates', propertyController.updateMaintenanceByDates);
+router.delete('/property/:propertyId/maintenance/delete-by-dates', propertyController.deleteMaintenanceByDates);
 
 
 // Property reports

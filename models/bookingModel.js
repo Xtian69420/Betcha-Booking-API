@@ -16,8 +16,12 @@ const bookingSchema = new mongoose.Schema({
     discount: { type: Number, default: 0 },
     additionalPaxPrice: { type: Number, required: true },
     additionalPax: { type: Number, default: 0 },
-    modeOfPayment: { type: String, default: 'N/A' },
-    paymentNo: { type: String, default: 'N/A' },
+
+    modeOfPaymentR: { type: String, default: 'N/A' },
+    paymentNoR: { type: String, default: 'N/A' },
+    modeOfPaymentP: { type: String, default: 'N/A' },
+    paymentNoP: { type: String, default: 'N/A' },
+
     datesOfBooking: { type: [Date], required: true },
     totalFee: { type: Number, required: true },
     numOfDays: { type: Number, default: 0 },

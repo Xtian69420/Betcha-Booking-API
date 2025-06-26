@@ -467,7 +467,6 @@ exports.createMaintenanceById = async (req, res) => {
       });
     }
 
-    // Add maintenance
     const newMaintenance = {
       dates,
       status: status || 'Active'
@@ -484,5 +483,106 @@ exports.createMaintenanceById = async (req, res) => {
   } catch (err) {
     console.error('Error adding maintenance:', err);
     res.status(500).json({ message: 'Server error while adding maintenance.' });
+  }
+};
+
+exports.updateMaintenanceByDates = async (req, res) => {
+  try {
+    const { propertyId } = req.params;
+    const { originalDates, newDates, status } = req.body;
+
+    if (!Array.isArray(originalDates) || !Array.isArray(newDates) || newDates.length === 0) {
+      return res.status(400).json({ message: 'Both originalDates and newDates are required arrays.' });
+    }
+
+    const property = await Property.findById(propertyId);
+    if (!property) {
+      return res.status(404).json({ message: 'Property not found.' });
+    }
+
+    // Normalize date strings to yyyy-mm-dd
+    const normalize = dateArr => dateArr.map(d => new Date(d).toISOString().split('T')[0]);
+
+    const formattedOriginal = normalize(originalDates);
+    const formattedNew = normalize(newDates);
+
+    // Find the target maintenance entry
+    const targetIndex = property.maintenance.findIndex(entry => {
+      const entryDates = normalize(entry.dates);
+      return entryDates.length === formattedOriginal.length &&
+             entryDates.every(d => formattedOriginal.includes(d));
+    });
+
+    if (targetIndex === -1) {
+      return res.status(404).json({ message: 'Maintenance entry with the specified dates not found.' });
+    }
+
+    // Check for booking conflicts
+    const bookings = await Booking.find({ propertyId });
+    const bookedDates = bookings.flatMap(b =>
+      b.datesOfBooking.map(d => new Date(d).toISOString().split('T')[0])
+    );
+
+    const conflictDates = formattedNew.filter(d => bookedDates.includes(d));
+    if (conflictDates.length > 0) {
+      return res.status(400).json({
+        message: 'New dates conflict with existing bookings.',
+        conflictDates
+      });
+    }
+
+    // Update maintenance entry
+    property.maintenance[targetIndex].dates = newDates;
+    if (status) property.maintenance[targetIndex].status = status;
+
+    await property.save();
+    res.status(200).json({
+      message: 'Maintenance updated successfully.',
+      maintenance: property.maintenance
+    });
+
+  } catch (err) {
+    console.error('Error updating maintenance:', err);
+    res.status(500).json({ message: 'Server error while updating maintenance.' });
+  }
+};
+
+exports.deleteMaintenanceByDates = async (req, res) => {
+  try {
+    const { propertyId } = req.params;
+    const { dates } = req.body;
+
+    if (!Array.isArray(dates) || dates.length === 0) {
+      return res.status(400).json({ message: 'Dates array is required.' });
+    }
+
+    const property = await Property.findById(propertyId);
+    if (!property) {
+      return res.status(404).json({ message: 'Property not found.' });
+    }
+
+    const normalizedToDelete = dates.map(d => new Date(d).toISOString().split('T')[0]);
+
+    const index = property.maintenance.findIndex(entry => {
+      const entryDates = entry.dates.map(d => new Date(d).toISOString().split('T')[0]);
+      return entryDates.length === normalizedToDelete.length &&
+             entryDates.every(d => normalizedToDelete.includes(d));
+    });
+
+    if (index === -1) {
+      return res.status(404).json({ message: 'Matching maintenance entry not found.' });
+    }
+
+    property.maintenance.splice(index, 1);
+    await property.save();
+
+    res.status(200).json({
+      message: 'Maintenance entry deleted successfully.',
+      maintenance: property.maintenance
+    });
+
+  } catch (err) {
+    console.error('Error deleting maintenance:', err);
+    res.status(500).json({ message: 'Server error while deleting maintenance.' });
   }
 };
