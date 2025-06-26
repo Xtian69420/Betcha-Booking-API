@@ -464,3 +464,69 @@ exports.cancellationMessage = async (req, res) => {
     res.status(500).json({ error: 'Failed to send cancellation email', details: error.message });
   }
 };
+
+exports.CheckInTodayMessage = async (req, res) => {
+  const { email, propertyName, guestName, timeIn } = req.body;
+
+  if (!email || !propertyName || !guestName || !timeIn) {
+    return res.status(400).json({ message: 'Missing required fields.' });
+  }
+
+  try {
+    await sgMail.send({
+      to: email,
+      from: {
+        name: 'Betcha Booking',
+        email: 'betcha.booking@outlook.com'
+      },
+      subject: `Check-In Reminder for Today - ${propertyName}`,
+      html: `
+        <html>
+          <body style="font-family: Arial, sans-serif; background-color: #f4f7fa; margin: 0; padding: 0;">
+            <table style="width: 100%; max-width: 600px; margin: 30px auto; background-color: #ffffff; padding: 20px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+              <tr>
+                <td style="text-align: center; padding-bottom: 20px; border-bottom: 2px solid #f0f0f0;">
+                  <h2 style="font-size: 24px; color: #2a9d8f;">Check-In Reminder</h2>
+                  <p style="font-size: 16px; color: #555;">Today is your check-in at <strong>${propertyName}</strong></p>
+                </td>
+              </tr>
+              <tr>
+                <td style="padding: 20px;">
+                  <p style="font-size: 16px; color: #333;">Hi <strong>${guestName}</strong>,</p>
+                  <p style="font-size: 16px; color: #333;">We're excited to welcome you today at <strong>${propertyName}</strong>!</p>
+
+                  <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
+                    <tr>
+                      <td style="padding: 10px; border: 1px solid #ddd;">Check-In Time:</td>
+                      <td style="padding: 10px; border: 1px solid #ddd;"><strong>${timeIn}</strong></td>
+                    </tr>
+                  </table>
+
+                  <p style="font-size: 16px; color: #e63946;"><strong>Important:</strong> All guests will be required to present a valid ID upon arrival for verification and security purposes.</p>
+
+                  <p style="font-size: 16px; color: #333;">
+                    To view the location, go to your <strong>'My Bookings'</strong> tab, then check your transaction for today — you'll see a map to help navigate the place.
+                  </p>
+
+
+                  <p style="font-size: 16px; color: #333;">Should you need assistance, don’t hesitate to contact us.</p>
+                </td>
+              </tr>
+              <tr>
+                <td style="text-align: center; padding: 20px; background-color: #f4f7fa; border-top: 2px solid #f0f0f0;">
+                  <p style="font-size: 12px; color: #777;">Betcha Booking © 2025</p>
+                  <p style="font-size: 12px; color: #777;">Visit us at <a href="https://beta-betcha-booking.netlify.app/" style="color: #2a9d8f;">Betcha by Homie House</a></p>
+                </td>
+              </tr>
+            </table>
+          </body>
+        </html>
+      `
+    });
+
+    res.status(200).json({ message: 'Check-in reminder email sent successfully!' });
+  } catch (error) {
+    console.error('Error sending check-in message:', error);
+    res.status(500).json({ message: 'Failed to send check-in reminder email', error: error.message });
+  }
+};

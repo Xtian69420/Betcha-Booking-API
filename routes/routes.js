@@ -116,6 +116,7 @@ router.patch('/booking/payment/full/:id', bookingController.fullPayment);
 // email generator
 router.post('/email/bookingmessage', otpController.BookingMessage);
 router.post('/email/cancellationMessage', otpController.cancellationMessage);
+router.post('/email/checkin/today', otpController.CheckInTodayMessage);
 
 // notification routes
 router.post('/notify/message', notificationController.messageNotification);
