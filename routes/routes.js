@@ -25,6 +25,10 @@ const storage = multer.diskStorage({
 });
 const upload = multer({ storage });
 
+router.get('/', (req, res) => {
+  res.status(200).json({ message: 'pong' });
+});
+
 // Guest User level
 router.post('/guest/create', upload.single('pfp'), guestController.createGuest);
 router.get('/guest/display/:id', guestController.displayGuest);
