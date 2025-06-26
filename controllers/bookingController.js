@@ -1,6 +1,7 @@
 const booking = require('../models/bookingModel');
 const Counter = require('../models/counterModel');
 const Property = require('../models/propertyModel');
+const mongoose = require('mongoose');
 
 exports.createBooking = async (req, res) => {
   try {
@@ -203,3 +204,131 @@ exports.getBookingsByPropertyId = async (req, res) => {
     res.status(500).json({ message: 'Internal server error.' });
   }
 };
+
+const guest = require('../models/guestModel');
+exports.reservationPayment = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { modeOfPayment, paymentNo, status } = req.body;
+
+    if (!modeOfPayment || !paymentNo || !status) {
+      return res.status(400).json({ message: 'All reservation fields are required.' });
+    }
+
+    const updatedBooking = await booking.findByIdAndUpdate(
+      id,
+      {
+        $set: {
+          'reservation.modeOfPayment': modeOfPayment,
+          'reservation.paymentNo': paymentNo,
+          'reservation.status': status,
+          status: status === 'Reserved' ? 'Reserved' : 'Pending Payment'
+        }
+      },
+      { new: true }
+    );
+
+    if (!updatedBooking) {
+      return res.status(404).json({ message: 'Booking not found.' });
+    }
+
+    const guestData = await guest.findById(updatedBooking.guestId);
+    const guestEmail = guestData?.email || 'N/A';
+
+    res.status(200).json({
+      message: 'Reservation payment updated successfully.',
+      guestEmail,
+      booking: updatedBooking
+    });
+
+  } catch (error) {
+    console.error('Error updating reservation payment:', error);
+    res.status(500).json({ message: 'Internal server error.' });
+  }
+};
+
+exports.packagePayment = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { modeOfPayment, paymentNo, status } = req.body;
+
+    if (!modeOfPayment || !paymentNo || !status) {
+      return res.status(400).json({ message: 'All package fields are required.' });
+    }
+
+    const updatedBooking = await booking.findByIdAndUpdate(
+      id,
+      {
+        $set: {
+          'package.modeOfPayment': modeOfPayment,
+          'package.paymentNo': paymentNo,
+          'package.status': status,
+          status: status === 'Fully-Paid' ? 'Fully-Paid' : 'Reserved'
+        }
+      },
+      { new: true }
+    );
+
+    if (!updatedBooking) {
+      return res.status(404).json({ message: 'Booking not found.' });
+    }
+
+    const guestData = await guest.findById(updatedBooking.guestId);
+    const guestEmail = guestData?.email || 'N/A';
+
+    res.status(200).json({
+      message: 'Package payment updated successfully.',
+      guestEmail,
+      booking: updatedBooking
+    });
+
+  } catch (error) {
+    console.error('Error updating package payment:', error);
+    res.status(500).json({ message: 'Internal server error.' });
+  }
+};
+
+exports.fullPayment = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { modeOfPayment, paymentNo, status } = req.body;
+
+    if (!modeOfPayment || !paymentNo || !status) {
+      return res.status(400).json({ message: 'modeOfPayment, paymentNo, and status are required.' });
+    }
+
+    const updatedBooking = await booking.findByIdAndUpdate(
+      id,
+      {
+        $set: {
+          'reservation.modeOfPayment': modeOfPayment,
+          'reservation.paymentNo': paymentNo,
+          'reservation.status': status,
+          'package.modeOfPayment': modeOfPayment,
+          'package.paymentNo': paymentNo,
+          'package.status': status,
+          status: status === 'Fully-Paid' ? 'Fully-Paid' : 'Reserved'
+        }
+      },
+      { new: true }
+    );
+
+    if (!updatedBooking) {
+      return res.status(404).json({ message: 'Booking not found.' });
+    }
+
+    const guestData = await guest.findById(updatedBooking.guestId);
+    const guestEmail = guestData?.email || 'N/A';
+
+    res.status(200).json({
+      message: 'Full payment (reservation + package) updated successfully.',
+      booking: updatedBooking,
+      guestEmail
+    });
+
+  } catch (error) {
+    console.error('Error updating full payment:', error);
+    res.status(500).json({ message: 'Internal server error.' });
+  }
+};
+

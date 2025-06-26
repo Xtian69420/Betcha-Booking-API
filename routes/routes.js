@@ -107,4 +107,12 @@ router.patch('/booking/update-status/:id', bookingController.updateStatus);
 router.get('/booking/status/:status', bookingController.displayByStatus);
 router.get('/booking/property/:propertyId', bookingController.getBookingsByPropertyId);
 
+// booking payment routes
+router.patch('/booking/payment/reservation/:id', bookingController.reservationPayment);
+router.patch('/booking/payment/package/:id', bookingController.packagePayment);
+router.patch('/booking/payment/full/:id', bookingController.fullPayment);
+
+// email generator
+router.post('/email/bookingmessage', otpController.BookingMessage);
+
 module.exports = router;
