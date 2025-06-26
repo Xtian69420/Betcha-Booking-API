@@ -99,8 +99,12 @@ router.post('/paymentPlatform/create', upload.single('qrPicture'), paymentContro
 router.get('/payments/display', paymentController.displayAllPayment);
 router.get('/payments/display/:id', paymentController.displayByIdPayment);
 router.put('/payments/update/:id', upload.single('qrPicture'),paymentController.updatePayment);
+router.delete('/payments/delete/:id',paymentController.deletePaymentById)
 
 // booking routes
 router.post('/booking/create', bookingController.createBooking);
+router.patch('/booking/update-status/:id', bookingController.updateStatus);
+router.get('/booking/status/:status', bookingController.displayByStatus);
+router.get('/booking/property/:propertyId', bookingController.getBookingsByPropertyId);
 
 module.exports = router;

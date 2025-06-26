@@ -28,7 +28,8 @@ const bookingSchema = new mongoose.Schema({
     checkIn: { type: Date, required: true },
     checkOut: { type: Date, required: true },
     timeIn: { type: String, required: true },
-    timeOut: { type: String, required: true }
+    timeOut: { type: String, required: true },
+    rating: { type: Number, default: 0 }
 }, {
     collection: 'booking_tb',
     timestamps: true

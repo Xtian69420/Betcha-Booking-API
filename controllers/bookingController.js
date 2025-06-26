@@ -110,3 +110,96 @@ exports.createBooking = async (req, res) => {
     res.status(500).json({ message: 'Internal server error.' });
   }
 };
+
+exports.updateStatus = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { status } = req.body;
+
+    const validStatuses = [
+      'Pending Payment',
+      'Reserved',
+      'Fully-Paid',
+      'Checked-In',
+      'Checked-Out',
+      'Completed',
+      'Cancel'
+    ];
+
+    if (!validStatuses.includes(status)) {
+      return res.status(400).json({ message: 'Invalid status value.' });
+    }
+
+    const updatedBooking = await booking.findByIdAndUpdate(
+      id,
+      { status },
+      { new: true }
+    );
+
+    if (!updatedBooking) {
+      return res.status(404).json({ message: 'Booking not found.' });
+    }
+
+    res.status(200).json({
+      message: 'Booking status updated successfully.',
+      booking: updatedBooking
+    });
+  } catch (err) {
+    console.error('Error updating booking status:', err);
+    res.status(500).json({ message: 'Internal server error.' });
+  }
+};
+
+exports.displayByStatus = async (req, res) => {
+  try {
+    const { status } = req.params;
+
+    const validStatuses = [
+      'Pending Payment',
+      'Reserved',
+      'Fully-Paid',
+      'Checked-In',
+      'Checked-Out',
+      'Completed',
+      'Cancel'
+    ];
+
+    if (!validStatuses.includes(status)) {
+      return res.status(400).json({ message: 'Invalid status value.' });
+    }
+
+    const bookingsByStatus = await booking.find({ status });
+
+    res.status(200).json({
+      message: `Bookings with status '${status}' retrieved successfully.`,
+      bookings: bookingsByStatus
+    });
+  } catch (err) {
+    console.error('Error retrieving bookings by status:', err);
+    res.status(500).json({ message: 'Internal server error.' });
+  }
+};
+
+exports.getBookingsByPropertyId = async (req, res) => {
+  try {
+    const { propertyId } = req.params;
+
+    if (!propertyId) {
+      return res.status(400).json({ message: 'Property ID is required.' });
+    }
+
+    const bookings = await booking.find({ propertyId });
+
+    if (!bookings || bookings.length === 0) {
+      return res.status(404).json({ message: 'No bookings found for this property.' });
+    }
+
+    res.status(200).json({
+      message: `Bookings for property ID ${propertyId} retrieved successfully.`,
+      bookings
+    });
+  } catch (err) {
+    console.error('Error fetching bookings by propertyId:', err);
+    res.status(500).json({ message: 'Internal server error.' });
+  }
+};

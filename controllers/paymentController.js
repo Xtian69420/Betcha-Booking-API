@@ -155,3 +155,21 @@ exports.displayByIdPayment = async (req, res) => {
     res.status(500).json({ message: 'Error retrieving payment', error: error.message });
   }
 };
+
+exports.deletePaymentById = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const payment = await Payment.findById(id);
+    if (!payment) {
+      return res.status(404).json({ message: 'Payment not found.' });
+    }
+
+    await Payment.findByIdAndDelete(id);
+
+    res.status(200).json({ message: 'Payment deleted successfully.' });
+  } catch (error) {
+    console.error('Error deleting payment:', error);
+    res.status(500).json({ message: 'Internal server error.' });
+  }
+};
