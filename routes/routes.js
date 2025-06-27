@@ -12,6 +12,8 @@ const paymentController = require ('../controllers/paymentController');
 const bookingController = require('../controllers/bookingController');
 const notificationController = require('../controllers/notificationController');
 const faqController = require('../controllers/faqController');
+const adminDashboardController = require('../controllers/adminDashboardController');
+const auditTrailController = require('../controllers/auditTrailController');
 
 const multer = require('multer');
 const path = require('path');
@@ -132,5 +134,17 @@ router.get('/faq/getAll', faqController.getAllFAQ);
 router.put('/faq/update/:id', faqController.updateFAQbyId);
 router.delete('/faq/delete/:id', faqController.deleteFAQbyId);
 router.get('/faq/five', faqController.get5Faq);
+
+// Admin Dashboard
+router.get('/dashboard/admin/summary', adminDashboardController.summary);
+router.get('/dashboard/admin/rankProperty', adminDashboardController.rankProperty);
+router.get('/dashboard/admin/audit', adminDashboardController.new5AuditTrails);
+
+// Audit Trail routes
+router.post('/audit/create', auditTrailController.createAudit);
+router.get('/audit/getAll', auditTrailController.getAllAudit);
+router.get('/audit/getAll/:userType', auditTrailController.getAllAuditByUserType);
+router.get('/audit/by-date/:date', auditTrailController.getAuditByDate); // date format: YYYY-MM-DD
+router.get('/audit/search', auditTrailController.getAuditBySearchQuery); // ?query=keyword
 
 module.exports = router;
