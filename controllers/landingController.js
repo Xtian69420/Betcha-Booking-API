@@ -1,4 +1,5 @@
 const landing = require('../models/landingModel');
+const Booking = require('../models/bookingModel');
 const { google } = require('googleapis');
 const fs = require('fs');
 require('dotenv').config();
@@ -146,5 +147,29 @@ exports.updateLanding = async (req, res) => {
   } catch (error) {
     console.error('Update Landing Error:', error);
     res.status(500).json({ message: 'Internal Server Error' });
+  }
+};
+
+exports.getHowManyDaysofBooked = async (req, res) => {
+  try {
+
+    const bookings = await Booking.find({
+      status: { $nin: ['Cancel', 'Pending Payment'] }
+    });
+
+    let totalDaysBooked = 0;
+
+    bookings.forEach(booking => {
+      totalDaysBooked += booking.datesOfBooking.length;
+    });
+
+    return res.status(200).json({
+      message: 'Total number of booked days calculated successfully.',
+      totalDaysBooked
+    });
+
+  } catch (error) {
+    console.error('Error calculating booked days:', error);
+    res.status(500).json({ message: 'Internal Server Error', error: error.message });
   }
 };

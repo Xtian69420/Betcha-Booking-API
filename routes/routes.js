@@ -146,6 +146,7 @@ router.get('/dashboard/admin/audit', adminDashboardController.new5AuditTrails);
 // Landing page
 router.post('/landing/create', upload.single('file'), landingController.createLanding);
 router.put('/landing/update/:id', upload.single('file'), landingController.updateLanding);
+router.get('/landing/totalOfDaysBooked', landingController.getHowManyDaysofBooked);
 
 // featured properties
 router.post('/featured/create', featuredPropertyController.createFeatured);
