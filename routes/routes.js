@@ -11,6 +11,7 @@ const propertyController = require ('../controllers/propertyController');
 const paymentController = require ('../controllers/paymentController');
 const bookingController = require('../controllers/bookingController');
 const notificationController = require('../controllers/notificationController');
+const faqController = require('../controllers/faqController');
 
 const multer = require('multer');
 const path = require('path');
@@ -124,5 +125,12 @@ router.post('/notify/cancellation', notificationController.cancellationNotificat
 router.patch('/notify/seen/:id', notificationController.updateSeen);
 router.get('/notify/to/:toId', notificationController.getAllNotificationByToId);
 router.delete('/notify/:id', notificationController.deleteNotificationById);
+
+// FAQ routes
+router.post('/faq/create', faqController.createFAQ);
+router.get('/faq/getAll', faqController.getAllFAQ);
+router.put('/faq/update/:id', faqController.updateFAQbyId);
+router.delete('/faq/delete/:id', faqController.deleteFAQbyId);
+router.get('/faq/five', faqController.get5Faq);
 
 module.exports = router;
