@@ -16,6 +16,7 @@ const adminDashboardController = require('../controllers/adminDashboardControlle
 const auditTrailController = require('../controllers/auditTrailController');
 const landingController = require ('../controllers/landingController');
 const featuredPropertyController = require('../controllers/featuredPropertyController');
+const maintenanceBookingCalendarController = require('../controllers/maintenanceBookingCalendarController');
 
 const multer = require('multer');
 const path = require('path');
@@ -158,5 +159,10 @@ router.get('/audit/getAll', auditTrailController.getAllAudit);
 router.get('/audit/getAll/:userType', auditTrailController.getAllAuditByUserType);
 router.get('/audit/by-date/:date', auditTrailController.getAuditByDate); // date format: YYYY-MM-DD
 router.get('/audit/search', auditTrailController.getAuditBySearchQuery); // ?query=keyword
+
+// Calendar
+router.get('/calendar/byProperty/:propertyId', maintenanceBookingCalendarController.getCalendarByPropertyId);
+router.get('/calendar/byProperties', maintenanceBookingCalendarController.getCalendarForMultiplePropertyById);
+router.get('/calendar/getAllProperties', maintenanceBookingCalendarController.getAllCalendarForAllProperties);
 
 module.exports = router;
