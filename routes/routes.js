@@ -14,6 +14,8 @@ const notificationController = require('../controllers/notificationController');
 const faqController = require('../controllers/faqController');
 const adminDashboardController = require('../controllers/adminDashboardController');
 const auditTrailController = require('../controllers/auditTrailController');
+const landingController = require ('../controllers/landingController');
+const featuredPropertyController = require('../controllers/featuredPropertyController');
 
 const multer = require('multer');
 const path = require('path');
@@ -139,6 +141,16 @@ router.get('/faq/five', faqController.get5Faq);
 router.get('/dashboard/admin/summary', adminDashboardController.summary);
 router.get('/dashboard/admin/rankProperty', adminDashboardController.rankProperty);
 router.get('/dashboard/admin/audit', adminDashboardController.new5AuditTrails);
+
+// Landing page
+router.post('/landing/create', upload.single('file'), landingController.createLanding);
+router.put('/landing/update/:id', upload.single('file'), landingController.updateLanding);
+
+// featured properties
+router.post('/featured/create', featuredPropertyController.createFeatured);
+router.get('/featured/display', featuredPropertyController.getAllFeatured);
+router.put('/featured/update/:id', featuredPropertyController.updateFeaturedById);
+router.delete('/featured/delete/:id', featuredPropertyController.deleteFeaturedById);
 
 // Audit Trail routes
 router.post('/audit/create', auditTrailController.createAudit);
