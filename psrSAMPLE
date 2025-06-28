@@ -1,0 +1,129 @@
+exports.generateSummary = async(req, res) =>{
+    try {
+        const { unitCategory } = req.params;
+        // i want to create a summarry report for week, month, quarter, semi-annual, annual
+        // if its week, the body would be week: 1-?, month:1-12, year:2025-current,
+        // if its month, the body would be month: 1-12, year:2025-current,
+        // if its quarter, quarter: 1-3, year:2025-current,
+        // if its semi-annual, annual: 1-2, year: 2025-current,
+        // if its year, year: 2025-current
+        /*
+            examples:
+
+            WEEK:
+            message: "Week 1 of January 2025",
+            {
+                propertyName: faeegag,
+                earned: 3489
+            },
+            {
+                propertyName: faeegag,
+                earned: 3489
+            }
+            ...,
+            total: 242424
+
+            ----------------
+            MONTH:
+            message: "January of 2025"
+            {
+                prorpertyName: kfjieuwa,
+                week#: 2000,
+                week#: 2000,
+                week#: 2000,
+                total: 6000
+            },
+            {
+                prorpertyName: kfjieuwa,
+                week#: 2000,
+                week#: 2000,
+                week#: 2000,
+                total: 6000
+            },
+            {
+                prorpertyName: kfjieuwa,
+                week#: 2000,
+                week#: 2000,
+                week#: 2000,
+                total: 6000
+            }
+            ....,
+            totalWeek#: 6000,
+            totalWeek#: 6000,
+            totalWeek#: 6000,
+            totalEarned: 18000,
+            ---------------------
+            QUARTER:
+            message: "1st Quarter of 2025",
+            {
+                prorpertyName: kfjieuwa,
+                january: 3493,
+                .....
+                april: 43354
+                total: 385439
+            },
+            {
+                prorpertyName: kfjieuwa,
+                january: 3493,
+                .....
+                april: 43354
+                total: 385439
+            },
+            january: 4523523,
+            .....
+            april: 349325,
+            total: 353535930
+
+            -----------------------
+            SEMI-ANNUAL:
+            message: "1st half of 2025",
+            {
+                prorpertyName: kfjieuwa,
+                january: 3493,
+                .....
+                july: 43354
+                total: 385439
+            },
+            {
+                prorpertyName: kfjieuwa,
+                january: 3493,
+                .....
+                july: 43354
+                total: 385439
+            },
+            january: 4523523,
+            .....
+            july: 349325,
+            total: 353535930
+
+            ----------------------
+            ANNUAL:
+            message: "Year 2025"
+
+            {
+                prorpertyName: kfjieuwa,
+                january: 3493,
+                .....
+                december: 43354
+                total: 385439
+            },
+            {
+                prorpertyName: kfjieuwa,
+                january: 3493,
+                .....
+                december: 43354
+                total: 385439
+            },
+            january: 4523523,
+            .....
+            december: 349325,
+            total: 353535930
+        */
+
+            // i want these when get has link of pdf or excel file to download like this:
+            // pdf: kjfauwfw.link
+            // excel: wekfia.link
+    } catch(error) {
+
+    }
+}

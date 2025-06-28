@@ -17,6 +17,13 @@ if (!fs.existsSync(uploadDir)) {
   fs.mkdirSync(uploadDir);
 }
 
+// Serve exports directory statically
+const exportsDir = path.join(__dirname, 'exports');
+if (!fs.existsSync(exportsDir)) {
+  fs.mkdirSync(exportsDir);
+}
+app.use('/exports', express.static(exportsDir));
+
 // Connect to MongoDB
 const dburl = process.env.DATABASE_URL;
 mongoose.connect(dburl, {

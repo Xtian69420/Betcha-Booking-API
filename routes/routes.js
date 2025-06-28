@@ -17,6 +17,7 @@ const auditTrailController = require('../controllers/auditTrailController');
 const landingController = require ('../controllers/landingController');
 const featuredPropertyController = require('../controllers/featuredPropertyController');
 const maintenanceBookingCalendarController = require('../controllers/maintenanceBookingCalendarController');
+const psrController = require('../controllers/employeePsrController')
 
 const multer = require('multer');
 const path = require('path');
@@ -165,5 +166,15 @@ router.get('/audit/search', auditTrailController.getAuditBySearchQuery); // ?que
 router.get('/calendar/byProperty/:propertyId', maintenanceBookingCalendarController.getCalendarByPropertyId);
 router.get('/calendar/byProperties', maintenanceBookingCalendarController.getCalendarForMultiplePropertyById);
 router.get('/calendar/getAllProperties', maintenanceBookingCalendarController.getAllCalendarForAllProperties);
+
+// PSR
+router.get('/psr/peakBooking', psrController.mostPeakBookingProperty);
+router.get('/psr/peakBookingDay', psrController.peakBookingDay);
+router.get('/psr/transactions', psrController.transactions);
+router.post('/psr/weekSummary', psrController.generateWeekSummary);
+router.post('/psr/monthSummary', psrController.generateMonthSummary);
+router.post('/psr/quarterSummary', psrController.generateQuarterSummary);
+router.post('/psr/semiAnnualSummary', psrController.generateSemiAnnualSummary);
+router.post('/psr/AnnualSummary', psrController.generateAnnualSummary);
 
 module.exports = router;
