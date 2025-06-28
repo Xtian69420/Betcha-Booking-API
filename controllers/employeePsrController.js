@@ -88,7 +88,7 @@ exports.mostPeakBookingProperty = async (req, res) => {
 exports.peakBookingDay = async (req, res) => {
   try {
     const now = new Date();
-    const year = now.getFullYear(); // Add this
+    const year = now.getFullYear(); 
 
     const startOfYear = new Date(year, 0, 1);
     const startOfMonth = moment.tz({ year, month: now.getMonth(), day: 1 }, 'Asia/Manila').toDate();
@@ -120,7 +120,6 @@ exports.peakBookingDay = async (req, res) => {
 
       if (result.length === 0) return null;
 
-      // Format to YYYY-MM-DD
       const peakDate = new Date(result[0]._id);
       return peakDate.toISOString().split('T')[0];
     };
@@ -185,7 +184,6 @@ exports.generateWeekSummary = async (req, res) => {
       })
     ]);
 
-    // Compute earnings per property
     const earningsMap = {};
     bookings.forEach(booking => {
       const name = booking.propertyName;
@@ -193,17 +191,14 @@ exports.generateWeekSummary = async (req, res) => {
       earningsMap[name] += booking.totalFee;
     });
 
-    // Build list using all properties
     const earningsList = allProperties.map(prop => ({
       propertyName: prop.name,
       earned: earningsMap[prop.name] || 0
     }));
 
-    // Compute total row
     const totalEarned = earningsList.reduce((sum, entry) => sum + entry.earned, 0);
     earningsList.push({ propertyName: 'TOTAL', earned: totalEarned });
 
-    // FILE PATHS
     const fileId = uuidv4();
     const pdfPath = path.join(__dirname, `../exports/week-summary-${fileId}.pdf`);
     const excelPath = path.join(__dirname, `../exports/week-summary-${fileId}.xlsx`);
@@ -212,12 +207,10 @@ exports.generateWeekSummary = async (req, res) => {
     const doc = new PDFDocument({ margin: 40, size: [500, 1000], layout: 'landscape' });
     doc.pipe(fs.createWriteStream(pdfPath));
 
-    // Initial Title
     doc.fontSize(22).text("Betcha Booking", { align: 'center' });
     doc.fontSize(18).text(`Week ${week} of ${moment().month(month - 1).format('MMMM')}, ${year}`, { align: 'center' });
     doc.moveDown(2);
 
-    // Table setup
     const columnWidths = [500, 200]; // wider
     const totalTableWidth = columnWidths.reduce((a, b) => a + b, 0);
     const pageWidth = doc.page.width - doc.page.margins.left - doc.page.margins.right;
@@ -245,7 +238,6 @@ exports.generateWeekSummary = async (req, res) => {
     y += cellHeight;
     };
 
-    // Initial Header
     drawTableHeader();
 
     let rowCount = 0;
@@ -322,7 +314,6 @@ exports.generateWeekSummary = async (req, res) => {
 
     await workbook.xlsx.writeFile(excelPath);
 
-    // DELETE FILES AFTER 1 MINUTE
     setTimeout(() => {
       fs.unlink(pdfPath, err => err && console.error(`PDF delete error: ${err}`));
       fs.unlink(excelPath, err => err && console.error(`Excel delete error: ${err}`));
@@ -375,23 +366,22 @@ exports.generateMonthSummary = async (req, res) => {
     }
 
     for (const booking of bookings) {
-    const name = booking.propertyName;
-    if (!summary[name]) continue; 
+        const name = booking.propertyName;
+        if (!summary[name]) continue; 
 
-    for (let i = 0; i < weeks.length; i++) {
-        const { start, end } = weeks[i];
-        const hasOverlap = booking.datesOfBooking.some(dateStr => {
-        const date = new Date(dateStr);
-        return date >= start.toDate() && date <= end.toDate();
-        });
+        for (let i = 0; i < weeks.length; i++) {
+            const { start, end } = weeks[i];
+            const hasOverlap = booking.datesOfBooking.some(dateStr => {
+            const date = new Date(dateStr);
+            return date >= start.toDate() && date <= end.toDate();
+            });
 
-        if (hasOverlap) {
-        summary[name].weekly[i] += booking.totalFee;
-        summary[name].total += booking.totalFee;
+            if (hasOverlap) {
+            summary[name].weekly[i] += booking.totalFee;
+            summary[name].total += booking.totalFee;
+            }
         }
     }
-    }
-
 
     const resultList = Object.entries(summary).map(([propertyName, { weekly, total }]) => ({
       propertyName,
@@ -427,12 +417,10 @@ exports.generateMonthSummary = async (req, res) => {
 
     doc.pipe(fs.createWriteStream(pdfPath));
 
-    // Initial Title
     doc.fontSize(22).text("Betcha Booking", { align: 'center' });
     doc.fontSize(18).text(`Monthly Summary: ${moment().month(month - 1).format('MMMM')} ${year}`, { align: 'center' });
     doc.moveDown(2);
 
-    // Table setup
     const columnWidths = [250, ...Array(weeks.length).fill(100), 120];
     const totalTableWidth = columnWidths.reduce((sum, width) => sum + width, 0);
     const pageWidth = doc.page.width - doc.page.margins.left - doc.page.margins.right;
@@ -467,7 +455,6 @@ exports.generateMonthSummary = async (req, res) => {
     y += cellHeight;
     };
 
-    // Initial table header
     drawTableHeader();
 
     let rowCount = 0;
@@ -513,27 +500,24 @@ exports.generateMonthSummary = async (req, res) => {
     const workbook = new ExcelJS.Workbook();
     const sheet = workbook.addWorksheet('Month Summary');
 
-    // Dynamically calculate how many columns are needed (weeks + 2)
-    const totalCols = weeks.length + 2; // 1 for Property Name, N for weeks, 1 for Earned
+
+    const totalCols = weeks.length + 2; 
     const lastColLetter = sheet.getColumn(totalCols).letter;
 
-    // Title row
     const titleRange = `A1:${lastColLetter}1`;
     sheet.mergeCells(titleRange);
     sheet.getCell('A1').value = 'Betcha Booking';
     sheet.getCell('A1').alignment = { horizontal: 'center' };
     sheet.getCell('A1').font = { bold: true, size: 16 };
 
-    // Subtitle row
     const subtitleRange = `A2:${lastColLetter}2`;
     sheet.mergeCells(subtitleRange);
     sheet.getCell('A2').value = `Monthly Summary: ${moment().month(month - 1).format('MMMM')} ${year}`;
     sheet.getCell('A2').alignment = { horizontal: 'center' };
     sheet.getCell('A2').font = { bold: true, size: 14 };
 
-    sheet.addRow([]); // spacer row
+    sheet.addRow([]);
 
-    // Header row
     const headerRow = ['Property Name'];
     for (let i = 0; i < weeks.length; i++) {
     headerRow.push(`Week ${i + 1}`);
@@ -542,19 +526,16 @@ exports.generateMonthSummary = async (req, res) => {
     const headers = sheet.addRow(headerRow);
     headers.font = { bold: true };
 
-    // Data rows
     resultList.forEach(row => {
     const dataRow = [row.propertyName, ...row.weekly, row.earned];
     const newRow = sheet.addRow(dataRow);
 
-    // Currency formatting
     for (let i = 1; i < dataRow.length; i++) {
         newRow.getCell(i + 1).numFmt = '"PHP"#,##0.00';
     }
     });
 
-    // Borders
-    const startRow = 5; // headers are at row 4
+    const startRow = 5; 
     const endRow = sheet.rowCount;
     for (let row = startRow; row <= endRow; row++) {
     for (let col = 1; col <= totalCols; col++) {
@@ -568,17 +549,15 @@ exports.generateMonthSummary = async (req, res) => {
     }
     }
 
-    // Column widths
     sheet.columns = [
-    { width: 30 }, // Property Name
-    ...Array(weeks.length).fill({ width: 15 }), // Weekly columns
-    { width: 20 } // Earned
+    { width: 30 }, 
+    ...Array(weeks.length).fill({ width: 15 }),
+    { width: 20 } 
     ];
 
     await workbook.xlsx.writeFile(excelPath);
 
 
-    // Auto-delete after 1 min
     setTimeout(() => {
       fs.unlink(pdfPath, err => err && console.error('PDF delete error', err));
       fs.unlink(excelPath, err => err && console.error('Excel delete error', err));
@@ -603,27 +582,24 @@ exports.generateQuarterSummary = async (req, res) => {
       return res.status(400).json({ message: "Please provide a valid quarter (1–4) and year." });
     }
 
-    const startMonth = (quarter - 1) * 3; // 0, 3, 6, 9
+    const startMonth = (quarter - 1) * 3; 
     const monthsInQuarter = [startMonth, startMonth + 1, startMonth + 2];
 
     const startDate = moment.tz({ year, month: startMonth, day: 1 }, 'Asia/Manila').startOf('month');
     const endDate = moment(startDate).add(2, 'months').endOf('month');
 
-    // Fetch all properties
     const properties = await Property.find();
     const propertyNames = properties.map(p => p.name);
 
-    // Fetch bookings in quarter
     const bookings = await Booking.find({
       datesOfBooking: { $elemMatch: { $gte: startDate.toDate(), $lte: endDate.toDate() } },
       status: { $in: ['Checked-Out', 'Completed', 'Fully-Paid', 'Reserved'] }
     });
 
-    // Group by property and month
     const summaryMap = {};
     for (const name of propertyNames) {
       summaryMap[name] = {
-        monthly: [0, 0, 0], // May, Jun, Jul (or whichever months)
+        monthly: [0, 0, 0],
         total: 0
       };
     }
@@ -648,7 +624,6 @@ exports.generateQuarterSummary = async (req, res) => {
       earned: total
     }));
 
-    // Add TOTAL row
     const totalMonthly = [0, 0, 0];
     let grandTotal = 0;
     for (const entry of resultList) {
@@ -661,7 +636,6 @@ exports.generateQuarterSummary = async (req, res) => {
     const pdfPath = path.join(__dirname, `../exports/quarter-summary-${fileId}.pdf`);
     const excelPath = path.join(__dirname, `../exports/quarter-summary-${fileId}.xlsx`);
 
-    // PDF: Size and styling
     const doc = new PDFDocument({ margin: 30, size: [500, 1000], layout: 'landscape' });
     doc.pipe(fs.createWriteStream(pdfPath));
 
@@ -676,11 +650,10 @@ exports.generateQuarterSummary = async (req, res) => {
     let y = doc.y;
     const headerMonths = monthsInQuarter.map(m => moment().month(m).format('MMM'));
 
-    // Split rows
     const dataRows = resultList.slice(0, -1);
     const totalRow = resultList[resultList.length - 1];
 
-    doc.fontSize(12); // Adjusted for consistency
+    doc.fontSize(12); 
 
     // === Draw table header function ===
     const drawTableHeader = () => {
@@ -707,7 +680,6 @@ exports.generateQuarterSummary = async (req, res) => {
     y += 20;
     };
 
-    // === Initial header ===
     drawTableHeader();
 
     let rowCount = 0;
@@ -747,7 +719,6 @@ exports.generateQuarterSummary = async (req, res) => {
     rowCount++;
     });
 
-    // === TOTAL ROW ===
     if (rowCount === 10) {
     doc.addPage({ margin: 30, size: [500, 1000], layout: 'landscape' });
     doc.fontSize(22).text("Betcha Booking", { align: 'center' });
@@ -926,7 +897,6 @@ exports.generateSemiAnnualSummary = async (req, res) => {
 
     const monthsLabels = months.map(m => moment().month(m).format('MMM'));
 
-    // Wider columns
     const columnWidths = [180, ...Array(6).fill(110), 120];
     const pageWidth = doc.page.width - doc.page.margins.left - doc.page.margins.right;
     const totalTableWidth = columnWidths.reduce((a, b) => a + b, 0);
@@ -934,12 +904,11 @@ exports.generateSemiAnnualSummary = async (req, res) => {
     const tableTop = doc.y;
     const cellPadding = 5;
 
-    doc.fontSize(9); // Smaller font
+    doc.fontSize(9); 
 
     let y = tableTop + 20;
     let rowCount = 0;
 
-    // Store TOTAL separately if it's the last item
     const dataRows = resultList.slice(0, -1);
     const totalRow = resultList[resultList.length - 1];
 
@@ -977,7 +946,7 @@ exports.generateSemiAnnualSummary = async (req, res) => {
         doc.moveDown(2);
 
         y = doc.y;
-        doc.fontSize(9); // Maintain smaller font
+        doc.fontSize(9);
         drawTableHeader();
         rowCount = 0;
     }
@@ -1006,27 +975,26 @@ exports.generateSemiAnnualSummary = async (req, res) => {
     rowCount++;
     });
 
-    // Draw TOTAL row on new page if needed
     if (rowCount === 10) {
-    doc.addPage({ margin: 40, size: [1000, 500] });
-    doc.fontSize(16).text('Betcha Booking', { align: 'center' });
-    doc.fontSize(12).text(`Semi-Annual Summary: ${year} - H${annual}`, { align: 'center' });
-    doc.moveDown(2);
-    y = doc.y;
-    doc.fontSize(9);
-    drawTableHeader();
+        doc.addPage({ margin: 40, size: [1000, 500] });
+        doc.fontSize(16).text('Betcha Booking', { align: 'center' });
+        doc.fontSize(12).text(`Semi-Annual Summary: ${year} - H${annual}`, { align: 'center' });
+        doc.moveDown(2);
+        y = doc.y;
+        doc.fontSize(9);
+        drawTableHeader();
     }
 
     let x = tableX;
-    doc.rect(x, y, columnWidths[0], 20).stroke();
-    doc.text(totalRow.propertyName, x + cellPadding, y + cellPadding, {
-    width: columnWidths[0] - 2 * cellPadding
+        doc.rect(x, y, columnWidths[0], 20).stroke();
+        doc.text(totalRow.propertyName, x + cellPadding, y + cellPadding, {
+        width: columnWidths[0] - 2 * cellPadding
     });
     x += columnWidths[0];
 
     totalRow.monthly.forEach((amt, i) => {
-    doc.rect(x, y, columnWidths[i + 1], 20).stroke();
-    doc.text(`PHP ${amt.toLocaleString()}`, x + cellPadding, y + cellPadding, {
+        doc.rect(x, y, columnWidths[i + 1], 20).stroke();
+        doc.text(`PHP ${amt.toLocaleString()}`, x + cellPadding, y + cellPadding, {
         width: columnWidths[i + 1] - 2 * cellPadding
     });
     x += columnWidths[i + 1];
@@ -1036,7 +1004,6 @@ exports.generateSemiAnnualSummary = async (req, res) => {
     doc.text(`PHP ${totalRow.earned.toLocaleString()}`, x + cellPadding, y + cellPadding, {
     width: columnWidths[columnWidths.length - 1] - 2 * cellPadding
     });
-
 
     doc.end();
 
@@ -1069,7 +1036,6 @@ exports.generateSemiAnnualSummary = async (req, res) => {
       }
     });
 
-    // Borders and column widths
     const totalRows = sheet.rowCount;
     for (let i = 4; i <= totalRows; i++) {
       for (let j = 1; j <= mergeCols; j++) {
@@ -1124,7 +1090,6 @@ exports.generateAnnualSummary = async (req, res) => {
       status: { $in: ['Checked-Out', 'Completed', 'Fully-Paid', 'Reserved'] }
     });
 
-    // Map: { propertyName: { monthly: [12], earned: total } }
     const summary = {};
     allProperties.forEach(p => {
       summary[p.name] = { monthly: Array(12).fill(0), earned: 0 };
@@ -1148,7 +1113,6 @@ exports.generateAnnualSummary = async (req, res) => {
       earned
     }));
 
-    // TOTAL Row
     const totalMonthly = Array(12).fill(0);
     let grandTotal = 0;
     resultList.forEach(row => {
@@ -1157,12 +1121,10 @@ exports.generateAnnualSummary = async (req, res) => {
     });
     resultList.push({ propertyName: 'TOTAL', monthly: totalMonthly, earned: grandTotal });
 
-    // ===== File Paths =====
     const fileId = uuidv4();
     const pdfPath = path.join(__dirname, `../exports/annual-summary-${fileId}.pdf`);
     const excelPath = path.join(__dirname, `../exports/annual-summary-${fileId}.xlsx`);
 
-    // ===== PDF =====
     const doc = new PDFDocument({ margin: 40, size: [1200, 500] });
     doc.pipe(fs.createWriteStream(pdfPath));
 
@@ -1178,7 +1140,6 @@ exports.generateAnnualSummary = async (req, res) => {
     const tableTop = doc.y;
     const cellPadding = 3;
 
-    // Header
     let x = tableX;
     doc.fontSize(8);
     doc.rect(x, tableTop, columnWidths[0], 20).stroke();
@@ -1194,7 +1155,7 @@ exports.generateAnnualSummary = async (req, res) => {
     doc.rect(x, tableTop, columnWidths[columnWidths.length - 1], 20).stroke();
     doc.text('Earned', x + cellPadding, tableTop + cellPadding, { width: columnWidths[columnWidths.length - 1] - 2 * cellPadding });
 
-    // Data Rows
+
     let y = tableTop + 20;
     let rowCount = 0;
 
@@ -1270,7 +1231,6 @@ exports.generateAnnualSummary = async (req, res) => {
       sheet.addRow(r);
     });
 
-    // Format & borders
     sheet.columns = [
       { width: 25 }, ...Array(12).fill({ width: 15 }), { width: 18 }
     ];
