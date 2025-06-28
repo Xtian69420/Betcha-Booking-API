@@ -114,6 +114,8 @@ router.post('/booking/create', bookingController.createBooking);
 router.patch('/booking/update-status/:id', bookingController.updateStatus);
 router.get('/booking/status/:status', bookingController.displayByStatus);
 router.get('/booking/property/:propertyId', bookingController.getBookingsByPropertyId);
+router.get('/booking/all', bookingController.getAllBookings);
+
 
 // booking payment routes
 router.patch('/booking/payment/reservation/:id', bookingController.reservationPayment);

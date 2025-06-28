@@ -87,27 +87,42 @@ exports.mostPeakBookingProperty = async (req, res) => {
 
 exports.peakBookingDay = async (req, res) => {
   try {
-    const now = new Date();
-    const year = now.getFullYear(); 
+    const now = moment.tz('Asia/Manila');
+    const year = now.year();
 
-    const startOfYear = new Date(year, 0, 1);
-    const startOfMonth = moment.tz({ year, month: now.getMonth(), day: 1 }, 'Asia/Manila').toDate();
-    const startOfWeek = new Date(now);
-    startOfWeek.setDate(now.getDate() - now.getDay()); 
-    startOfWeek.setHours(0, 0, 0, 0);
+    const startOfYear = now.clone().startOf('year').toDate();
+    const endOfYear = now.clone().endOf('year').toDate();
+
+    const startOfMonth = now.clone().startOf('month').toDate();
+    const endOfMonth = now.clone().endOf('month').toDate();
+
+    const startOfWeek = now.clone().startOf('week').toDate(); 
+    const endOfWeek = now.clone().endOf('week').toDate();
 
     const matchCondition = { status: { $ne: "Cancel" } };
 
-    const findPeakDate = async (startDate) => {
+    const findPeakDate = async (startDate, endDate) => {
       const result = await Booking.aggregate([
         {
           $match: {
             ...matchCondition,
-            datesOfBooking: { $elemMatch: { $gte: startDate } }
+            datesOfBooking: {
+              $elemMatch: {
+                $gte: startDate,
+                $lte: endDate
+              }
+            }
           }
         },
         { $unwind: "$datesOfBooking" },
-        { $match: { datesOfBooking: { $gte: startDate } } },
+        {
+          $match: {
+            datesOfBooking: {
+              $gte: startDate,
+              $lte: endDate
+            }
+          }
+        },
         {
           $group: {
             _id: "$datesOfBooking",
@@ -119,21 +134,25 @@ exports.peakBookingDay = async (req, res) => {
       ]);
 
       if (result.length === 0) return null;
-
-      const peakDate = new Date(result[0]._id);
-      return peakDate.toISOString().split('T')[0];
+      return moment(result[0]._id).tz('Asia/Manila').format('YYYY-MM-DD');
     };
 
     const [yearPeak, monthPeak, weekPeak] = await Promise.all([
-      findPeakDate(startOfYear),
-      findPeakDate(startOfMonth),
-      findPeakDate(startOfWeek)
+      findPeakDate(startOfYear, endOfYear),
+      findPeakDate(startOfMonth, endOfMonth),
+      findPeakDate(startOfWeek, endOfWeek)
     ]);
 
     res.status(200).json({
-      year: { peakDay: yearPeak || null },
-      month: { peakDay: monthPeak || null },
-      week: { peakDay: weekPeak || null }
+      year: {
+        peakDay: yearPeak || "No bookings this year"
+      },
+      month: {
+        peakDay: monthPeak || "No bookings this month"
+      },
+      week: {
+        peakDay: weekPeak || "No bookings this week"
+      }
     });
 
   } catch (error) {
@@ -1154,7 +1173,6 @@ exports.generateAnnualSummary = async (req, res) => {
 
     doc.rect(x, tableTop, columnWidths[columnWidths.length - 1], 20).stroke();
     doc.text('Earned', x + cellPadding, tableTop + cellPadding, { width: columnWidths[columnWidths.length - 1] - 2 * cellPadding });
-
 
     let y = tableTop + 20;
     let rowCount = 0;

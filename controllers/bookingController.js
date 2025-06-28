@@ -112,6 +112,21 @@ exports.createBooking = async (req, res) => {
   }
 };
 
+exports.getAllBookings = async (req, res) => {
+  try {
+    const bookings = await booking.find().sort({ createdAt: -1 });
+
+    res.status(200).json({
+      message: 'All bookings retrieved successfully.',
+      bookings
+    });
+  } catch (error) {
+    console.error('Error fetching all bookings:', error);
+    res.status(500).json({ message: 'Internal server error.' });
+  }
+};
+
+
 exports.updateStatus = async (req, res) => {
   try {
     const { id } = req.params;
