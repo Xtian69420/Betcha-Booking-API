@@ -91,7 +91,7 @@ exports.peakBookingDay = async (req, res) => {
     const year = now.getFullYear(); // Add this
 
     const startOfYear = new Date(year, 0, 1);
-    const firstOfMonth = moment.tz({ year, month: now.getMonth(), day: 1 }, 'Asia/Manila');
+    const startOfMonth = moment.tz({ year, month: now.getMonth(), day: 1 }, 'Asia/Manila').toDate();
     const startOfWeek = new Date(now);
     startOfWeek.setDate(now.getDate() - now.getDay()); 
     startOfWeek.setHours(0, 0, 0, 0);
