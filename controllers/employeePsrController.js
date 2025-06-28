@@ -88,11 +88,12 @@ exports.mostPeakBookingProperty = async (req, res) => {
 exports.peakBookingDay = async (req, res) => {
   try {
     const now = new Date();
+    const year = now.getFullYear(); // Add this
 
-    const startOfYear = new Date(now.getFullYear(), 0, 1);
-    const firstOfMonth = moment.tz({ year, month: month - 1, day: 1 }, 'Asia/Manila');
+    const startOfYear = new Date(year, 0, 1);
+    const firstOfMonth = moment.tz({ year, month: now.getMonth(), day: 1 }, 'Asia/Manila');
     const startOfWeek = new Date(now);
-    startOfWeek.setDate(now.getDate() - now.getDay()); // Sunday
+    startOfWeek.setDate(now.getDate() - now.getDay()); 
     startOfWeek.setHours(0, 0, 0, 0);
 
     const matchCondition = { status: { $ne: "Cancel" } };
