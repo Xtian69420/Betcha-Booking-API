@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Betcha Ticket</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    html, body {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+      background-color: #313338;
+      font-family: Arial, sans-serif;
+      overflow: hidden; 
+    }
+
+    .chat-container {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      max-width: 600px;
+      margin: 0 auto;
+      background: #2b2d31;
+      padding: 20px;
+      border-radius: 0;
+    }
+
+    .chat-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      color: white;
+      margin-bottom: 10px;
+    }
+
+    #messages {
+      flex: 1;
+      overflow-y: auto; 
+      padding-right: 5px;
+      margin-bottom: 10px;
+    }
+
+    .message {
+      margin-bottom: 20px;
+      padding: 10px;
+      background: #404249;
+      border-radius: 8px;
+    }
+
+    .message .meta {
+      font-size: 12px;
+      color: #aaa;
+      margin-bottom: 5px;
+    }
+
+    .message .text {
+      font-size: 14px;
+      color: #fff;
+    }
+
+    .form {
+      display: flex;
+      gap: 10px;
+    }
+
+    .form textarea {
+      flex: 1;
+      padding: 8px;
+      border: none;
+      border-radius: 4px;
+      resize: none;
+    }
+
+    .form button {
+      background: #5865f2;
+      color: white;
+      padding: 8px 12px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    .form button:hover {
+      background: #4752c4;
+    }
+  </style>
+</head>
+<body>
+  <div class="chat-container">
+    <div class="chat-header">
+      <h2>🎫 Ticket #<span id="ticketNumber">Loading...</span></h2>
+      <button onclick="loadTicket()" style="background: #5865f2; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer;">🔁 Refresh</button>
+    </div>
+
+    <div id="messages"></div>
+
+    <div class="form">
+      <textarea id="replyText" placeholder="Type your reply..."></textarea>
+      <button onclick="sendReply()">Send</button>
+    </div>
+  </div>
+
+  <script>
+    const ticketId = '68618cb8e9930e8a53d2a7a6';
+    const userId = '685009ff53a090e126b9e2b4';
+    const userLevel = 'guest';
+
+    async function loadTicket() {
+      const res = await fetch(`http://localhost:3000/tk/${ticketId}`);
+      const data = await res.json();
+
+      document.getElementById('ticketNumber').innerText = data.ticket.ticketNumber;
+      const messagesContainer = document.getElementById('messages');
+      messagesContainer.innerHTML = '';
+
+      data.ticket.messages.forEach(msg => {
+        const dateTimePH = msg.phTime || new Date(msg.dateTime).toLocaleString('en-PH', { timeZone: 'Asia/Manila' });
+        const div = document.createElement('div');
+        div.className = 'message';
+        div.innerHTML = `
+          <div class="meta"><strong>${msg.userName}</strong> • ${msg.userLevel} • ${dateTimePH}</div>
+          <div class="text">${msg.message}</div>
+        `;
+        messagesContainer.appendChild(div);
+      });
+
+      messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    }
+
+    async function sendReply() {
+      const message = document.getElementById('replyText').value.trim();
+      if (!message) return;
+
+      try {
+        const res = await fetch(`http://localhost:3000/tk/reply/${ticketId}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ userId: userId, userLevel, message })
+        });
+
+        if (!res.ok) {
+          const err = await res.json();
+          throw new Error(err.message || 'Reply failed');
+        }
+
+        document.getElementById('replyText').value = '';
+        await loadTicket();
+      } catch (err) {
+        alert("Failed to send reply: " + err.message);
+        console.error(err);
+      }
+    }
+
+    loadTicket(); 
+  </script>
+</body>
+</html>

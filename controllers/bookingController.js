@@ -350,3 +350,103 @@ exports.fullPayment = async (req, res) => {
     res.status(500).json({ message: 'Internal server error.' });
   }
 };
+
+
+exports.rateBooking = async (req, res) => {
+  try {
+    const { id } = req.params; 
+    const { rating } = req.body;
+
+    if (!rating || typeof rating !== 'number' || rating < 1 || rating > 5) {
+      return res.status(400).json({ message: 'Rating must be a number between 1 and 5.' });
+    }
+
+    const ratedBooking = await booking.findById(id);
+    if (!ratedBooking) {
+      return res.status(404).json({ message: 'Booking not found.' });
+    }
+
+    if (ratedBooking.rating > 0) {
+      return res.status(400).json({ message: 'Booking already rated.' });
+    }
+
+    ratedBooking.rating = rating;
+    await ratedBooking.save();
+
+    const property = await Property.findById(ratedBooking.propertyId);
+    if (!property) {
+      return res.status(404).json({ message: 'Property not found.' });
+    }
+
+    const newRateCount = property.rateCount + 1;
+    const newAverageRating = ((property.rating * property.rateCount) + rating) / newRateCount;
+
+    property.rating = newAverageRating;
+    property.rateCount = newRateCount;
+
+    await property.save();
+
+    res.status(200).json({
+      message: 'Booking rated and property rating updated successfully.',
+      bookingId: ratedBooking._id,
+      newBookingRating: ratedBooking.rating,
+      propertyId: property._id,
+      newPropertyRating: property.rating,
+      totalRates: property.rateCount
+    });
+
+  } catch (error) {
+    console.error('Error rating booking:', error);
+    res.status(500).json({ message: 'Internal server error.' });
+  }
+};
+
+exports.getBookingsByGuestId = async (req, res) => {
+  try {
+    const { guestId } = req.params;
+
+    if (!guestId) {
+      return res.status(400).json({ message: 'Guest ID is required.' });
+    }
+
+    const allBookings = await booking.find({ guestId });
+
+    if (allBookings.length === 0) {
+      return res.status(404).json({ message: 'No bookings found for this guest.' });
+    }
+
+    const pendingStatuses = [
+      'Pending Payment',
+      'Reserved',
+      'Fully-Paid',
+      'Checked-In',
+      'Checked-Out'
+    ];
+    const completedStatuses = ['Completed', 'Cancel'];
+
+    const pending = [];
+    const completed = [];
+    const rate = [];
+
+    allBookings.forEach(b => {
+      if (b.status === 'Completed' && b.rating === 0) {
+        rate.push(b); // needs to be rated
+      } else if (pendingStatuses.includes(b.status)) {
+        pending.push(b);
+      } else if (completedStatuses.includes(b.status)) {
+        completed.push(b);
+      }
+    });
+
+    res.status(200).json({
+      message: 'Bookings grouped successfully.',
+      pending,
+      completed,
+      rate
+    });
+
+  } catch (error) {
+    console.error('Error fetching guest bookings:', error);
+    res.status(500).json({ message: 'Internal server error.' });
+  }
+};

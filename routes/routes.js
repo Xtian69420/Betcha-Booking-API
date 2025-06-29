@@ -20,6 +20,7 @@ const maintenanceBookingCalendarController = require('../controllers/maintenance
 const psrController = require('../controllers/employeePsrController')
 const tsController = require('../controllers/employeeTSModel');
 const employeePMController = require('../controllers/employeePmController');
+const tkController = require('../controllers/tkController');
 
 
 const multer = require('multer');
@@ -94,6 +95,11 @@ router.put('/property/update/:id', upload.none(), propertyController.updatePrope
 router.put('/property/update/photos/:id', upload.array('photos', 10), propertyController.updatePhotoProperty);
 router.patch('/property/update/status/:id', propertyController.editPropertyStatus);
 
+// guest property
+router.post('/property/searchGuest', propertyController.searchPropertyGuest);
+router.get('/cities', propertyController.getAllCities);
+router.get('/property/byCategory', propertyController.getPropertiesByCategory)
+
 // adding maintenance
 router.post('/property/:id/maintenance/create', propertyController.createMaintenanceById);
 router.put('/property/:propertyId/maintenance/update-by-dates', propertyController.updateMaintenanceByDates);
@@ -124,6 +130,11 @@ router.get('/booking/all', bookingController.getAllBookings);
 router.patch('/booking/payment/reservation/:id', bookingController.reservationPayment);
 router.patch('/booking/payment/package/:id', bookingController.packagePayment);
 router.patch('/booking/payment/full/:id', bookingController.fullPayment);
+
+// booking guest
+router.put('/booking/rate/:id', bookingController.rateBooking);
+router.get('/booking/guest/:guestId', bookingController.getBookingsByGuestId);
+
 
 // email generator
 router.post('/email/bookingmessage', otpController.BookingMessage);
@@ -189,5 +200,13 @@ router.post('/ts/transactionsByProperties', tsController.getAllPendingAndComplet
 router.post('/pm/bookings/byDateAndProperties', employeePMController.getBookingSpecificDateAndProperties);
 router.post('/pm/bookings/checkinToday', employeePMController.getCheckInToday);
 
+// TK
+router.post('/tk/create', tkController.createTicket);
+router.get('/tk/customer-service/:id', tkController.getAllTicketsByCustomerServiceId);
+router.get('/tk/sender/:id', tkController.getAllTicketsBySenderId);
+router.get('/tk/all', tkController.getAllTickets);
+router.post('/tk/reply/:id', tkController.createMessageInTicket);
+router.patch('/tk/status/:id', tkController.updateStatusById);
+router.get('/tk/:id', tkController.getTicketById);
 
 module.exports = router;

@@ -586,3 +586,117 @@ exports.deleteMaintenanceByDates = async (req, res) => {
     res.status(500).json({ message: 'Server error while deleting maintenance.' });
   }
 };
+
+exports.searchPropertyGuest = async (req, res) => {
+  try {
+    const { city, CheckIn, CheckOut, priceStartrange, priceEndrange, people } = req.body;
+
+    if (!city || !CheckIn || !CheckOut || !priceStartrange || !priceEndrange || !people) {
+      return res.status(400).json({ message: 'All search fields are required.' });
+    }
+
+    const checkInDate = new Date(CheckIn);
+    const checkOutDate = new Date(CheckOut);
+
+    const matchedProperties = await Property.find({
+      city: { $regex: new RegExp(city, 'i') },
+      packagePrice: { $gte: priceStartrange, $lte: priceEndrange },
+      maxCapacity: { $gte: people },
+      status: 'Active'
+    });
+
+    const availableProperties = [];
+
+    for (const property of matchedProperties) {
+
+      const conflictingBookings = await Booking.findOne({
+        propertyId: property._id.toString(),
+        status: { $ne: 'Cancel' },
+        $or: [
+          {
+            checkIn: { $lte: checkOutDate },
+            checkOut: { $gte: checkInDate }
+          },
+          {
+            datesOfBooking: {
+              $in: getDateRange(checkInDate, checkOutDate)
+            }
+          }
+        ]
+      });
+
+      const maintenanceBlocked = property.maintenance.some(m => {
+        return m.dates.some(date =>
+          date >= checkInDate && date <= checkOutDate
+        );
+      });
+
+      if (!conflictingBookings && !maintenanceBlocked) {
+        availableProperties.push(property);
+      }
+    }
+
+    res.status(200).json({
+      message: `${availableProperties.length} properties found.`,
+      data: availableProperties
+    });
+
+  } catch (error) {
+    console.error('searchPropertyGuest error:', error);
+    res.status(500).json({ message: 'Server error.', error: error.message });
+  }
+};
+
+function getDateRange(startDate, endDate) {
+  const dates = [];
+  let current = new Date(startDate);
+  while (current <= endDate) {
+    dates.push(new Date(current));
+    current.setDate(current.getDate() + 1);
+  }
+  return dates;
+}
+
+exports.getAllCities = async (req, res) => {
+  try {
+    const cities = await Property.distinct('city', { status: 'Active' });
+
+    if (!cities.length) {
+      return res.status(404).json({ message: 'No cities found.' });
+    }
+
+    res.status(200).json({
+      message: `${cities.length} unique cities found.`,
+      cities
+    });
+  } catch (error) {
+    console.error('getAllCities error:', error);
+    res.status(500).json({ message: 'Server error.', error: error.message });
+  }
+};
+
+exports.getPropertiesByCategory = async (req, res) => {
+  try {
+
+    const allProperties = await Property.find({ status: 'Active' });
+    const result = {
+      allProperties: allProperties,
+      barkada: [],
+      couple: [],
+      family: [],
+      other: []
+    };
+
+    allProperties.forEach(prop => {
+      const categoryKey = prop.category.toLowerCase();
+      if (result[categoryKey]) {
+        result[categoryKey].push(prop);
+      }
+    });
+
+    res.status(200).json(result);
+  } catch (error) {
+    console.error('getPropertiesByCategoryWithAll error:', error);
+    res.status(500).json({ message: 'Server error.', error: error.message });
+  }
+};

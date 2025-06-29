@@ -58,6 +58,7 @@ const propertySchema = new mongoose.Schema({
     },
     discount: { type: Number, default: 0 },
     rating: { type: Number, default: 0 },
+    rateCount: { type: Number, default: 0 },
     reports: {
         unsolved: { type: [reportSchema], default: [] },
         solved: { type: [reportSchema], default: [] }
