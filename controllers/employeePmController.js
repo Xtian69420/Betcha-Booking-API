@@ -2,7 +2,6 @@ const Booking = require('../models/bookingModel');
 const Property = require('../models/propertyModel');
 const moment = require('moment-timezone');
 
-// Get bookings on a specific date for specific properties
 exports.getBookingSpecificDateAndProperties = async (req, res) => {
   try {
     const { checkIn, propertyIds } = req.body;
@@ -40,7 +39,6 @@ exports.getBookingSpecificDateAndProperties = async (req, res) => {
   }
 };
 
-// Get today's check-ins for specific properties (PH time)
 exports.getCheckInToday = async (req, res) => {
   try {
     const { propertyIds } = req.body;

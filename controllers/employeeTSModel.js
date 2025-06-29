@@ -18,6 +18,7 @@ exports.getAllPendingAndCompletedTransactionByProperties = async (req, res) => {
     const completedStatuses = ['Completed', 'Cancel'];
 
     const formatBooking = (booking) => ({
+      bookingId: booking._id,
       transNo: booking.transNo,
       nameOfGuest: booking.guestName,
       propertyName: booking.propertyName,
