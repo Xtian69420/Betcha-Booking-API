@@ -19,6 +19,8 @@ const featuredPropertyController = require('../controllers/featuredPropertyContr
 const maintenanceBookingCalendarController = require('../controllers/maintenanceBookingCalendarController');
 const psrController = require('../controllers/employeePsrController')
 const tsController = require('../controllers/employeeTSModel');
+const employeePMController = require('../controllers/employeePmController');
+
 
 const multer = require('multer');
 const path = require('path');
@@ -182,5 +184,10 @@ router.post('/psr/AnnualSummary', psrController.generateAnnualSummary);
 
 // TS
 router.post('/ts/transactionsByProperties', tsController.getAllPendingAndCompletedTransactionByProperties);
+
+// PM
+router.post('/pm/bookings/byDateAndProperties', employeePMController.getBookingSpecificDateAndProperties);
+router.post('/pm/bookings/checkinToday', employeePMController.getCheckInToday);
+
 
 module.exports = router;

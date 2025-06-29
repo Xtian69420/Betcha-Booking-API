@@ -13,26 +13,26 @@ exports.messageNotification = async (req, res) => {
       return res.status(400).json({ message: 'Missing required fields.' });
     }
 
+    const dateTimePH = moment().tz('Asia/Manila').toDate();
+
     const newNotification = new Notification({
-      from: {
-        fromId,
-        name: fromName,
-        role: fromRole
-      },
-      to: {
-        toId,
-        name: toName,
-        role: toRole
-      },
+      from: { fromId, name: fromName, role: fromRole },
+      to: { toId, name: toName, role: toRole },
       seen: false,
-      dateTime: Date.now(),
+      dateTime: dateTimePH,
       category: 'Message',
       message
     });
 
     await newNotification.save();
-    res.status(201).json({ message: 'Message notification created.', data: newNotification });
 
+    res.status(201).json({
+      message: 'Message notification created.',
+      data: {
+        ...newNotification.toObject(),
+        dateTimePH: moment(newNotification.dateTime).tz('Asia/Manila').format('YYYY-MM-DD HH:mm:ss')
+      }
+    });
   } catch (error) {
     console.error('Error creating message notification:', error);
     res.status(500).json({ message: 'Server error.' });
@@ -51,19 +51,13 @@ exports.cancellationNotification = async (req, res) => {
       return res.status(400).json({ message: 'Missing required fields for cancellation notification.' });
     }
 
+    const dateTimePH = moment().tz('Asia/Manila').toDate();
+
     const newNotification = new Notification({
-      from: {
-        fromId,
-        name: fromName,
-        role: fromRole
-      },
-      to: {
-        toId,
-        name: toName,
-        role: toRole
-      },
+      from: { fromId, name: fromName, role: fromRole },
+      to: { toId, name: toName, role: toRole },
       seen: false,
-      dateTime: Date.now(),
+      dateTime: dateTimePH,
       category: 'Cancellation Request',
       message,
       approveCancel: false,
@@ -74,13 +68,20 @@ exports.cancellationNotification = async (req, res) => {
     });
 
     await newNotification.save();
-    res.status(201).json({ message: 'Cancellation notification created.', data: newNotification });
 
+    res.status(201).json({
+      message: 'Cancellation notification created.',
+      data: {
+        ...newNotification.toObject(),
+        dateTimePH: moment(newNotification.dateTime).tz('Asia/Manila').format('YYYY-MM-DD HH:mm:ss')
+      }
+    });
   } catch (error) {
     console.error('Error creating cancellation notification:', error);
     res.status(500).json({ message: 'Server error.' });
   }
 };
+
 
 exports.updateSeen = async (req, res) => {
   try {
@@ -109,7 +110,12 @@ exports.getAllNotificationByToId = async (req, res) => {
 
     const notifications = await Notification.find({ 'to.toId': toId }).sort({ createdAt: -1 });
 
-    res.status(200).json({ message: 'Notifications fetched successfully.', data: notifications });
+    const formatted = notifications.map(notif => ({
+      ...notif.toObject(),
+      dateTimePH: moment(notif.dateTime).tz('Asia/Manila').format('YYYY-MM-DD HH:mm:ss')
+    }));
+
+    res.status(200).json({ message: 'Notifications fetched successfully.', data: formatted });
   } catch (error) {
     console.error('Error fetching notifications:', error);
     res.status(500).json({ message: 'Server error.' });

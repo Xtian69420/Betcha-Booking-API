@@ -12,7 +12,7 @@ const notificationSchema = new mongoose.Schema({
         role : { type: String, enum: ['admin', 'employee', 'guest'], required: true }
     },
     seen : { type: Boolean, default: false },
-    dateTime : { type: Date, default: Date.now }, 
+    dateTime : { type: Date }, 
     category : { type: String, enum: ['Cancellation Request', 'Message'], default: 'Message' },
     message : { type: String, required: true },
 

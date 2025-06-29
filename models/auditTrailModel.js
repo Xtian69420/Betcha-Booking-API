@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 
 const auditTrailSchema = new mongoose.Schema({
     refNo: { type: Number, required: true },
-    dateTime: { type: Date, default: Date.now }, 
+    dateTime: { type: Date }, 
     userId: { type: String, required: true },
     userType: { type: String, required: true },
     activity: { type: String, required: true }

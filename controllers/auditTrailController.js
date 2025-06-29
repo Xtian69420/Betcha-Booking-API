@@ -3,6 +3,8 @@ const Guest = require('../models/guestModel');
 const Admin = require('../models/adminModel');
 const Employee = require('../models/employeeModel');
 
+const moment = require('moment-timezone');
+
 exports.createAudit = async (req, res) => {
   try {
     const { userId, userType, activity } = req.body;
@@ -30,13 +32,19 @@ exports.createAudit = async (req, res) => {
       userId,
       userType,
       activity,
-      name: fullName, 
-      dateTime: Date.now()
+      name: fullName,
+      dateTime: moment().tz('Asia/Manila').toDate() 
     });
 
     await newAudit.save();
 
-    res.status(201).json({ message: 'Audit created.', audit: newAudit });
+    res.status(201).json({
+    message: 'Audit created.',
+    audit: {
+      ...newAudit.toObject(),
+      dateTimePH: moment(newAudit.dateTime).tz('Asia/Manila').format('YYYY-MM-DD HH:mm:ss')
+    }
+  });
   } catch (error) {
     console.error('Create Audit Error:', error);
     res.status(500).json({ message: 'Internal Server Error.' });
@@ -46,7 +54,13 @@ exports.createAudit = async (req, res) => {
 exports.getAllAudit = async (req, res) => {
   try {
     const audits = await AuditTrail.find().sort({ createdAt: -1 });
-    res.status(200).json(audits);
+
+    const formatted = audits.map(audit => ({
+      ...audit.toObject(),
+      dateTimePH: moment(audit.dateTime).tz('Asia/Manila').format('YYYY-MM-DD HH:mm:ss')
+    }));
+
+    res.status(200).json(formatted);
   } catch (error) {
     console.error('Get All Audit Error:', error);
     res.status(500).json({ message: 'Internal Server Error.' });
@@ -57,7 +71,13 @@ exports.getAllAuditByUserType = async (req, res) => {
   try {
     const { userType } = req.params;
     const audits = await AuditTrail.find({ userType }).sort({ createdAt: -1 });
-    res.status(200).json(audits);
+
+    const formatted = audits.map(audit => ({
+      ...audit.toObject(),
+      dateTimePH: moment(audit.dateTime).tz('Asia/Manila').format('YYYY-MM-DD HH:mm:ss')
+    }));
+
+    res.status(200).json(formatted);
   } catch (error) {
     console.error('Get Audit By UserType Error:', error);
     res.status(500).json({ message: 'Internal Server Error.' });
@@ -78,7 +98,12 @@ exports.getAuditByDate = async (req, res) => {
       }
     }).sort({ dateTime: -1 });
 
-    res.status(200).json(audits);
+    const formatted = audits.map(audit => ({
+      ...audit.toObject(),
+      dateTimePH: moment(audit.dateTime).tz('Asia/Manila').format('YYYY-MM-DD HH:mm:ss')
+    }));
+
+    res.status(200).json(formatted);
   } catch (error) {
     console.error('Get Audit By Date Error:', error);
     res.status(500).json({ message: 'Internal Server Error.' });
@@ -95,7 +120,6 @@ exports.getAuditBySearchQuery = async (req, res) => {
       { userType: { $regex: query, $options: 'i' } }
     ];
 
-    // Add numeric match for refNo if query is a number
     const queryAsNumber = Number(query);
     if (!isNaN(queryAsNumber)) {
       searchConditions.push({ refNo: queryAsNumber });
@@ -105,7 +129,12 @@ exports.getAuditBySearchQuery = async (req, res) => {
       $or: searchConditions
     }).sort({ dateTime: -1 });
 
-    res.status(200).json(audits);
+    const formatted = audits.map(audit => ({
+      ...audit.toObject(),
+      dateTimePH: moment(audit.dateTime).tz('Asia/Manila').format('YYYY-MM-DD HH:mm:ss')
+    }));
+
+    res.status(200).json(formatted);
   } catch (error) {
     console.error('Search Audit Error:', error);
     res.status(500).json({ message: 'Internal Server Error.' });
