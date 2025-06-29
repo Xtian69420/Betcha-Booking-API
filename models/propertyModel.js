@@ -1,6 +1,5 @@
 const mongoose = require('mongoose');
 
-// Report Schema
 const reportSchema = new mongoose.Schema({
     id: { type: Number },
     sender: { type: String, required: true },
@@ -11,7 +10,6 @@ const reportSchema = new mongoose.Schema({
     message: { type: String, required: true }
 }, { _id: false });
 
-// Calendar Schema
 const calendarSchema = new mongoose.Schema({
     dates: {
         type: [Date],
@@ -24,7 +22,6 @@ const calendarSchema = new mongoose.Schema({
     }
 }, { _id: false });
 
-// Property Schema
 const propertySchema = new mongoose.Schema({
     status: {
         type: String,

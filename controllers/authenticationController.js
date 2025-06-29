@@ -10,7 +10,6 @@ exports.Login = async (req, res) => {
     if (!email || !password)
       return res.status(400).json({ message: 'Email and password are required.' });
 
-    // Check if user exists in any of the 3 models
     let user = await admin.findOne({ email });
     let userType = 'admin';
 
