@@ -21,6 +21,7 @@ const psrController = require('../controllers/employeePsrController')
 const tsController = require('../controllers/employeeTSModel');
 const employeePMController = require('../controllers/employeePmController');
 const tkController = require('../controllers/tkController');
+const chatBotController = require('../controllers/chatBotController');
 
 
 const multer = require('multer');
@@ -199,6 +200,9 @@ router.post('/ts/transactionsByProperties', tsController.getAllPendingAndComplet
 // PM
 router.post('/pm/bookings/byDateAndProperties', employeePMController.getBookingSpecificDateAndProperties);
 router.post('/pm/bookings/checkinToday', employeePMController.getCheckInToday);
+
+// chat bot
+router.post('/chat', chatBotController.chatBotFlow);
 
 // TK
 router.post('/tk/create', tkController.createTicket);
