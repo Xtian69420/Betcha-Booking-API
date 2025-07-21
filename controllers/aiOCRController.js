@@ -9,37 +9,39 @@ exports.scanImageUpload = async (req, res) => {
     }
 
     const imagePath = path.resolve(__dirname, '..', req.file.path);
-
-    const worker = await createWorker('eng'); // No longer needs .load() or .loadLanguage()
-
+    const worker = await createWorker('eng');
     const {
       data: { text }
     } = await worker.recognize(imagePath);
 
     await worker.terminate();
-    fs.unlinkSync(imagePath); // Delete uploaded image after processing
+    fs.unlinkSync(imagePath); // Delete the uploaded file
 
-    let result;
+    let result = 'Reference number not found';
 
-    // First: Match "Ref. No." or "Reference No." style
-    const refNoMatch = text.match(
-      /(?:Ref(?:erence)?\.?\s*No\.?\s*[:\-]?\s*)([A-Z\d]{6,20})/i
-    );
+    const patterns = [
+      /Ref(?:erence)?\.?\s*No\.?\s*[:\-]?\s*([A-Z0-9 ]{6,})/i,
+      /Ref(?:erence)?\.?\s*ID\s*[:\-]?\s*([A-Z0-9 ]{6,})/i
+    ];
 
-    if (refNoMatch) {
-      result = refNoMatch[1].replace(/\s+/g, '');
-    } else {
-      // Second: Match "Reference ID"/"Ref. ID" with three space-separated blocks
-      const refIdMatch = text.match(
-        /(?:Reference\s*ID|Ref\.?\s*ID)[:\-]?\s*((?:[A-Z0-9]{3,4}\s*){3})/i
-      );
+    for (const regex of patterns) {
+      const match = text.match(regex);
+      if (match && match[1]) {
+        const ref = match[1]
+          .trim()
+          .split(/\s+/) // keep original grouping
+          .filter(g => /^[A-Z0-9]+$/i.test(g)) // only valid groups
+          .slice(0, 3) // max 3 groups
+          .join(''); // no space in final result
 
-      if (refIdMatch) {
-        result = refIdMatch[1].replace(/\s+/g, '');
-      } else {
-        result = 'Ref. No. not found';
+        // Validate that it's not picking up a date (like 23NOVEMBER)
+        if (!/^\d{1,2}(st|nd|rd|th)?\s?[A-Z]+$/i.test(ref)) {
+          result = ref.toUpperCase();
+          break;
+        }
       }
     }
+
 
     res.json({ result, fullText: text });
 
