@@ -14,7 +14,6 @@ exports.chatBotFlow = async (req, res) => {
     const sessionKey = `user_${userId}`;
     const input = message.trim().toLowerCase();
 
-    // End session if user types 'end'
     if (input === 'end') {
       if (sessions[sessionKey]) {
         delete sessions[sessionKey];
@@ -24,7 +23,6 @@ exports.chatBotFlow = async (req, res) => {
       }
     }
 
-    // Initialize session if not found
     if (!sessions[sessionKey]) sessions[sessionKey] = { step: 0 };
     const user = sessions[sessionKey];
 

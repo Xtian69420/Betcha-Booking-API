@@ -22,6 +22,7 @@ const tsController = require('../controllers/employeeTSModel');
 const employeePMController = require('../controllers/employeePmController');
 const tkController = require('../controllers/tkController');
 const chatBotController = require('../controllers/chatBotController');
+const OCRController = require('../controllers/aiOCRController');
 
 
 const multer = require('multer');
@@ -212,5 +213,9 @@ router.get('/tk/all', tkController.getAllTickets);
 router.post('/tk/reply/:id', tkController.createMessageInTicket);
 router.patch('/tk/status/:id', tkController.updateStatusById);
 router.get('/tk/:id', tkController.getTicketById);
+
+// OCR
+router.post('/ocr/scan/upload', upload.single('image'), OCRController.scanImageUpload);
+
 
 module.exports = router;
