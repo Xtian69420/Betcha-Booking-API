@@ -271,3 +271,27 @@ exports.unarchiveGuest = async (req, res) => {
     res.status(500).json({ message: 'Internal server error' });
   }
 };
+
+exports.addWarning = async (req, res) => {
+  try {
+    const guestId = req.params.id;
+    
+    const updatedGuest = await guest.findByIdAndUpdate(
+      guestId,
+      { $inc: { warning: 1 } }, 
+      { new: true } 
+    );
+
+    if (!updatedGuest) {
+      return res.status(404).json({ error: 'Guest not found' });
+    }
+
+    res.json({
+      message: 'Warning count incremented successfully',
+      data: updatedGuest
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Server error' });
+  }
+};
