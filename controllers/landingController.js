@@ -18,7 +18,7 @@ const folderId = '1iQ003kR1GdXch2uDXSEeB5pPWrV7bJ1k';
 
 exports.createLanding = async (req, res) => {
   try {
-    const { title, content } = req.body;
+    const { title, content, txtColor } = req.body;
 
     if (!title || !content) {
       return res.status(400).json({ message: 'Title and content are required.' });
@@ -68,7 +68,8 @@ exports.createLanding = async (req, res) => {
     const newLanding = new landing({
       title,
       content,
-      imageLink
+      imageLink,
+      txtColor: txtColor || 'White'
     });
 
     await newLanding.save();
@@ -87,7 +88,7 @@ exports.createLanding = async (req, res) => {
 exports.updateLanding = async (req, res) => {
   try {
     const { id } = req.params;
-    const { title, content } = req.body;
+    const { title, content, txtColor } = req.body;
 
     const existingLanding = await landing.findById(id);
     if (!existingLanding) {
@@ -98,6 +99,7 @@ exports.updateLanding = async (req, res) => {
 
     if (title) updatedFields.title = title;
     if (content) updatedFields.content = content;
+    if (txtColor) updatedFields.txtColor = txtColor;
 
     if (req.file) {
       try {
@@ -149,6 +151,7 @@ exports.updateLanding = async (req, res) => {
     res.status(500).json({ message: 'Internal Server Error' });
   }
 };
+
 
 exports.getHowManyDaysofBooked = async (req, res) => {
   try {

@@ -3,7 +3,8 @@ const mongoose = require('mongoose');
 const landingSchema = new mongoose.Schema({
     title: { type: String, required: true },
     content: { type: String, required: true },
-    imageLink: { type: String, required: true }
+    imageLink: { type: String, required: true },
+    txtColor: { type: String, default: 'White' }
 },{
     collection: 'landing_tb',
     timestamps: true

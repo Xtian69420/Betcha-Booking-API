@@ -105,3 +105,49 @@ exports.new5AuditTrails = async (req, res) => {
     res.status(500).json({ message: 'Internal Server Error' });
   }
 };
+
+const Employee = require('../models/employeeModel');
+exports.EmployeeCountActive = async (req, res) => {
+  try {
+    const count = await Employee.countDocuments({
+      status: { $in: ['active', 'Active'] }
+    });
+    res.status(200).json({ count });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+const Guest = require('../models/guestModel');
+exports.GuestCountActive = async (req, res) => {
+  try {
+    const count = await Guest.countDocuments({
+      archived: false
+    });
+    res.status(200).json({ count });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+exports.PropertyCountActive = async (req, res) => {
+  try {
+    const count = await Property.countDocuments({
+      status: { $in: ['Active', 'active'] }
+    });
+    res.status(200).json({ count });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+exports.BookingCountActive = async (req, res) => {
+  try {
+    const count = await Booking.countDocuments({
+      status: { $nin: ['Cancel', 'cancel', 'Cancelled', 'cancelled'] }
+    });
+    res.status(200).json({ count });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};

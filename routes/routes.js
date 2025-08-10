@@ -162,6 +162,11 @@ router.get('/dashboard/admin/summary', adminDashboardController.summary);
 router.get('/dashboard/admin/rankProperty', adminDashboardController.rankProperty);
 router.get('/dashboard/admin/audit', adminDashboardController.new5AuditTrails);
 
+router.get('/dashboard/admin/employee/activeCount', adminDashboardController.EmployeeCountActive);
+router.get('/dashboard/admin/guest/activeCount', adminDashboardController.GuestCountActive);
+router.get('/dashboard/admin/property/activeCount', adminDashboardController.PropertyCountActive);
+router.get('/dashboard/admin/booking/activeCount', adminDashboardController.BookingCountActive);
+
 // Landing page
 router.post('/landing/create', upload.single('file'), landingController.createLanding);
 router.put('/landing/update/:id', upload.single('file'), landingController.updateLanding);
@@ -217,5 +222,8 @@ router.get('/tk/:id', tkController.getTicketById);
 // OCR
 router.post('/ocr/scan/upload', upload.single('image'), OCRController.scanImageUpload);
 
+// OCR Drivers License
+router.post('/ocr/scan/drivers-license', upload.single('image'), OCRController.ScanIDDriversLicense);
+router.post('/ocr/scan/passport', upload.single('image'), OCRController.ScanIDPassport);
 
 module.exports = router;

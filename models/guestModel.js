@@ -13,7 +13,7 @@ const guestSchema = new mongoose.Schema({
     verified: { type: Boolean, default: false },
     userType: { type: String, default: 'guest' },
     warning: { type: Number, default: 0},
-    archived: { type: Boolean, default: false }
+    archived: { type: Boolean, default: false },
 }, {
   collection: 'guest_tb',
   timestamps: true
