@@ -14,17 +14,22 @@ const auth = new google.auth.GoogleAuth({
 const drive = google.drive({ version: 'v3', auth });
 const folderId = '1PMt8OR1KZfV_sEV809V-KqaMUwmPH44y';
 
+// ================= CREATE PAYMENT =================
 exports.createPayment = async (req, res) => {
   try {
-    const { paymentName } = req.body;
+    const { paymentName, category } = req.body;
 
     if (!paymentName || typeof paymentName !== 'string') {
       return res.status(400).json({ message: 'Payment name is required and must be a string.' });
     }
 
-    const existingPayment = await Payment.findOne({ paymentName });
+    if (!category || typeof category !== 'string') {
+      return res.status(400).json({ message: 'Category is required and must be a string.' });
+    }
+
+    const existingPayment = await Payment.findOne({ paymentName, category });
     if (existingPayment) {
-      return res.status(400).json({ message: 'Payment name already in use!' });
+      return res.status(400).json({ message: 'Payment name with this category already exists!' });
     }
 
     let qrPhotoLink = '';
@@ -63,6 +68,7 @@ exports.createPayment = async (req, res) => {
 
     const newPayment = new Payment({
       paymentName,
+      category,
       qrPhotoLink,
     });
 
@@ -78,6 +84,7 @@ exports.createPayment = async (req, res) => {
   }
 };
 
+// ================= UPDATE PAYMENT =================
 exports.updatePayment = async (req, res) => {
   try {
     const { id } = req.params;
@@ -132,6 +139,7 @@ exports.updatePayment = async (req, res) => {
   }
 };
 
+// ================= DISPLAY ALL PAYMENTS =================
 exports.displayAllPayment = async (req, res) => {
   try {
     const payments = await Payment.find();
@@ -142,6 +150,7 @@ exports.displayAllPayment = async (req, res) => {
   }
 };
 
+// ================= DISPLAY PAYMENT BY ID =================
 exports.displayByIdPayment = async (req, res) => {
   try {
     const { id } = req.params;
@@ -156,6 +165,7 @@ exports.displayByIdPayment = async (req, res) => {
   }
 };
 
+// ================= DELETE PAYMENT =================
 exports.deletePaymentById = async (req, res) => {
   try {
     const { id } = req.params;
