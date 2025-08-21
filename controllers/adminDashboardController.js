@@ -151,3 +151,51 @@ exports.BookingCountActive = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
+
+exports.BookingCountToday = async (req, res) => {
+  try {
+    const now = new Date();
+
+    const count = await Booking.countDocuments({
+      status: { $nin: ['Cancel', 'cancel', 'Cancelled', 'cancelled'] },
+      checkIn: { $lte: now },
+      checkOut: { $gte: now }
+    });
+
+    res.status(200).json({ activeBookingsToday: count });
+  } catch (error) {
+    console.error("Error counting today's active bookings:", error);
+    res.status(500).json({ message: "Server Error", error: error.message });
+  }
+};
+
+
+exports.AvailableRoomToday = async (req, res) => {
+  try {
+    const today = new Date();
+
+    const activeProperties = await Property.find({
+      status: { $in: ['Active', 'active'] }
+    }).lean();
+
+    const activePropertyIds = activeProperties.map(p => p._id.toString());
+
+    const overlappingBookings = await Booking.find({
+      propertyId: { $in: activePropertyIds },
+      status: { $nin: ['Cancel', 'cancel', 'Cancelled', 'cancelled'] },
+      checkIn: { $lte: today },
+      checkOut: { $gte: today }
+    }).lean();
+
+    const bookedPropertyIds = new Set(overlappingBookings.map(b => b.propertyId));
+    const availableRooms = activeProperties.filter(p => !bookedPropertyIds.has(p._id.toString()));
+
+    res.status(200).json({
+      availableRoomCount: availableRooms.length,
+      availableRooms
+    });
+  } catch (error) {
+    console.error("Error fetching available rooms today:", error);
+    res.status(500).json({ message: "Server Error", error: error.message });
+  }
+};

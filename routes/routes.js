@@ -162,10 +162,13 @@ router.get('/dashboard/admin/summary', adminDashboardController.summary);
 router.get('/dashboard/admin/rankProperty', adminDashboardController.rankProperty);
 router.get('/dashboard/admin/audit', adminDashboardController.new5AuditTrails);
 
+// Admin Dashboard Routes
 router.get('/dashboard/admin/employee/activeCount', adminDashboardController.EmployeeCountActive);
 router.get('/dashboard/admin/guest/activeCount', adminDashboardController.GuestCountActive);
 router.get('/dashboard/admin/property/activeCount', adminDashboardController.PropertyCountActive);
 router.get('/dashboard/admin/booking/activeCount', adminDashboardController.BookingCountActive);
+router.get('/dashboard/admin/booking/todayCount', adminDashboardController.BookingCountToday);
+router.get('/dashboard/admin/property/availableToday', adminDashboardController.AvailableRoomToday);
 
 // Landing page
 router.post('/landing/create', upload.single('file'), landingController.createLanding);
