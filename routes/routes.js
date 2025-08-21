@@ -24,6 +24,7 @@ const tkController = require('../controllers/tkController');
 const chatBotController = require('../controllers/chatBotController');
 const OCRController = require('../controllers/aiOCRController');
 const guestWarningController = require('../controllers/guestWarningController');
+const newLandingPage = require('../controllers/landingPageController');
 
 const multer = require('multer');
 const path = require('path');
@@ -171,8 +172,8 @@ router.get('/dashboard/admin/booking/todayCount', adminDashboardController.Booki
 router.get('/dashboard/admin/property/availableToday', adminDashboardController.AvailableRoomToday);
 
 // Landing page
-router.post('/landing/create', upload.single('file'), landingController.createLanding);
-router.put('/landing/update/:id', upload.single('file'), landingController.updateLanding);
+//router.post('/landing/create', upload.single('file'), landingController.createLanding);
+//router.put('/landing/update/:id', upload.single('file'), landingController.updateLanding);
 router.get('/landing/totalOfDaysBooked', landingController.getHowManyDaysofBooked);
 
 // featured properties
@@ -235,5 +236,11 @@ router.post('/ocr/scan/upload', upload.single('image'), OCRController.scanImageU
 // OCR Drivers License
 router.post('/ocr/scan/drivers-license', upload.single('image'), OCRController.ScanIDDriversLicense);
 router.post('/ocr/scan/passport', upload.single('image'), OCRController.ScanIDPassport);
+
+// new landing page
+router.post('/landing/create', upload.single('file'), newLandingPage.createLanding);
+router.put('/landing/update/:id', upload.single('file'), newLandingPage.updateLanding);
+router.get('/landing/display/:id', newLandingPage.getLandingById);
+router.delete('/landing/delete/:id', newLandingPage.deleteLanding);
 
 module.exports = router;
