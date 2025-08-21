@@ -1,10 +1,14 @@
 const mongoose = require('mongoose');
 
 const guestWarningSchema = new mongoose.Schema({
-    guestId : { type: String, required: true },
-    reason : { type: String, required: true },
-    transNo : { type: String, required: true },
-    reportedBy : { type: String, required : true }
+    guestId: { 
+        type: mongoose.Schema.Types.ObjectId, 
+        ref: 'guest', 
+        required: true 
+    },
+    reason: { type: String, required: true },
+    transNo: { type: String, required: true },
+    reportedBy: { type: String, required : true }
 }, {
   collection: 'guestWarning_tb',
   timestamps: true

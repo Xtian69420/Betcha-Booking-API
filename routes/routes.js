@@ -23,7 +23,7 @@ const employeePMController = require('../controllers/employeePmController');
 const tkController = require('../controllers/tkController');
 const chatBotController = require('../controllers/chatBotController');
 const OCRController = require('../controllers/aiOCRController');
-
+const guestWarningController = require('../controllers/guestWarningController');
 
 const multer = require('multer');
 const path = require('path');
@@ -177,6 +177,12 @@ router.post('/featured/create', featuredPropertyController.createFeatured);
 router.get('/featured/display', featuredPropertyController.getAllFeatured);
 router.put('/featured/update/:id', featuredPropertyController.updateFeaturedById);
 router.delete('/featured/delete/:id', featuredPropertyController.deleteFeaturedById);
+
+// warning guest
+router.post('/report', guestWarningController.createReport);
+router.get('/reports', guestWarningController.displayAllReports);
+router.get('/reports/:guestId', guestWarningController.displayReportsByGuestId);
+router.patch('/reset-warning/:guestId', guestWarningController.resetWarnings);
 
 // Audit Trail routes
 router.post('/audit/create', auditTrailController.createAudit);
