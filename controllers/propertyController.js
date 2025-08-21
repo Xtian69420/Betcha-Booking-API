@@ -234,7 +234,7 @@ exports.appendPhotoProperty = async (req, res) => {
 exports.deletePhotoProperty = async (req, res) => {
   try {
     const { id } = req.params;
-    const { photoUrl } = req.body; // pass the photo link you want to remove
+    const { photoUrl } = req.body;
 
     if (!photoUrl) {
       return res.status(400).json({ error: 'Photo URL is required.' });
@@ -242,7 +242,7 @@ exports.deletePhotoProperty = async (req, res) => {
 
     const updated = await Property.findByIdAndUpdate(
       id,
-      { $pull: { photoLinks: photoUrl } }, // ✅ removes only that photo
+      { $pull: { photoLinks: photoUrl } }, 
       { new: true }
     );
 
