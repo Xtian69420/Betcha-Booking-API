@@ -176,7 +176,7 @@ exports.updateProperty = async (req, res) => {
   }
 };
 
-exports.updatePhotoProperty = async (req, res) => {
+exports.appendPhotoProperty = async (req, res) => {
   try {
     const { id } = req.params;
 
@@ -214,7 +214,11 @@ exports.updatePhotoProperty = async (req, res) => {
       fs.unlinkSync(file.path);
     }
 
-    const updated = await Property.findByIdAndUpdate(id, { photoLinks }, { new: true });
+    const updated = await Property.findByIdAndUpdate(
+      id,
+      { $push: { photoLinks: { $each: photoLinks } } }, 
+      { new: true }
+    );
 
     if (!updated) {
       return res.status(404).json({ error: 'Property not found.' });
@@ -222,10 +226,37 @@ exports.updatePhotoProperty = async (req, res) => {
 
     res.status(200).json(updated);
   } catch (err) {
-    console.error('Error updating photos:', err);
+    console.error('Error appending photos:', err);
     res.status(500).json({ error: 'Internal server error.' });
   }
 };
+
+exports.deletePhotoProperty = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { photoUrl } = req.body; // pass the photo link you want to remove
+
+    if (!photoUrl) {
+      return res.status(400).json({ error: 'Photo URL is required.' });
+    }
+
+    const updated = await Property.findByIdAndUpdate(
+      id,
+      { $pull: { photoLinks: photoUrl } }, // ✅ removes only that photo
+      { new: true }
+    );
+
+    if (!updated) {
+      return res.status(404).json({ error: 'Property not found.' });
+    }
+
+    res.status(200).json(updated);
+  } catch (err) {
+    console.error('Error deleting photo:', err);
+    res.status(500).json({ error: 'Internal server error.' });
+  }
+};
+
 
 exports.createReport = async (req, res) => {
   try {

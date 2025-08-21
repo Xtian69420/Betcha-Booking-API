@@ -95,7 +95,8 @@ router.get('/property/search', propertyController.searchPropertyAdmin);
 router.get('/property/display', propertyController.displayAllProperty);
 router.get('/property/display/:id', propertyController.displayByIdProperty);
 router.put('/property/update/:id', upload.none(), propertyController.updateProperty);
-router.put('/property/update/photos/:id', upload.array('photos', 10), propertyController.updatePhotoProperty);
+router.patch('/property/photos/append/:id', upload.array('photos', 10), propertyController.appendPhotoProperty);
+router.delete('/property/photos/delete/:id', propertyController.deletePhotoProperty);
 router.patch('/property/update/status/:id', propertyController.editPropertyStatus);
 
 // guest property
