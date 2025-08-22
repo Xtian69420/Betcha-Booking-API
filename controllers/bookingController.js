@@ -71,13 +71,13 @@ exports.createBooking = async (req, res) => {
     const checkIn = sortedDates[0];
     const checkOut = sortedDates[sortedDates.length - 1];
 
-    const numOfDays = Math.ceil((checkOut - checkIn) / (1000 * 60 * 60 * 24)) + 1;
+    const numOfDays = Math.ceil((checkOut - checkIn) / (1000 * 60 * 60 * 24)) - 1;
     if (numOfDays <= 0) {
       return res.status(400).json({ message: 'Invalid booking date range.' });
     }
 
     const discountedPackageFee = packageFee - (packageFee * discount / 100);
-    const totalFee = reservationFee + discountedPackageFee + (additionalPax * additionalPaxPrice);
+    const totalFee = reservationFee + (discountedPackageFee * numOfDays) + (additionalPax * additionalPaxPrice);
 
     const newBooking = new booking({
       transNo,
