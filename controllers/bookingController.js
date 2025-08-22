@@ -440,3 +440,172 @@ exports.getBookingsByGuestId = async (req, res) => {
     res.status(500).json({ message: 'Internal server error.' });
   }
 };
+
+// Update Reservation Payment Status
+exports.updateReservationPaymentStatus = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { bookingStatus, paymentStatus } = req.body;
+
+    if (!bookingStatus || !paymentStatus) {
+      return res.status(400).json({ message: 'bookingStatus and paymentStatus are required.' });
+    }
+
+    // Validate bookingStatus
+    const validBookingStatuses = [
+      'Pending Payment', 'Reserved', 'Fully-Paid', 
+      'Checked-In', 'Checked-Out', 'Completed', 'Cancel'
+    ];
+    if (!validBookingStatuses.includes(bookingStatus)) {
+      return res.status(400).json({ message: 'Invalid bookingStatus value.' });
+    }
+
+    // Validate paymentStatus
+    const validPaymentStatuses = ['Pending', 'Approved', 'Declined'];
+    if (!validPaymentStatuses.includes(paymentStatus)) {
+      return res.status(400).json({ message: 'Invalid paymentStatus value.' });
+    }
+
+    const updatedBooking = await booking.findByIdAndUpdate(
+      id,
+      {
+        $set: {
+          status: bookingStatus,
+          'reservation.status': paymentStatus
+        }
+      },
+      { new: true }
+    );
+
+    if (!updatedBooking) return res.status(404).json({ message: 'Booking not found.' });
+
+    res.status(200).json({
+      message: 'Reservation payment status updated successfully.',
+      booking: updatedBooking
+    });
+
+  } catch (error) {
+    console.error('Error updating reservation payment status:', error);
+    res.status(500).json({ message: 'Internal server error.' });
+  }
+};
+
+exports.updatePackagePaymentStatus = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { bookingStatus, paymentStatus } = req.body;
+
+    if (!bookingStatus || !paymentStatus) {
+      return res.status(400).json({ message: 'bookingStatus and paymentStatus are required.' });
+    }
+
+    const validBookingStatuses = [
+      'Pending Payment', 'Reserved', 'Fully-Paid', 
+      'Checked-In', 'Checked-Out', 'Completed', 'Cancel'
+    ];
+    if (!validBookingStatuses.includes(bookingStatus)) {
+      return res.status(400).json({ message: 'Invalid bookingStatus value.' });
+    }
+
+    const validPaymentStatuses = ['Pending', 'Approved', 'Declined'];
+    if (!validPaymentStatuses.includes(paymentStatus)) {
+      return res.status(400).json({ message: 'Invalid paymentStatus value.' });
+    }
+
+    const updatedBooking = await booking.findByIdAndUpdate(
+      id,
+      {
+        $set: {
+          status: bookingStatus,
+          'package.status': paymentStatus
+        }
+      },
+      { new: true }
+    );
+
+    if (!updatedBooking) return res.status(404).json({ message: 'Booking not found.' });
+
+    res.status(200).json({
+      message: 'Package payment status updated successfully.',
+      booking: updatedBooking
+    });
+
+  } catch (error) {
+    console.error('Error updating package payment status:', error);
+    res.status(500).json({ message: 'Internal server error.' });
+  }
+};
+
+exports.updateFullPaymentStatus = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { bookingStatus, paymentStatus } = req.body;
+
+    if (!bookingStatus || !paymentStatus) {
+      return res.status(400).json({ message: 'bookingStatus and paymentStatus are required.' });
+    }
+
+    // Validate bookingStatus
+    const validBookingStatuses = [
+      'Pending Payment', 'Reserved', 'Fully-Paid', 
+      'Checked-In', 'Checked-Out', 'Completed', 'Cancel'
+    ];
+    if (!validBookingStatuses.includes(bookingStatus)) {
+      return res.status(400).json({ message: 'Invalid bookingStatus value.' });
+    }
+
+    // Validate paymentStatus
+    const validPaymentStatuses = ['Pending', 'Approved', 'Declined'];
+    if (!validPaymentStatuses.includes(paymentStatus)) {
+      return res.status(400).json({ message: 'Invalid paymentStatus value.' });
+    }
+
+    const updatedBooking = await booking.findByIdAndUpdate(
+      id,
+      {
+        $set: {
+          status: bookingStatus,
+          'reservation.status': paymentStatus,
+          'package.status': paymentStatus
+        }
+      },
+      { new: true }
+    );
+
+    if (!updatedBooking) return res.status(404).json({ message: 'Booking not found.' });
+
+    res.status(200).json({
+      message: 'Full payment status updated successfully.',
+      booking: updatedBooking
+    });
+
+  } catch (error) {
+    console.error('Error updating full payment status:', error);
+    res.status(500).json({ message: 'Internal server error.' });
+  }
+};
+
+exports.getBookingById = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    if (!id) {
+      return res.status(400).json({ message: 'Booking ID is required.' });
+    }
+
+    const foundBooking = await booking.findById(id);
+
+    if (!foundBooking) {
+      return res.status(404).json({ message: 'Booking not found.' });
+    }
+
+    res.status(200).json({
+      message: 'Booking retrieved successfully.',
+      booking: foundBooking
+    });
+    
+  } catch (error) {
+    console.error('Error fetching booking by ID:', error);
+    res.status(500).json({ message: 'Internal server error.' });
+  }
+};

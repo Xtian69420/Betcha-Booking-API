@@ -128,12 +128,17 @@ router.patch('/booking/update-status/:id', bookingController.updateStatus);
 router.get('/booking/status/:status', bookingController.displayByStatus);
 router.get('/booking/property/:propertyId', bookingController.getBookingsByPropertyId);
 router.get('/booking/all', bookingController.getAllBookings);
-
+router.get('/booking/:id', bookingController.getBookingById);
 
 // booking payment routes
 router.patch('/booking/payment/reservation/:id', bookingController.reservationPayment);
 router.patch('/booking/payment/package/:id', bookingController.packagePayment);
 router.patch('/booking/payment/full/:id', bookingController.fullPayment);
+
+// Payment checking routes (approve/decline)
+router.patch('/booking/paymentChecking/reservation/:id', bookingController.updateReservationPaymentStatus);
+router.patch('/booking/paymentChecking/package/:id', bookingController.updatePackagePaymentStatus);
+router.patch('/booking/paymentChecking/fully-payment/:id', bookingController.updateFullPaymentStatus);
 
 // booking guest
 router.put('/booking/rate/:id', bookingController.rateBooking);
