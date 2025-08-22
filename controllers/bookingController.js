@@ -221,7 +221,7 @@ exports.getBookingsByPropertyId = async (req, res) => {
 };
 
 const guest = require('../models/guestModel');
-
+// Reservation Payment
 exports.reservationPayment = async (req, res) => {
   try {
     const { id } = req.params;
@@ -237,7 +237,7 @@ exports.reservationPayment = async (req, res) => {
         $set: {
           'reservation.modeOfPayment': modeOfPayment,
           'reservation.paymentNo': paymentNo,
-          numberBankEwallets: numberBankEwallets || 'N/A',
+          'reservation.numberBankEwallets': numberBankEwallets || 'N/A',
           paymentCategory: 'Reservation'
         }
       },
@@ -277,7 +277,7 @@ exports.packagePayment = async (req, res) => {
         $set: {
           'package.modeOfPayment': modeOfPayment,
           'package.paymentNo': paymentNo,
-          numberBankEwallets: numberBankEwallets || 'N/A',
+          'package.numberBankEwallets': numberBankEwallets || 'N/A',
           paymentCategory: 'Full-Payment'
         }
       },
@@ -301,6 +301,7 @@ exports.packagePayment = async (req, res) => {
   }
 };
 
+// Full Payment
 exports.fullPayment = async (req, res) => {
   try {
     const { id } = req.params;
@@ -316,9 +317,10 @@ exports.fullPayment = async (req, res) => {
         $set: {
           'reservation.modeOfPayment': modeOfPayment,
           'reservation.paymentNo': paymentNo,
+          'reservation.numberBankEwallets': numberBankEwallets || 'N/A',
           'package.modeOfPayment': modeOfPayment,
           'package.paymentNo': paymentNo,
-          numberBankEwallets: numberBankEwallets || 'N/A',
+          'package.numberBankEwallets': numberBankEwallets || 'N/A',
           paymentCategory: 'Full-Payment'
         }
       },
@@ -341,6 +343,7 @@ exports.fullPayment = async (req, res) => {
     res.status(500).json({ message: 'Internal server error.' });
   }
 };
+
 
 exports.rateBooking = async (req, res) => {
   try {
