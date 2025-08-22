@@ -225,10 +225,10 @@ const guest = require('../models/guestModel');
 exports.reservationPayment = async (req, res) => {
   try {
     const { id } = req.params;
-    const { modeOfPayment, paymentNo, status, numberBankEwallets } = req.body;
+    const { modeOfPayment, paymentNo, numberBankEwallets } = req.body;
 
-    if (!modeOfPayment || !paymentNo || !status) {
-      return res.status(400).json({ message: 'All reservation fields are required.' });
+    if (!modeOfPayment || !paymentNo) {
+      return res.status(400).json({ message: 'Mode of payment and payment number are required.' });
     }
 
     const updatedBooking = await booking.findByIdAndUpdate(
@@ -237,17 +237,14 @@ exports.reservationPayment = async (req, res) => {
         $set: {
           'reservation.modeOfPayment': modeOfPayment,
           'reservation.paymentNo': paymentNo,
-          'reservation.status': status,
           numberBankEwallets: numberBankEwallets || 'N/A',
-          status: status === 'Reserved' ? 'Reserved' : 'Pending Payment'
+          paymentCategory: 'Reservation'
         }
       },
       { new: true }
     );
 
-    if (!updatedBooking) {
-      return res.status(404).json({ message: 'Booking not found.' });
-    }
+    if (!updatedBooking) return res.status(404).json({ message: 'Booking not found.' });
 
     const guestData = await guest.findById(updatedBooking.guestId);
     const guestEmail = guestData?.email || 'N/A';
@@ -264,14 +261,14 @@ exports.reservationPayment = async (req, res) => {
   }
 };
 
-
+// Package Payment
 exports.packagePayment = async (req, res) => {
   try {
     const { id } = req.params;
-    const { modeOfPayment, paymentNo, status } = req.body;
+    const { modeOfPayment, paymentNo, numberBankEwallets } = req.body;
 
-    if (!modeOfPayment || !paymentNo || !status) {
-      return res.status(400).json({ message: 'All package fields are required.' });
+    if (!modeOfPayment || !paymentNo) {
+      return res.status(400).json({ message: 'Mode of payment and payment number are required.' });
     }
 
     const updatedBooking = await booking.findByIdAndUpdate(
@@ -280,16 +277,14 @@ exports.packagePayment = async (req, res) => {
         $set: {
           'package.modeOfPayment': modeOfPayment,
           'package.paymentNo': paymentNo,
-          'package.status': status,
-          status: status === 'Fully-Paid' ? 'Fully-Paid' : 'Reserved'
+          numberBankEwallets: numberBankEwallets || 'N/A',
+          paymentCategory: 'Full-Payment'
         }
       },
       { new: true }
     );
 
-    if (!updatedBooking) {
-      return res.status(404).json({ message: 'Booking not found.' });
-    }
+    if (!updatedBooking) return res.status(404).json({ message: 'Booking not found.' });
 
     const guestData = await guest.findById(updatedBooking.guestId);
     const guestEmail = guestData?.email || 'N/A';
@@ -309,10 +304,10 @@ exports.packagePayment = async (req, res) => {
 exports.fullPayment = async (req, res) => {
   try {
     const { id } = req.params;
-    const { modeOfPayment, paymentNo, status, numberBankEwallets } = req.body;
+    const { modeOfPayment, paymentNo, numberBankEwallets } = req.body;
 
-    if (!modeOfPayment || !paymentNo || !status) {
-      return res.status(400).json({ message: 'modeOfPayment, paymentNo, and status are required.' });
+    if (!modeOfPayment || !paymentNo) {
+      return res.status(400).json({ message: 'Mode of payment and payment number are required.' });
     }
 
     const updatedBooking = await booking.findByIdAndUpdate(
@@ -321,20 +316,16 @@ exports.fullPayment = async (req, res) => {
         $set: {
           'reservation.modeOfPayment': modeOfPayment,
           'reservation.paymentNo': paymentNo,
-          'reservation.status': status,
           'package.modeOfPayment': modeOfPayment,
           'package.paymentNo': paymentNo,
-          'package.status': status,
           numberBankEwallets: numberBankEwallets || 'N/A',
-          status: status === 'Fully-Paid' ? 'Fully-Paid' : 'Reserved'
+          paymentCategory: 'Full-Payment'
         }
       },
       { new: true }
     );
 
-    if (!updatedBooking) {
-      return res.status(404).json({ message: 'Booking not found.' });
-    }
+    if (!updatedBooking) return res.status(404).json({ message: 'Booking not found.' });
 
     const guestData = await guest.findById(updatedBooking.guestId);
     const guestEmail = guestData?.email || 'N/A';
@@ -350,7 +341,6 @@ exports.fullPayment = async (req, res) => {
     res.status(500).json({ message: 'Internal server error.' });
   }
 };
-
 
 exports.rateBooking = async (req, res) => {
   try {

@@ -11,6 +11,7 @@ const bookingSchema = new mongoose.Schema({
     enum: ['Pending Payment', 'Reserved', 'Fully-Paid', 'Checked-In', 'Checked-Out', 'Completed', 'Cancel'],
     default: 'Pending Payment'
   },
+  paymentCategory: { type: String, default: ''},
   reservationFee: { type: Number, required: true },
   packageFee: { type: Number, required: true },
   discount: { type: Number, default: 0 },
