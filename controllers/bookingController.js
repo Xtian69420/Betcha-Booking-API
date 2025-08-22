@@ -443,8 +443,6 @@ exports.getBookingsByGuestId = async (req, res) => {
     res.status(500).json({ message: 'Internal server error.' });
   }
 };
-
-// Update Reservation Payment Status
 exports.updateReservationPaymentStatus = async (req, res) => {
   try {
     const { id } = req.params;
@@ -454,16 +452,14 @@ exports.updateReservationPaymentStatus = async (req, res) => {
       return res.status(400).json({ message: 'bookingStatus and paymentStatus are required.' });
     }
 
-    // Validate bookingStatus
     const validBookingStatuses = [
-      'Pending Payment', 'Reserved', 'Fully-Paid', 
+      'Pending Payment', 'Reserved', 'Fully-Paid',
       'Checked-In', 'Checked-Out', 'Completed', 'Cancel'
     ];
     if (!validBookingStatuses.includes(bookingStatus)) {
       return res.status(400).json({ message: 'Invalid bookingStatus value.' });
     }
 
-    // Validate paymentStatus
     const validPaymentStatuses = ['Pending', 'Approved', 'Declined'];
     if (!validPaymentStatuses.includes(paymentStatus)) {
       return res.status(400).json({ message: 'Invalid paymentStatus value.' });
@@ -477,7 +473,7 @@ exports.updateReservationPaymentStatus = async (req, res) => {
           'reservation.status': paymentStatus
         }
       },
-      { new: true }
+      { new: true, runValidators: true }
     );
 
     if (!updatedBooking) return res.status(404).json({ message: 'Booking not found.' });
@@ -493,6 +489,7 @@ exports.updateReservationPaymentStatus = async (req, res) => {
   }
 };
 
+// ✅ Update Package Payment Status
 exports.updatePackagePaymentStatus = async (req, res) => {
   try {
     const { id } = req.params;
@@ -503,7 +500,7 @@ exports.updatePackagePaymentStatus = async (req, res) => {
     }
 
     const validBookingStatuses = [
-      'Pending Payment', 'Reserved', 'Fully-Paid', 
+      'Pending Payment', 'Reserved', 'Fully-Paid',
       'Checked-In', 'Checked-Out', 'Completed', 'Cancel'
     ];
     if (!validBookingStatuses.includes(bookingStatus)) {
@@ -523,7 +520,7 @@ exports.updatePackagePaymentStatus = async (req, res) => {
           'package.status': paymentStatus
         }
       },
-      { new: true }
+      { new: true, runValidators: true }
     );
 
     if (!updatedBooking) return res.status(404).json({ message: 'Booking not found.' });
@@ -539,6 +536,7 @@ exports.updatePackagePaymentStatus = async (req, res) => {
   }
 };
 
+// ✅ Update Full Payment Status (both reservation + package)
 exports.updateFullPaymentStatus = async (req, res) => {
   try {
     const { id } = req.params;
@@ -548,16 +546,14 @@ exports.updateFullPaymentStatus = async (req, res) => {
       return res.status(400).json({ message: 'bookingStatus and paymentStatus are required.' });
     }
 
-    // Validate bookingStatus
     const validBookingStatuses = [
-      'Pending Payment', 'Reserved', 'Fully-Paid', 
+      'Pending Payment', 'Reserved', 'Fully-Paid',
       'Checked-In', 'Checked-Out', 'Completed', 'Cancel'
     ];
     if (!validBookingStatuses.includes(bookingStatus)) {
       return res.status(400).json({ message: 'Invalid bookingStatus value.' });
     }
 
-    // Validate paymentStatus
     const validPaymentStatuses = ['Pending', 'Approved', 'Declined'];
     if (!validPaymentStatuses.includes(paymentStatus)) {
       return res.status(400).json({ message: 'Invalid paymentStatus value.' });
@@ -572,7 +568,7 @@ exports.updateFullPaymentStatus = async (req, res) => {
           'package.status': paymentStatus
         }
       },
-      { new: true }
+      { new: true, runValidators: true }
     );
 
     if (!updatedBooking) return res.status(404).json({ message: 'Booking not found.' });
