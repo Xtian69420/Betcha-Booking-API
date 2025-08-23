@@ -70,6 +70,7 @@ router.put('/employee/archive/:id', employeeController.archiveEmployee);
 router.put('/employee/unarchive/:id', employeeController.unarchiveEmployee);
 router.delete('/employee/delete/:id', employeeController.deleteEmployee);
 router.get('/employee/search', employeeController.searchEmployees);
+router.get('/employee/privilege/tk', employeeController.getEmployeesWithTKPrivilege);
 
 // Role routes
 router.post('/roles/create', rolesController.createRoles);

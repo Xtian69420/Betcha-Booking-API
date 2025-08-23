@@ -315,3 +315,27 @@ exports.searchEmployees = async (req, res) => {
     res.status(500).json({ message: 'Internal server error' });
   }
 };
+
+exports.getEmployeesWithTKPrivilege = async (req, res) => {
+  try {
+    const employees = await employee.find()
+      .populate('role'); 
+
+    const employeesWithTK = employees.filter(emp =>
+      emp.role.some(r => r.privileges.includes("TK"))
+    );
+
+    if (employeesWithTK.length === 0) {
+      return res.status(404).json({ message: 'No employees found with TK privilege' });
+    }
+
+    res.status(200).json({
+      message: 'Employees with TK privilege retrieved successfully',
+      employees: employeesWithTK
+    });
+
+  } catch (error) {
+    console.error('Get Employees With TK Privilege Error:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+};
