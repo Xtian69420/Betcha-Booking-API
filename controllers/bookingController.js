@@ -608,3 +608,28 @@ exports.getBookingById = async (req, res) => {
     res.status(500).json({ message: 'Internal server error.' });
   }
 };
+
+exports.deleteBooking = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    if (!id) {
+      return res.status(400).json({ message: 'Booking ID is required.' });
+    }
+
+    const deletedBooking = await booking.findByIdAndDelete(id);
+
+    if (!deletedBooking) {
+      return res.status(404).json({ message: 'Booking not found.' });
+    }
+
+    res.status(200).json({
+      message: 'Booking deleted successfully.',
+      booking: deletedBooking
+    });
+
+  } catch (error) {
+    console.error('Error deleting booking:', error);
+    res.status(500).json({ message: 'Internal server error.' });
+  }
+};

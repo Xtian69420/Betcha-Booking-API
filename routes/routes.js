@@ -129,6 +129,7 @@ router.get('/booking/status/:status', bookingController.displayByStatus);
 router.get('/booking/property/:propertyId', bookingController.getBookingsByPropertyId);
 router.get('/booking/all', bookingController.getAllBookings);
 router.get('/booking/:id', bookingController.getBookingById);
+router.delete('/booking/:id', bookingController.deleteBooking);
 
 // booking payment routes
 router.patch('/booking/payment/reservation/:id', bookingController.reservationPayment);

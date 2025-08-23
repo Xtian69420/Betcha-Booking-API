@@ -109,7 +109,7 @@
     const userLevel = 'guest';
 
     async function loadTicket() {
-      const res = await fetch(`http://localhost:3000/tk/${ticketId}`);
+      const res = await fetch(`https://betcha-api.onrender.com/tk/${ticketId}`);
       const data = await res.json();
 
       document.getElementById('ticketNumber').innerText = data.ticket.ticketNumber;
@@ -135,7 +135,7 @@
       if (!message) return;
 
       try {
-        const res = await fetch(`http://localhost:3000/tk/reply/${ticketId}`, {
+        const res = await fetch(`https://betcha-api.onrender.com/tk/reply/${ticketId}`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ userId: userId, userLevel, message })
