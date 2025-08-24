@@ -66,7 +66,6 @@ exports.createAdmin = async (req, res) => {
         return res.status(500).json({ message: 'Failed to upload profile picture' });
       }
     }
-
     const newAdmin = new admin({
       firstname,
       minitial,
