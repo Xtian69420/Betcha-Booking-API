@@ -306,7 +306,7 @@ exports.resendOtp = async (req, res) => {
       to: email,
       from: {
         name: 'Betcha Booking',
-        email: 'betcha.booking@outlook.com'
+        email: 'betcha-booking@outlook.com'
       },
       subject: 'Resent OTP',
       html: ` 
