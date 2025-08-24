@@ -51,7 +51,8 @@ exports.displayReportsByGuestId = async (req, res) => {
             name: `${foundGuest.firstname} ${foundGuest.minitial ? foundGuest.minitial + ". " : ""}${foundGuest.lastname}`,
             dateCreated: r.createdAt,
             transNo: r.transNo,
-            reportedBy: r.reportedBy
+            reportedBy: r.reportedBy,
+            reason: r.reason
         }));
 
         res.status(200).json(formattedReports);
@@ -71,7 +72,8 @@ exports.displayAllReports = async (req, res) => {
             name: `${r.guestId.firstname} ${r.guestId.minitial ? r.guestId.minitial + ". " : ""}${r.guestId.lastname}`,
             dateCreated: r.createdAt,
             transNo: r.transNo,
-            reportedBy: r.reportedBy
+            reportedBy: r.reportedBy,
+            reason: r.reason
         }));
 
         res.status(200).json(formattedReports);
