@@ -200,8 +200,8 @@ router.patch('/reset-warning/:guestId', guestWarningController.resetWarnings);
 router.post('/audit/create', auditTrailController.createAudit);
 router.get('/audit/getAll', auditTrailController.getAllAudit);
 router.get('/audit/getAll/:userType', auditTrailController.getAllAuditByUserType);
-router.get('/audit/by-date/:date', auditTrailController.getAuditByDate); // date format: YYYY-MM-DD
-router.get('/audit/search', auditTrailController.getAuditBySearchQuery); // ?query=keyword
+router.get('/audit/by-date/:date', auditTrailController.getAuditByDate); 
+router.get('/audit/search', auditTrailController.getAuditBySearchQuery); 
 
 // Calendar
 router.get('/calendar/byProperty/:propertyId', maintenanceBookingCalendarController.getCalendarByPropertyId);

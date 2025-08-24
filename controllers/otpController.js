@@ -7,6 +7,18 @@ const sgMail = require('@sendgrid/mail');
 const cron = require('node-cron');
 require('dotenv').config();
 
+// Debug: Check environment variable loading
+console.log('Environment Variables:', {
+  NODE_ENV: process.env.NODE_ENV,
+  SENDGRID_API_KEY_EXISTS: !!process.env.SENDGRID_API_KEY,
+  SENDGRID_API_KEY_LENGTH: process.env.SENDGRID_API_KEY ? process.env.SENDGRID_API_KEY.length : 0
+});
+
+// Verify API key format (should start with 'SG.')
+if (!process.env.SENDGRID_API_KEY || !process.env.SENDGRID_API_KEY.startsWith('SG.')) {
+  console.error('WARNING: SendGrid API key is missing or invalid format');
+}
+
 sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
 const generateOTP = () => crypto.randomInt(100000, 999999);
@@ -44,7 +56,7 @@ exports.sendOtpRegistration = async (req, res) => {
       to: email,
       from: {
         name: 'Betcha Booking',
-        email: 'betcha.booking@outlook.com'
+        email: 'betcha-booking@outlook.com'
       },
       subject: 'OTP for Registration',
       html: ` 
@@ -106,7 +118,7 @@ exports.sendOtpForgotPassword = async (req, res) => {
       to: email,
       from: {
         name: 'Betcha Booking',
-        email: 'betcha.booking@outlook.com'
+        email: 'betcha-booking@outlook.com'
       },
       subject: 'OTP for Password Reset',
       html: ` 
@@ -164,7 +176,7 @@ exports.verifyOtp = async (req, res) => {
       to: email,
       from: {
         name: 'Betcha Booking',
-        email: 'betcha.booking@outlook.com'
+        email: 'betcha-booking@outlook.com'
       },
     subject: 'Welcome to Betcha by Homie House Booking!',
     html: `
@@ -269,17 +281,32 @@ exports.resendOtp = async (req, res) => {
   if (!email) return res.status(400).json({ message: 'Email is required' });
 
   try {
-    await otp.deleteMany({ email });
-    const code = generateOTP();
-    const expiresAt = new Date(Date.now() + 5 * 60000);
+    // Check if there's an existing valid OTP
+    const existingOtp = await otp.findOne({ 
+      email,
+      expiresAt: { $gt: new Date() }
+    });
 
-    await otp.create({ email, otp: code, expiresAt });
+    let code;
+    let expiresAt;
+
+    if (existingOtp) {
+      // Use existing OTP if it's still valid
+      code = existingOtp.otp;
+      expiresAt = existingOtp.expiresAt;
+    } else {
+      // Generate new OTP if none exists or expired
+      await otp.deleteMany({ email });
+      code = generateOTP();
+      expiresAt = new Date(Date.now() + 5 * 60000);
+      await otp.create({ email, otp: code, expiresAt });
+    }
 
     await sgMail.send({
       to: email,
       from: {
         name: 'Betcha Booking',
-        email: 'betcha.booking@outlook.com'
+        email: 'betcha-booking@outlook.com'
       },
       subject: 'Resent OTP',
       html: ` 
@@ -325,7 +352,7 @@ exports.BookingMessage = async (req, res) => {
             to: email,
             from: {
               name: 'Betcha Booking',
-              email: 'betcha.booking@outlook.com'
+              email: 'betcha-booking@outlook.com'
             },
             subject: 'Booking Confirmation - Betcha by Homie House Booking',
             html:`
@@ -404,7 +431,7 @@ exports.cancellationMessage = async (req, res) => {
       to: email,
       from: {
         name: 'Betcha Booking',
-        email: 'betcha.booking@outlook.com'
+        email: 'betcha-booking@outlook.com'
       },
       subject: 'Booking Cancellation Notice - Betcha by Homie House',
       html: `
@@ -477,7 +504,7 @@ exports.CheckInTodayMessage = async (req, res) => {
       to: email,
       from: {
         name: 'Betcha Booking',
-        email: 'betcha.booking@outlook.com'
+        email: 'betcha-booking@outlook.com'
       },
       subject: `Check-In Reminder for Today - ${propertyName}`,
       html: `
