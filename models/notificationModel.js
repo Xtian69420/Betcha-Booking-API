@@ -20,6 +20,7 @@ const notificationSchema = new mongoose.Schema({
     statusRejection : { type: String, default: 'Pending' },
     transNo : { type: String },
     amountRefund : { type: Number },
+    modeOfRefund : { type: String },
     reasonToGuest : { type: String },
     numberEwalletBank : { type: String }
 }, {
