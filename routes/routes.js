@@ -148,6 +148,7 @@ router.put('/booking/rate/:id', bookingController.rateBooking);
 router.get('/booking/guest/:guestId', bookingController.getBookingsByGuestId);
 
 
+
 // email generator
 router.post('/email/bookingmessage', otpController.BookingMessage);
 router.post('/email/cancellationMessage', otpController.cancellationMessage);
