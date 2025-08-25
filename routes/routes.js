@@ -170,7 +170,7 @@ router.get('/faq/five', faqController.get5Faq);
 
 // Admin Dashboard
 router.get('/dashboard/admin/summary', adminDashboardController.summary);
-router.get('/dashboard/admin/rankProperty', adminDashboardController.rankProperty);
+router.post('/dashboard/admin/rankProperty', adminDashboardController.rankProperty);
 router.get('/dashboard/admin/audit', adminDashboardController.new5AuditTrails);
 
 // Admin Dashboard Routes
