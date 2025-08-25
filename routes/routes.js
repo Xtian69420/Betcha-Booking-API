@@ -56,6 +56,7 @@ router.put('/guest/unarchive/:id', guestController.unarchiveGuest);
 // Admin User level
 router.post('/admin/create', upload.single('pfp'), adminController.createAdmin);
 router.get('/admin/display', adminController.getAllAdmin);
+router.get('/admin/display/:id', adminController.getAdminById);
 router.put('/admin/update/:id', adminController.updateAdmin);
 router.put('/admin/update/pfp/:id', upload.single('pfp'), adminController.updateAdminPfp);
 router.delete('/admin/delete/:id', adminController.deleteAdmin);

@@ -1,3 +1,19 @@
+exports.getAdminById = async (req, res) => {
+  try {
+    const { id } = req.params;
+    if (!id) {
+      return res.status(400).json({ message: 'Admin ID is required' });
+    }
+    const adminUser = await admin.findById(id);
+    if (!adminUser) {
+      return res.status(404).json({ message: 'Admin not found' });
+    }
+    res.status(200).json(adminUser);
+  } catch (error) {
+    console.error('Get Admin By ID Error:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+};
 const admin = require('../models/adminModel');
 const guest = require('../models/guestModel')
 const employee = require ('../models/employeeModel');
