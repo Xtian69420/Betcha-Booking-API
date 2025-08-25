@@ -161,6 +161,7 @@ router.post('/notify/cancellation', notificationController.cancellationNotificat
 router.patch('/notify/seen/:id', notificationController.updateSeen);
 router.get('/notify/to/:toId', notificationController.getAllNotificationByToId);
 router.delete('/notify/:id', notificationController.deleteNotificationById);
+router.patch('/notify/status-rejection/:id', notificationController.updateStatusRejection);
 
 // FAQ routes
 router.post('/faq/create', faqController.createFAQ);

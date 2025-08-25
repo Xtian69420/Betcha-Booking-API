@@ -139,3 +139,37 @@ exports.deleteNotificationById = async (req, res) => {
     res.status(500).json({ message: 'Server error.' });
   }
 };
+
+exports.updateStatusRejection = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { statusRejection } = req.body;
+
+    if (!statusRejection) {
+      return res.status(400).json({ message: 'Status rejection value is required.' });
+    }
+
+    const updatedNotification = await Notification.findByIdAndUpdate(
+      id,
+      { statusRejection },
+      { new: true }
+    );
+
+    if (!updatedNotification) {
+      return res.status(404).json({ message: 'Notification not found.' });
+    }
+
+    const formattedResponse = {
+      ...updatedNotification.toObject(),
+      dateTimePH: moment(updatedNotification.dateTime).tz('Asia/Manila').format('YYYY-MM-DD HH:mm:ss')
+    };
+
+    res.status(200).json({ 
+      message: 'Status rejection updated successfully.', 
+      data: formattedResponse 
+    });
+  } catch (error) {
+    console.error('Error updating status rejection:', error);
+    res.status(500).json({ message: 'Server error.' });
+  }
+};

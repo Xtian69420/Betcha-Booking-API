@@ -17,7 +17,7 @@ const notificationSchema = new mongoose.Schema({
     message : { type: String, required: true },
 
     // Optional cancellation fields
-    approveCancel : { type: Boolean, default: false },
+    statusRejection : { type: String, default: 'Pending' },
     transNo : { type: String },
     amountRefund : { type: Number },
     reasonToGuest : { type: String },
