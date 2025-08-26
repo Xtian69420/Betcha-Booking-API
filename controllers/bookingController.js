@@ -659,6 +659,63 @@ exports.deleteBooking = async (req, res) => {
   }
 };
 
+exports.updateBookingDates = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { newBookingDates } = req.body;
+
+    if (!id) {
+      return res.status(400).json({ message: 'Booking ID is required.' });
+    }
+
+    if (!newBookingDates || !Array.isArray(newBookingDates) || newBookingDates.length === 0) {
+      return res.status(400).json({ message: 'newBookingDates must be a non-empty array.' });
+    }
+
+    // Convert string dates to Date objects and sort them
+    const dateObjects = newBookingDates.map(dateStr => new Date(dateStr)).sort((a, b) => a - b);
+
+    // Validate dates
+    const invalidDates = dateObjects.filter(date => isNaN(date.getTime()));
+    if (invalidDates.length > 0) {
+      return res.status(400).json({ message: 'One or more dates are invalid.' });
+    }
+
+    // Set checkIn as the first date and checkOut as the last date
+    const checkIn = dateObjects[0];
+    const checkOut = dateObjects[dateObjects.length - 1];
+
+    // Calculate number of days
+    const numOfDays = Math.ceil((checkOut - checkIn) / (1000 * 60 * 60 * 24)) + 1;
+
+    const updatedBooking = await booking.findByIdAndUpdate(
+      id,
+      {
+        $set: {
+          datesOfBooking: dateObjects,
+          checkIn,
+          checkOut,
+          numOfDays
+        }
+      },
+      { new: true }
+    );
+
+    if (!updatedBooking) {
+      return res.status(404).json({ message: 'Booking not found.' });
+    }
+
+    res.status(200).json({
+      message: 'Booking dates updated successfully.',
+      booking: updatedBooking
+    });
+
+  } catch (error) {
+    console.error('Error updating booking dates:', error);
+    res.status(500).json({ message: 'Internal server error.' });
+  }
+};
+
 exports.getTopProperties = async (req, res) => {
   try {
     // Aggregate bookings to get top 5 most booked properties

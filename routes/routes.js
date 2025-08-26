@@ -127,6 +127,7 @@ router.delete('/payments/delete/:id',paymentController.deletePaymentById)
 // booking routes
 router.post('/booking/create', bookingController.createBooking);
 router.patch('/booking/update-status/:id', bookingController.updateStatus);
+router.patch('/booking/update-dates/:id', bookingController.updateBookingDates);
 router.get('/booking/status/:status', bookingController.displayByStatus);
 router.get('/booking/property/:propertyId', bookingController.getBookingsByPropertyId);
 router.get('/booking/all', bookingController.getAllBookings);
@@ -148,8 +149,6 @@ router.patch('/booking/paymentChecking/fully-payment/:id', bookingController.upd
 // booking guest
 router.put('/booking/rate/:id', bookingController.rateBooking);
 router.get('/booking/guest/:guestId', bookingController.getBookingsByGuestId);
-
-
 
 // email generator
 router.post('/email/bookingmessage', otpController.BookingMessage);
