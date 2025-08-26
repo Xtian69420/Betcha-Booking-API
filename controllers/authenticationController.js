@@ -78,5 +78,4 @@ exports.updatePassword = async (req, res) => {
     res.status(500).json({ message: 'Internal server error.' });
   }
 };
-
 // https://in.sumsub.com/websdk/p/sbx_uni_5lWlhioi8FNABcxg
