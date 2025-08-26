@@ -672,6 +672,12 @@ exports.updateBookingDates = async (req, res) => {
       return res.status(400).json({ message: 'newBookingDates must be a non-empty array.' });
     }
 
+    // Get the current booking to check property and dates
+    const currentBooking = await booking.findById(id);
+    if (!currentBooking) {
+      return res.status(404).json({ message: 'Booking not found.' });
+    }
+
     // Convert string dates to Date objects and sort them
     const dateObjects = newBookingDates.map(dateStr => new Date(dateStr)).sort((a, b) => a - b);
 
@@ -679,6 +685,36 @@ exports.updateBookingDates = async (req, res) => {
     const invalidDates = dateObjects.filter(date => isNaN(date.getTime()));
     if (invalidDates.length > 0) {
       return res.status(400).json({ message: 'One or more dates are invalid.' });
+    }
+
+    // Check for conflicts with other bookings (excluding current booking and cancelled bookings)
+    const existingBookings = await booking.find({ 
+      propertyId: currentBooking.propertyId,
+      _id: { $ne: id }, // Exclude current booking
+      status: { $ne: 'Cancel' } // Exclude cancelled bookings
+    });
+
+    const allBookedDates = existingBookings.flatMap(b =>
+      b.datesOfBooking.map(d => d.toISOString().slice(0, 10))
+    );
+
+    // Check for property maintenance dates
+    const property = await Property.findById(currentBooking.propertyId);
+    const allMaintenanceDates = property?.maintenance?.flatMap(m =>
+      m.dates.map(d => d.toISOString().slice(0, 10))
+    ) || [];
+
+    // Check for conflicts
+    const conflictDates = newBookingDates.filter(date =>
+      allBookedDates.includes(new Date(date).toISOString().slice(0, 10)) ||
+      allMaintenanceDates.includes(new Date(date).toISOString().slice(0, 10))
+    );
+
+    if (conflictDates.length > 0) {
+      return res.status(400).json({
+        message: 'Some of the selected dates are already booked or under maintenance.',
+        conflictDates
+      });
     }
 
     // Set checkIn as the first date and checkOut as the last date
@@ -700,10 +736,6 @@ exports.updateBookingDates = async (req, res) => {
       },
       { new: true }
     );
-
-    if (!updatedBooking) {
-      return res.status(404).json({ message: 'Booking not found.' });
-    }
 
     res.status(200).json({
       message: 'Booking dates updated successfully.',
