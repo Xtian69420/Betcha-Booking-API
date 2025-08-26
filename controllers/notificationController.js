@@ -45,7 +45,7 @@ exports.cancellationNotification = async (req, res) => {
     const {
       fromId, fromName, fromRole,
       toId, toName, toRole,
-      message, transNo, amountRefund, reasonToGuest, numberEwalletBank, modeOfRefund
+      message, transNo, bookingId, amountRefund, reasonToGuest, numberEwalletBank, modeOfRefund
     } = req.body;
 
     if (!fromId || !fromName || !fromRole || !toId || !toName || !toRole || !message || !transNo) {
@@ -63,6 +63,7 @@ exports.cancellationNotification = async (req, res) => {
       message,
       statusRejection: 'Pending',
       transNo,
+      bookingId,
       amountRefund,
       modeOfRefund,
       reasonToGuest,
