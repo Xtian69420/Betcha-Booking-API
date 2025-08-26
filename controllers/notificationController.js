@@ -111,7 +111,9 @@ exports.getAllNotificationByToId = async (req, res) => {
   try {
     const { toId } = req.params;
 
-    const notifications = await Notification.find({ 'to.toId': toId }).sort({ createdAt: -1 });
+    const notifications = await Notification.find({ 'to.toId': toId })
+      .populate('bookingId')
+      .sort({ createdAt: -1 });
 
     const formatted = notifications.map(notif => ({
       ...notif.toObject(),

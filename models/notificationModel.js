@@ -19,7 +19,7 @@ const notificationSchema = new mongoose.Schema({
     // Optional cancellation fields
     statusRejection : { type: String, default: 'Pending' },
     transNo : { type: String },
-    bookingId : { type: String },
+    bookingId : { type: mongoose.Schema.Types.ObjectId, ref: 'booking' },
     amountRefund : { type: Number },
     modeOfRefund : { type: String },
     reasonToGuest : { type: String },
