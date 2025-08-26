@@ -1,5 +1,6 @@
 const Notification = require('../models/notificationModel'); 
 const moment = require('moment-timezone');
+const mongoose = require('mongoose');
 
 // Message Notification
 exports.messageNotification = async (req, res) => {
@@ -54,6 +55,16 @@ exports.cancellationNotification = async (req, res) => {
 
     const dateTimePH = moment().tz('Asia/Manila').toDate();
 
+    // Convert bookingId string to ObjectId if provided
+    let bookingObjectId = null;
+    if (bookingId) {
+      try {
+        bookingObjectId = new mongoose.Types.ObjectId(bookingId);
+      } catch (error) {
+        return res.status(400).json({ message: 'Invalid booking ID format.' });
+      }
+    }
+
     const newNotification = new Notification({
       from: { fromId, name: fromName, role: fromRole },
       to: { toId, name: toName, role: toRole },
@@ -63,7 +74,7 @@ exports.cancellationNotification = async (req, res) => {
       message,
       statusRejection: 'Pending',
       transNo,
-      bookingId,
+      bookingId: bookingObjectId,
       amountRefund,
       modeOfRefund,
       reasonToGuest,
