@@ -69,7 +69,8 @@ exports.getCheckInToday = async (req, res) => {
         checkOut: moment(booking.checkOut).tz('Asia/Manila').format('YYYY-MM-DD'),
         timeIn: booking.timeIn,
         timeOut: booking.timeOut,
-        nameOfGuest: booking.guestName
+        nameOfGuest: booking.guestName,
+        status: booking.status
       });
     });
 
