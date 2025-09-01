@@ -37,14 +37,17 @@ exports.createBooking = async (req, res) => {
       maintenance
     } = property;
 
-    const existingBookings = await booking.find({ propertyId });
+    const existingBookings = await booking.find({ 
+      propertyId,
+      status: { $nin: ['Cancel', 'cancel', 'Cancelled'] } // Exclude cancelled bookings
+    });
 
     const allBookedDates = existingBookings.flatMap(b =>
       b.datesOfBooking.map(d => d.toISOString().slice(0, 10))
     );
-    const allMaintenanceDates = maintenance.flatMap(m =>
-      m.dates.map(d => d.toISOString().slice(0, 10))
-    );
+    const allMaintenanceDates = maintenance
+      .filter(m => m.status !== 'Deactivated') // Exclude deactivated maintenance
+      .flatMap(m => m.dates.map(d => d.toISOString().slice(0, 10)));
 
     const conflictDates = datesOfBooking.filter(date =>
       allBookedDates.includes(new Date(date).toISOString().slice(0, 10)) ||
@@ -691,18 +694,18 @@ exports.updateBookingDates = async (req, res) => {
     const existingBookings = await booking.find({ 
       propertyId: currentBooking.propertyId,
       _id: { $ne: id }, // Exclude current booking
-      status: { $ne: 'Cancel' } // Exclude cancelled bookings
+      status: { $nin: ['Cancel', 'cancel', 'Cancelled'] } // Exclude cancelled bookings
     });
 
     const allBookedDates = existingBookings.flatMap(b =>
       b.datesOfBooking.map(d => d.toISOString().slice(0, 10))
     );
 
-    // Check for property maintenance dates
+    // Check for property maintenance dates (excluding deactivated maintenance)
     const property = await Property.findById(currentBooking.propertyId);
-    const allMaintenanceDates = property?.maintenance?.flatMap(m =>
-      m.dates.map(d => d.toISOString().slice(0, 10))
-    ) || [];
+    const allMaintenanceDates = property?.maintenance
+      ?.filter(m => m.status !== 'Deactivated') // Exclude deactivated maintenance
+      ?.flatMap(m => m.dates.map(d => d.toISOString().slice(0, 10))) || [];
 
     // Check for conflicts
     const conflictDates = newBookingDates.filter(date =>
