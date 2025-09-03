@@ -209,7 +209,7 @@ router.get('/audit/search', auditTrailController.getAuditBySearchQuery);
 
 // Calendar
 router.get('/calendar/byProperty/:propertyId', maintenanceBookingCalendarController.getCalendarByPropertyId);
-router.get('/calendar/byProperties', maintenanceBookingCalendarController.getCalendarForMultiplePropertyById);
+router.post('/calendar/byProperties', maintenanceBookingCalendarController.getCalendarForMultiplePropertyById);
 router.get('/calendar/getAllProperties', maintenanceBookingCalendarController.getAllCalendarForAllProperties);
 
 // PSR
