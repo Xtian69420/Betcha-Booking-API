@@ -346,7 +346,6 @@ exports.resendOtp = async (req, res) => {
 
 exports.BookingMessage = async (req, res) => {
     const { email, amount, typeOfPayment, methodOfPayment, unitName, checkIn, checkOut, timeIn, timeOut } = req.body;
-
     try {
         const msg = {
             to: email,
@@ -354,7 +353,7 @@ exports.BookingMessage = async (req, res) => {
               name: 'Betcha Booking',
               email: 'betcha-booking@outlook.com'
             },
-            subject: 'Booking Confirmation - Betcha by Homie House Booking',
+            subject: 'Booking - Betcha by Homie House Booking',
             html:`
                 <html>
                     <body style="font-family: Arial, sans-serif; background-color: #f4f7fa; margin: 0; padding: 0;">
