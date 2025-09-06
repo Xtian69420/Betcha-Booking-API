@@ -426,7 +426,7 @@ exports.getBookingsByGuestId = async (req, res) => {
 
     allBookings.forEach(b => {
       if (b.status === 'Completed' && b.rating === 0) {
-        rate.push(b); // needs to be rated
+        rate.push(b); 
       } else if (pendingStatuses.includes(b.status)) {
         pending.push(b);
       } else if (completedStatuses.includes(b.status)) {
@@ -492,7 +492,6 @@ exports.updateReservationPaymentStatus = async (req, res) => {
   }
 };
 
-// ✅ Update Package Payment Status
 exports.updatePackagePaymentStatus = async (req, res) => {
   try {
     const { id } = req.params;
@@ -539,7 +538,6 @@ exports.updatePackagePaymentStatus = async (req, res) => {
   }
 };
 
-// ✅ Update Full Payment Status (both reservation + package)
 exports.updateFullPaymentStatus = async (req, res) => {
   try {
     const { id } = req.params;
@@ -675,13 +673,11 @@ exports.updateBookingDates = async (req, res) => {
       return res.status(400).json({ message: 'newBookingDates must be a non-empty array.' });
     }
 
-    // Get the current booking to check property and dates
     const currentBooking = await booking.findById(id);
     if (!currentBooking) {
       return res.status(404).json({ message: 'Booking not found.' });
     }
 
-    // Convert string dates to Date objects and sort them
     const dateObjects = newBookingDates.map(dateStr => new Date(dateStr)).sort((a, b) => a - b);
 
     // Validate dates
@@ -690,24 +686,21 @@ exports.updateBookingDates = async (req, res) => {
       return res.status(400).json({ message: 'One or more dates are invalid.' });
     }
 
-    // Check for conflicts with other bookings (excluding current booking and cancelled bookings)
     const existingBookings = await booking.find({ 
       propertyId: currentBooking.propertyId,
-      _id: { $ne: id }, // Exclude current booking
-      status: { $nin: ['Cancel', 'cancel', 'Cancelled'] } // Exclude cancelled bookings
+      _id: { $ne: id }, 
+      status: { $nin: ['Cancel', 'cancel', 'Cancelled'] } 
     });
 
     const allBookedDates = existingBookings.flatMap(b =>
       b.datesOfBooking.map(d => d.toISOString().slice(0, 10))
     );
 
-    // Check for property maintenance dates (excluding deactivated maintenance)
     const property = await Property.findById(currentBooking.propertyId);
     const allMaintenanceDates = property?.maintenance
-      ?.filter(m => m.status !== 'Deactivated') // Exclude deactivated maintenance
+      ?.filter(m => m.status !== 'Deactivated') 
       ?.flatMap(m => m.dates.map(d => d.toISOString().slice(0, 10))) || [];
 
-    // Check for conflicts
     const conflictDates = newBookingDates.filter(date =>
       allBookedDates.includes(new Date(date).toISOString().slice(0, 10)) ||
       allMaintenanceDates.includes(new Date(date).toISOString().slice(0, 10))
@@ -720,11 +713,9 @@ exports.updateBookingDates = async (req, res) => {
       });
     }
 
-    // Set checkIn as the first date and checkOut as the last date
     const checkIn = dateObjects[0];
     const checkOut = dateObjects[dateObjects.length - 1];
 
-    // Calculate number of days
     const numOfDays = Math.ceil((checkOut - checkIn) / (1000 * 60 * 60 * 24)) + 1;
 
     const updatedBooking = await booking.findByIdAndUpdate(
@@ -753,9 +744,7 @@ exports.updateBookingDates = async (req, res) => {
 
 exports.getTopProperties = async (req, res) => {
   try {
-    // Aggregate bookings to get top 5 most booked properties
     const topProperties = await booking.aggregate([
-      // Exclude cancelled bookings
       {
         $match: {
           status: { 
@@ -763,7 +752,7 @@ exports.getTopProperties = async (req, res) => {
           }
         }
       },
-      // Group by propertyId and count bookings
+
       {
         $group: {
           _id: '$propertyId',
@@ -771,23 +760,17 @@ exports.getTopProperties = async (req, res) => {
           propertyName: { $first: '$propertyName' }
         }
       },
-      // Sort by booking count in descending order
       {
         $sort: { bookingCount: -1 }
-      },
-      // Limit to top 5
-      {
+      },      {
         $limit: 5
       }
     ]);
 
-    // Get property details for the top properties
     const propertyIds = topProperties.map(p => new mongoose.Types.ObjectId(p._id));
     const propertyDetails = await Property.find({ 
       '_id': { $in: propertyIds } 
     });
-
-    // Combine booking counts with property details
     const result = topProperties.map(top => {
       const propertyDetail = propertyDetails.find(p => p._id.toString() === top._id.toString());
       return {
