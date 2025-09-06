@@ -18,7 +18,6 @@ const auth = new google.auth.GoogleAuth({
 const drive = google.drive({ version: 'v3', auth });
 const folderId = '1sL-VBECK9rMbBnJqxtL52IObJTrwysno';
 
-// Create Employee
 exports.createEmployee = async (req, res) => {
   try {
     const { firstname, minitial, lastname, email, password, role, properties } = req.body;
@@ -90,7 +89,6 @@ exports.createEmployee = async (req, res) => {
   }
 };
 
-// Update Employee
 exports.updateEmployee = async (req, res) => {
   try {
     const { id } = req.params;
@@ -133,7 +131,7 @@ exports.getAllEmployees = async (req, res) => {
     const employees = await employee
       .find()
       .populate('role')         
-      //.populate('properties');  
+      .populate('properties');  
 
     if (employees.length === 0)
       return res.status(404).json({ message: 'No employee accounts found' });
@@ -146,8 +144,6 @@ exports.getAllEmployees = async (req, res) => {
 };
 
 
-
-// Update Employee Profile Picture
 exports.updateEmployeePfp = async (req, res) => {
   try {
     const employeeId = req.params.id;
@@ -200,7 +196,6 @@ exports.updateEmployeePfp = async (req, res) => {
   }
 };
 
-// Delete Employee
 exports.deleteEmployee = async (req, res) => {
   try {
     const { id } = req.params;
@@ -227,7 +222,7 @@ exports.getEmployeeById = async (req, res) => {
     const employeeUser = await employee
       .findById(id)
       .populate('role')         
-      //.populate('properties');  
+      .populate('properties');  
 
     if (!employeeUser) {
       return res.status(404).json({ message: 'Employee not found' });

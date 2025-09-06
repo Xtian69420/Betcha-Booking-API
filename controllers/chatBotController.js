@@ -2,7 +2,7 @@ const Property = require('../models/propertyModel');
 const FAQ = require('../models/faqModel');
 const Booking = require('../models/bookingModel');
 
-const sessions = {}; // In-memory sessions keyed by user_<userId>
+const sessions = {}; 
 
 exports.chatBotFlow = async (req, res) => {
   try {
