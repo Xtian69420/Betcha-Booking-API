@@ -15,7 +15,7 @@ exports.scanImageUpload = async (req, res) => {
     } = await worker.recognize(imagePath);
 
     await worker.terminate();
-    fs.unlinkSync(imagePath); // Delete the uploaded file
+    fs.unlinkSync(imagePath); /
 
     let result = 'Reference number not found';
 
@@ -29,12 +29,11 @@ exports.scanImageUpload = async (req, res) => {
       if (match && match[1]) {
         const ref = match[1]
           .trim()
-          .split(/\s+/) // keep original grouping
-          .filter(g => /^[A-Z0-9]+$/i.test(g)) // only valid groups
-          .slice(0, 3) // max 3 groups
-          .join(''); // no space in final result
+          .split(/\s+/) 
+          .filter(g => /^[A-Z0-9]+$/i.test(g)) 
+          .slice(0, 3) 
+          .join(''); 
 
-        // Validate that it's not picking up a date (like 23NOVEMBER)
         if (!/^\d{1,2}(st|nd|rd|th)?\s?[A-Z]+$/i.test(ref)) {
           result = ref.toUpperCase();
           break;
@@ -64,7 +63,7 @@ exports.ScanIDDriversLicense = async (req, res) => {
     } = await worker.recognize(imagePath);
 
     await worker.terminate();
-    fs.unlinkSync(imagePath); // Remove uploaded file
+    fs.unlinkSync(imagePath); 
 
     let firstName = '';
     let lastName = '';
@@ -88,7 +87,6 @@ exports.ScanIDDriversLicense = async (req, res) => {
           .map(w => w.replace(/[^A-Za-z]/g, ""))
           .filter(w => /^[A-Za-z]+$/.test(w));
 
-        // 🔹 Ignore leading junk like "a" or 1-letter lowercase words
         while (words.length && (words[0].length < 2 || /^[a-z]/.test(words[0]))) {
           words.shift();
         }
@@ -143,14 +141,12 @@ exports.ScanIDPassport = async (req, res) => {
     const imageBase64 = fs.readFileSync(imagePath, { encoding: 'base64' });
     fs.unlinkSync(imagePath); // delete after reading
 
-    // Prepare form data
     const formData = new FormData();
     formData.append('apikey', 'K85666349088957');
     formData.append('base64Image', `data:image/png;base64,${imageBase64}`);
     formData.append('language', 'eng');
     formData.append('isOverlayRequired', 'false');
 
-    // Send POST request with form data
     const response = await axios.post('https://api.ocr.space/parse/image', formData, {
       headers: formData.getHeaders(),
       maxContentLength: Infinity,
@@ -169,7 +165,6 @@ exports.ScanIDPassport = async (req, res) => {
     const text = parsedResults[0].ParsedText;
     console.log('OCR Space text:', text);
 
-    // MRZ parsing logic remains unchanged...
     const lines = text
       .split('\n')
       .map(l => l.trim())
