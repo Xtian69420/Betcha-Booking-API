@@ -15,7 +15,7 @@ exports.scanImageUpload = async (req, res) => {
     } = await worker.recognize(imagePath);
 
     await worker.terminate();
-    fs.unlinkSync(imagePath); /
+    fs.unlinkSync(imagePath);
 
     let result = 'Reference number not found';
 

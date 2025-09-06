@@ -14,7 +14,7 @@ console.log('Environment Variables:', {
   SENDGRID_API_KEY_LENGTH: process.env.SENDGRID_API_KEY ? process.env.SENDGRID_API_KEY.length : 0
 });
 
-// Verify API key format (should start with 'SG.')
+
 if (!process.env.SENDGRID_API_KEY || !process.env.SENDGRID_API_KEY.startsWith('SG.')) {
   console.error('WARNING: SendGrid API key is missing or invalid format');
 }
@@ -23,7 +23,6 @@ sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
 const generateOTP = () => crypto.randomInt(100000, 999999);
 
-// Cron job to clean expired OTPs every minute
 cron.schedule('* * * * *', async () => {
   try {
     await otp.deleteMany({ expiresAt: { $lt: new Date() } });
