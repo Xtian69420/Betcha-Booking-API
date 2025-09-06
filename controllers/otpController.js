@@ -345,7 +345,7 @@ exports.resendOtp = async (req, res) => {
 };
 
 exports.BookingMessage = async (req, res) => {
-    const { email, amount, typeOfPayment, methodOfPayment, unitName, checkIn, checkOut } = req.body;
+    const { email, amount, typeOfPayment, methodOfPayment, unitName, checkIn, checkOut, timeIn, timeOut } = req.body;
 
     try {
         const msg = {
@@ -386,11 +386,11 @@ exports.BookingMessage = async (req, res) => {
                                         </tr>
                                         <tr>
                                             <td style="font-size: 14px; padding: 10px; border: 1px solid #ddd;">Check-In Date:</td>
-                                            <td style="font-size: 14px; padding: 10px; border: 1px solid #ddd;"><strong>${checkIn}</strong></td>
+                                            <td style="font-size: 14px; padding: 10px; border: 1px solid #ddd;"><strong>${checkIn} ${timeIn}</strong></td>
                                         </tr>
                                         <tr>
                                             <td style="font-size: 14px; padding: 10px; border: 1px solid #ddd;">Check-Out Date:</td>
-                                            <td style="font-size: 14px; padding: 10px; border: 1px solid #ddd;"><strong>${checkOut}</strong></td>
+                                            <td style="font-size: 14px; padding: 10px; border: 1px solid #ddd;"><strong>${checkOut} ${timeOut}</strong></td>
                                         </tr>
                                     </table>
                                     <p style="font-size: 16px; color: #333333;">

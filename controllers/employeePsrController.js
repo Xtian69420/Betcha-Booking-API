@@ -240,7 +240,6 @@ exports.generateWeekSummary = async (req, res) => {
     let y = doc.y;
     doc.fontSize(12);
 
-    // Header function
     const drawTableHeader = () => {
     let x = tableX;
     doc.rect(x, y, columnWidths[0], cellHeight).stroke();
