@@ -29,7 +29,7 @@ const newLandingPage = require('../controllers/landingPageController');
 const multer = require('multer');
 const path = require('path');
 
-// upload setup (REUSABLE)
+// upload setup (REUSABLE NA 'TO)
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     cb(null, 'uploads/');

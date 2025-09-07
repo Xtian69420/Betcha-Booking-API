@@ -24,7 +24,6 @@ exports.createTicket = async (req, res) => {
       return res.status(400).json({ message: 'Missing required message fields.' });
     }
 
-    // Normalize userLevel and find user model
     const normalizedLevel = userLevel.toLowerCase();
     let userModel;
 
@@ -33,17 +32,14 @@ exports.createTicket = async (req, res) => {
     else if (normalizedLevel === 'employee') userModel = Employee;
     else return res.status(400).json({ message: 'Invalid user level.' });
 
-    // Get user name
     const user = await userModel.findById(userId);
     if (!user) return res.status(404).json({ message: 'User not found.' });
 
     const userName = `${user.firstname} ${user.lastname}`;
 
-    // Auto-increment ticketNumber
     const lastTicket = await Tk.findOne().sort({ ticketNumber: -1 });
     const ticketNumber = lastTicket ? lastTicket.ticketNumber + 1 : 1;
 
-    // Build new message object
     const populatedMessage = {
       userId,
       userName,
