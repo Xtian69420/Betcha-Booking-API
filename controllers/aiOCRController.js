@@ -94,7 +94,14 @@ exports.ScanIDDriversLicense = async (req, res) => {
         if (words.length >= 3) {
           lastName = words[0].charAt(0).toUpperCase() + words[0].slice(1).toLowerCase();
           firstName = words[1].charAt(0).toUpperCase() + words[1].slice(1).toLowerCase();
-          middleName = words.slice(2).map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ');
+          // Capitalize each hyphenated part, preserve dashes (e.g., Nabal-I)
+          const originalWords = nameLine.trim().split(/\s+/).slice(2);
+          middleName = originalWords.map(word =>
+            word
+              .split('-')
+              .map(part => part.charAt(0).toUpperCase() + part.slice(1).toLowerCase())
+              .join('-')
+          ).join(' ');
         }
       }
     }
