@@ -2,7 +2,6 @@ const Notification = require('../models/notificationModel');
 const moment = require('moment-timezone');
 const mongoose = require('mongoose');
 
-// Message Notification
 exports.messageNotification = async (req, res) => {
   try {
     const {

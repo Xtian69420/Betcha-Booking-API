@@ -7,7 +7,6 @@ const sgMail = require('@sendgrid/mail');
 const cron = require('node-cron');
 require('dotenv').config();
 
-// Debug: Check environment variable loading
 console.log('Environment Variables:', {
   NODE_ENV: process.env.NODE_ENV,
   SENDGRID_API_KEY_EXISTS: !!process.env.SENDGRID_API_KEY,

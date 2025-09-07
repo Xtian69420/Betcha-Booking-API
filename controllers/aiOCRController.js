@@ -65,10 +65,10 @@ exports.ScanIDDriversLicense = async (req, res) => {
     await worker.terminate();
     fs.unlinkSync(imagePath); 
 
-    let firstName = '';
-    let lastName = '';
-    let middleInitial = '';
-    let birthday = '';
+  let firstName = '';
+  let lastName = '';
+  let middleName = '';
+  let birthday = '';
 
     const labelIndex = text.search(/Last\s*Name/i);
     if (labelIndex >= 0) {
@@ -94,7 +94,7 @@ exports.ScanIDDriversLicense = async (req, res) => {
         if (words.length >= 3) {
           lastName = words[0].charAt(0).toUpperCase() + words[0].slice(1).toLowerCase();
           firstName = words[1].charAt(0).toUpperCase() + words[1].slice(1).toLowerCase();
-          middleInitial = words[2].charAt(0).toUpperCase();
+          middleName = words.slice(2).map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ');
         }
       }
     }
@@ -119,7 +119,7 @@ exports.ScanIDDriversLicense = async (req, res) => {
       birthday,
       firstName,
       lastName,
-      middleInitial,
+      middleName,
       fullText: text
     });
 

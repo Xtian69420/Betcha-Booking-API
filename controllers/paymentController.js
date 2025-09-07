@@ -14,7 +14,6 @@ const auth = new google.auth.GoogleAuth({
 const drive = google.drive({ version: 'v3', auth });
 const folderId = '1PMt8OR1KZfV_sEV809V-KqaMUwmPH44y';
 
-// ================= CREATE PAYMENT =================
 exports.createPayment = async (req, res) => {
   try {
     const { paymentName, category } = req.body;
@@ -84,7 +83,6 @@ exports.createPayment = async (req, res) => {
   }
 };
 
-// ================= UPDATE PAYMENT =================
 exports.updatePayment = async (req, res) => {
   try {
     const { id } = req.params;
@@ -139,7 +137,6 @@ exports.updatePayment = async (req, res) => {
   }
 };
 
-// ================= DISPLAY ALL PAYMENTS =================
 exports.displayAllPayment = async (req, res) => {
   try {
     const payments = await Payment.find();
@@ -150,7 +147,6 @@ exports.displayAllPayment = async (req, res) => {
   }
 };
 
-// ================= DISPLAY PAYMENT BY ID =================
 exports.displayByIdPayment = async (req, res) => {
   try {
     const { id } = req.params;
@@ -165,7 +161,6 @@ exports.displayByIdPayment = async (req, res) => {
   }
 };
 
-// ================= DELETE PAYMENT =================
 exports.deletePaymentById = async (req, res) => {
   try {
     const { id } = req.params;
