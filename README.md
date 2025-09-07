@@ -1,3 +1,24 @@
+# License & Technology Stack
+
+This backend is built using the following open-source technologies and libraries:
+
+- **Node.js** (JavaScript runtime)
+- **ExpressJS** (Web framework)
+- **MongoDB** (Database)
+- **Mongoose** (MongoDB ODM)
+- **Multer** (File uploads)
+- **@sendgrid/mail** (Email sending)
+- **Sharp** (Image processing)
+- **ExcelJS** (Excel file generation)
+- **PDFKit** (PDF generation)
+- **Axios** (HTTP requests)
+- **node-cron** (Scheduled jobs)
+- **openai** (AI integration)
+- **cors** (CORS middleware)
+
+All libraries are used under their respective open-source licenses. See each package's documentation for details.
+
+This project itself is licensed under the ISC License (see `package.json`).
 
 # Betcha-Booking-API
 
