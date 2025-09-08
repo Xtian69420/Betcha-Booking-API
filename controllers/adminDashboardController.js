@@ -13,7 +13,7 @@ exports.summary = async (req, res) => {
 
     const startOfYear = new Date(now.getFullYear(), 0, 1);
 
-    const matchCondition = { status: { $ne: 'Cancel' } };
+  const matchCondition = { status: { $nin: ['Cancel', 'Pending Payment'] } };
 
     const [weekIncome, monthIncome, yearIncome] = await Promise.all([
       Booking.aggregate([
