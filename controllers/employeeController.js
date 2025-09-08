@@ -131,7 +131,7 @@ exports.getAllEmployees = async (req, res) => {
     const employees = await employee
       .find()
       .populate('role')         
-      .populate('property');  
+      .populate('properties');  
 
     if (employees.length === 0)
       return res.status(404).json({ message: 'No employee accounts found' });

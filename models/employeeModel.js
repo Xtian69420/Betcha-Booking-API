@@ -12,11 +12,10 @@ const employeeSchema = new mongoose.Schema({
       ref: 'roles',
       required: true
     }],
-    properties: {
-        type: [String],
-        ref: 'properties',
-        default: ['default']
-    },
+    properties: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'property'
+    }],
     userType: { type: String, default: 'employee' },
     status: { type: String, default: 'active' }
 }, {
