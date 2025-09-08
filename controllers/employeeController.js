@@ -342,6 +342,26 @@ exports.getEmployeeByPropertyIdAndPrivilege = async (req, res) => {
       return res.status(400).json({ message: 'propertyId and privilege are required' });
     }
 
+    console.log('Searching for propertyId:', propertyId);
+    console.log('Searching for privilege:', privilege);
+
+    // First, let's get ALL employees and see what we have
+    const allEmployees = await employee.find({}).populate('role').populate('properties');
+    console.log(`Total employees in database: ${allEmployees.length}`);
+
+    // Log each employee's properties
+    allEmployees.forEach(emp => {
+      console.log(`Employee: ${emp.firstname} ${emp.lastname}`);
+      console.log('Raw properties field:', emp.properties);
+      if (emp.properties && emp.properties.length > 0) {
+        emp.properties.forEach((prop, index) => {
+          console.log(`  Property ${index}:`, prop._id ? prop._id.toString() : prop);
+        });
+      }
+      console.log('Roles:', emp.role.map(r => ({ name: r.name, privileges: r.privileges })));
+      console.log('---');
+    });
+
     // Convert propertyId string to ObjectId for proper matching
     const mongoose = require('mongoose');
     let propertyObjectId;
@@ -351,12 +371,28 @@ exports.getEmployeeByPropertyIdAndPrivilege = async (req, res) => {
       return res.status(400).json({ message: 'Invalid propertyId format' });
     }
 
-    const employees = await employee.find({ properties: propertyObjectId })
-      .populate('role');
+    // Now filter manually to see what matches
+    const matchingEmployees = allEmployees.filter(emp => {
+      if (!emp.properties || emp.properties.length === 0) return false;
+      
+      const hasProperty = emp.properties.some(prop => {
+        const propId = prop._id ? prop._id.toString() : prop.toString();
+        return propId === propertyId;
+      });
+      
+      console.log(`Employee ${emp.firstname} has property ${propertyId}:`, hasProperty);
+      return hasProperty;
+    });
 
-    const filtered = employees.filter(emp =>
-      emp.role.some(r => Array.isArray(r.privileges) && r.privileges.includes(privilege))
-    );
+    console.log(`Employees with matching property: ${matchingEmployees.length}`);
+
+    const filtered = matchingEmployees.filter(emp => {
+      const hasPrivilege = emp.role.some(r => Array.isArray(r.privileges) && r.privileges.includes(privilege));
+      console.log(`Employee ${emp.firstname} ${emp.lastname} has privilege ${privilege}:`, hasPrivilege);
+      return hasPrivilege;
+    });
+
+    console.log(`Final filtered employees: ${filtered.length}`);
 
     if (filtered.length === 0) {
       return res.status(404).json({ message: 'No employees found with the given property and privilege' });
