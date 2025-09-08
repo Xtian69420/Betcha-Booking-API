@@ -59,7 +59,7 @@ exports.systemNotification = async (req, res) => {
       to: { toId, name: toName, role: toRole },
       seen: false,
       dateTime: dateTimePH,
-      category: 'System',
+      category: 'Message',
       message
     });
 
