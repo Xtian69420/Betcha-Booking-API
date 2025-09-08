@@ -4,7 +4,7 @@ const notificationSchema = new mongoose.Schema({
     from: {
         fromId : { type: String, required: true },
         name : { type: String, required : true },
-        role : { type: String, enum: ['admin', 'employee', 'guest'], required: true }
+        role : { type: String, enum: ['admin', 'employee', 'guest', 'system'], required: true }
     },
     to : { 
         toId : { type: String, required: true }, 

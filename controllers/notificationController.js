@@ -40,6 +40,44 @@ exports.messageNotification = async (req, res) => {
   }
 };
 
+exports.systemNotification = async (req, res) => {
+  try {
+    const { toId, toName, toRole, message } = req.body;
+
+    if (!toId || !toName || !toRole || !message) {
+      return res.status(400).json({ message: 'Missing required fields: toId, toName, toRole, message.' });
+    }
+
+    const dateTimePH = moment().tz('Asia/Manila').toDate();
+
+    const newNotification = new Notification({
+      from: { 
+        fromId: 'system', 
+        name: 'System - Betcha', 
+        role: 'system' 
+      },
+      to: { toId, name: toName, role: toRole },
+      seen: false,
+      dateTime: dateTimePH,
+      category: 'System',
+      message
+    });
+
+    await newNotification.save();
+
+    res.status(201).json({
+      message: 'System notification created.',
+      data: {
+        ...newNotification.toObject(),
+        dateTimePH: moment(newNotification.dateTime).tz('Asia/Manila').format('YYYY-MM-DD HH:mm:ss')
+      }
+    });
+  } catch (error) {
+    console.error('Error creating system notification:', error);
+    res.status(500).json({ message: 'Server error.' });
+  }
+};
+
 exports.cancellationNotification = async (req, res) => {
   try {
     const {

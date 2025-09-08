@@ -158,6 +158,7 @@ router.post('/email/checkin/today', otpController.CheckInTodayMessage);
 
 // notification routes
 router.post('/notify/message', notificationController.messageNotification);
+router.post('/notify/system', notificationController.systemNotification);
 router.post('/notify/cancellation', notificationController.cancellationNotification);
 router.patch('/notify/seen/:id', notificationController.updateSeen);
 router.get('/notify/to/:toId', notificationController.getAllNotificationByToId);

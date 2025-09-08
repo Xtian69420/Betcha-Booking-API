@@ -342,11 +342,18 @@ exports.getEmployeeByPropertyIdAndPrivilege = async (req, res) => {
       return res.status(400).json({ message: 'propertyId and privilege are required' });
     }
 
-    // Find employees with the propertyId in their properties array
-    const employees = await employee.find({ properties: propertyId })
+    // Convert propertyId string to ObjectId for proper matching
+    const mongoose = require('mongoose');
+    let propertyObjectId;
+    try {
+      propertyObjectId = new mongoose.Types.ObjectId(propertyId);
+    } catch (error) {
+      return res.status(400).json({ message: 'Invalid propertyId format' });
+    }
+
+    const employees = await employee.find({ properties: propertyObjectId })
       .populate('role');
 
-    // Filter employees whose role(s) include the given privilege
     const filtered = employees.filter(emp =>
       emp.role.some(r => Array.isArray(r.privileges) && r.privileges.includes(privilege))
     );
