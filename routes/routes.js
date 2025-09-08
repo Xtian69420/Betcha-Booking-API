@@ -72,7 +72,7 @@ router.put('/employee/unarchive/:id', employeeController.unarchiveEmployee);
 router.delete('/employee/delete/:id', employeeController.deleteEmployee);
 router.get('/employee/search', employeeController.searchEmployees);
 router.get('/employee/privilege/tk', employeeController.getEmployeesWithTKPrivilege);
-router.post('/employee/by-property-and-privilege', employeeController.getEmployeeByPropertyIdAndPrivilage);
+router.post('/employee/by-property-and-privilege', employeeController.getEmployeeByPropertyIdAndPrivilege);
 
 // Role routes
 router.post('/roles/create', rolesController.createRoles);
