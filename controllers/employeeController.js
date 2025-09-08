@@ -131,7 +131,7 @@ exports.getAllEmployees = async (req, res) => {
     const employees = await employee
       .find()
       .populate('role')         
-      .populate('properties');  
+      .populate('property');  
 
     if (employees.length === 0)
       return res.status(404).json({ message: 'No employee accounts found' });
@@ -334,3 +334,30 @@ exports.getEmployeesWithTKPrivilege = async (req, res) => {
     res.status(500).json({ message: 'Internal server error' });
   }
 };
+
+exports.getEmployeeByPropertyIdAndPrivilege = async (req, res) => {
+  try {
+    const { propertyId, privilege } = req.body;
+    if (!propertyId || !privilege) {
+      return res.status(400).json({ message: 'propertyId and privilege are required' });
+    }
+
+    // Find employees with the propertyId in their properties array
+    const employees = await employee.find({ properties: propertyId })
+      .populate('role');
+
+    // Filter employees whose role(s) include the given privilege
+    const filtered = employees.filter(emp =>
+      emp.role.some(r => Array.isArray(r.privileges) && r.privileges.includes(privilege))
+    );
+
+    if (filtered.length === 0) {
+      return res.status(404).json({ message: 'No employees found with the given property and privilege' });
+    }
+
+    res.status(200).json({ employees: filtered });
+  } catch (error) {
+    console.error('Get Employees by Property and Privilege Error:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+}
