@@ -10,7 +10,7 @@ const guestSchema = new mongoose.Schema({
     birthday: { type: Date, required: true },
     sex: { type: String, default: 'N/A' },
     pfplink: { type: String, default: 'https://drive.google.com/thumbnail?id=1jR18TOfk0Tx2ltegL6wFZ8M1Id0GdHhe&sz=w1920-h1080' },
-    verified: { type: Boolean, default: false },
+    verified: { type: Boolean, default: true },
     userType: { type: String, default: 'guest' },
     warning: { type: Number, default: 0},
     archived: { type: Boolean, default: false },
