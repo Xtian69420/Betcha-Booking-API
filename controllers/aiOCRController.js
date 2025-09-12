@@ -69,6 +69,7 @@ exports.ScanIDDriversLicense = async (req, res) => {
   let lastName = '';
   let middleName = '';
   let birthday = '';
+  let gender = '';
 
     const labelIndex = text.search(/Last\s*Name/i);
     if (labelIndex >= 0) {
@@ -122,11 +123,19 @@ exports.ScanIDDriversLicense = async (req, res) => {
       }
     }
 
+    // Extract gender/sex information
+    const sexMatch = text.match(/Sex\s+([MF])\s/i) || text.match(/\bSex\s*[:\-]?\s*([MF])\b/i) || text.match(/\b([MF])\s+\d{4}\/\d{1,2}\/\d{1,2}/);
+    if (sexMatch) {
+      const sexCode = sexMatch[1].toUpperCase();
+      gender = sexCode === 'M' ? 'Male' : 'Female';
+    }
+
     res.json({
       birthday,
       firstName,
       lastName,
       middleName,
+      gender,
       fullText: text
     });
 
