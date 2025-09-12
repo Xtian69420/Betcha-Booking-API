@@ -109,6 +109,11 @@ exports.updateEmployee = async (req, res) => {
       }
     }
 
+    // Hash password if it's being updated
+    if (updateFields.password) {
+      updateFields.password = await bcrypt.hash(updateFields.password, 10);
+    }
+
     const updatedEmployee = await employee.findByIdAndUpdate(
       id,
       { $set: updateFields },
@@ -117,7 +122,10 @@ exports.updateEmployee = async (req, res) => {
 
     if (!updatedEmployee) return res.status(404).json({ message: 'Employee not found' });
 
-    res.status(200).json({ message: 'Employee updated successfully', employee: updatedEmployee });
+    // Remove password from response for security
+    const { password: _, ...safeEmployee } = updatedEmployee.toObject();
+
+    res.status(200).json({ message: 'Employee updated successfully', employee: safeEmployee });
 
   } catch (error) {
     console.error('Update Employee Error:', error);

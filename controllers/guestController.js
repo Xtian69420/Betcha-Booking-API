@@ -125,6 +125,11 @@ exports.updateGuest = async (req, res) => {
         return res.status(400).json({ message: 'Email already in use' });
       }
     }
+
+    // Hash password if it's being updated
+    if (updateFields.password) {
+      updateFields.password = await bcrypt.hash(updateFields.password, 10);
+    }
     
     const updatedGuest = await guest.findByIdAndUpdate(
       id,
@@ -136,7 +141,10 @@ exports.updateGuest = async (req, res) => {
       return res.status(404).json({ message: 'Guest not found' });
     }
 
-    res.status(200).json({ message: 'Guest updated successfully', guest: updatedGuest });
+    // Remove password from response for security
+    const { password: _, ...safeGuest } = updatedGuest.toObject();
+
+    res.status(200).json({ message: 'Guest updated successfully', guest: safeGuest });
   } catch (error) {
     console.error('Update Guest Error:', error);
     res.status(500).json({ message: 'Internal server error' });
