@@ -11,7 +11,7 @@ exports.getCalendarByPropertyId = async (req, res) => {
 
     const bookings = await Booking.find({
       propertyId: propertyId,
-      status: { $nin: ['Cancel', 'Pending Payment'] }
+      status: { $nin: ['Cancel'] }
     });
 
     const bookingDates = [];
@@ -66,7 +66,7 @@ exports.getCalendarForMultiplePropertyById = async (req, res) => {
 
       const bookings = await Booking.find({
         propertyId,
-        status: { $nin: ['Cancel', 'Pending Payment'] }
+        status: { $nin: ['Cancel'] }
       });
 
       const bookingDates = [];
@@ -119,7 +119,7 @@ exports.getAllCalendarForAllProperties = async (req, res) => {
       // Fetch valid bookings for this property
       const bookings = await Booking.find({
         propertyId: propertyId.toString(),
-        status: { $nin: ['Cancel', 'Pending Payment'] }
+        status: { $nin: ['Cancel'] }
       });
 
       const bookingDates = [];

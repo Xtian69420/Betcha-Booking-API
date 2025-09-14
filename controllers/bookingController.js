@@ -39,7 +39,7 @@ exports.createBooking = async (req, res) => {
 
     const existingBookings = await booking.find({ 
       propertyId,
-      status: { $nin: ['Cancel', 'cancel', 'Cancelled'] } // Exclude cancelled bookings
+      status: { $nin: ['Cancel', 'cancel', 'Cancelled', 'Pending'] } // Exclude cancelled bookings
     });
 
     const allBookedDates = existingBookings.flatMap(b =>
