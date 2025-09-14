@@ -11,7 +11,7 @@ exports.getCalendarByPropertyId = async (req, res) => {
 
     const bookings = await Booking.find({
       propertyId: propertyId,
-      status: { $nin: ['Cancel'] }
+      status: { $nin: ['Cancel', 'Pending Payment'] }
     });
 
     const bookingDates = [];
