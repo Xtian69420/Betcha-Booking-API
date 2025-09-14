@@ -128,7 +128,6 @@ exports.updateAdmin = async (req, res) =>{
           }
         }
 
-        // Hash password if it's being updated
         if (updateFields.password) {
           updateFields.password = await bcrypt.hash(updateFields.password, 10);
         }
@@ -142,7 +141,6 @@ exports.updateAdmin = async (req, res) =>{
             return res.status(404).json({ message: 'Admin not found' });
         }
 
-        // Remove password from response for security
         const { password: _, ...safeAdmin } = updatedAdmin.toObject();
     
         res.status(200).json({ message: 'Admin updated successfully', admin: safeAdmin });
