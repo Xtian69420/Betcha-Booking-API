@@ -39,7 +39,7 @@ exports.createBooking = async (req, res) => {
 
     const existingBookings = await booking.find({ 
       propertyId,
-      status: { $nin: ['Cancel', 'cancel', 'Cancelled', 'Pending'] } // Exclude cancelled bookings
+      status: { $nin: ['Cancel', 'cancel', 'Cancelled'] } // Exclude cancelled bookings
     });
 
     const allBookedDates = existingBookings.flatMap(b =>
@@ -72,9 +72,9 @@ exports.createBooking = async (req, res) => {
       .map(d => new Date(d))
       .sort((a, b) => a - b);
     const checkIn = sortedDates[0];
-    const checkOut = sortedDates[sortedDates.length - 1];
+    const checkOut = new Date(sortedDates[sortedDates.length - 1]);
 
-    const numOfDays = Math.ceil((checkOut - checkIn) / (1000 * 60 * 60 * 24));
+    const numOfDays = datesOfBooking.length;
     if (numOfDays <= 0) {
       return res.status(400).json({ message: 'Invalid booking date range.' });
     }
