@@ -74,7 +74,7 @@ exports.createBooking = async (req, res) => {
     const checkIn = sortedDates[0];
     const checkOut = sortedDates[sortedDates.length - 1];
 
-    const numOfDays = Math.ceil((checkOut - checkIn) / (1000 * 60 * 60 * 24)) + 1;
+    const numOfDays = Math.ceil((checkOut - checkIn) / (1000 * 60 * 60 * 24));
     if (numOfDays <= 0) {
       return res.status(400).json({ message: 'Invalid booking date range.' });
     }
