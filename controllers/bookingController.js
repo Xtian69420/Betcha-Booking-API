@@ -795,7 +795,6 @@ exports.getRefundAmount = async (req, res) => {
   try {
     const { refundType, bookingId } = req.body;
 
-    // Validate required parameters
     if (!refundType) {
       return res.status(400).json({ message: 'refundType is required.' });
     }
@@ -804,13 +803,11 @@ exports.getRefundAmount = async (req, res) => {
       return res.status(400).json({ message: 'bookingId is required.' });
     }
 
-    // Validate refundType values
     const validRefundTypes = ['P', 'G', 'DNA'];
     if (!validRefundTypes.includes(refundType)) {
       return res.status(400).json({ message: 'Invalid refundType. Must be P, G, or DNA.' });
     }
 
-    // Handle DNA case immediately
     if (refundType === 'DNA') {
       return res.status(200).json({
         message: 'No refund available.',
@@ -818,7 +815,6 @@ exports.getRefundAmount = async (req, res) => {
       });
     }
 
-    // Find the booking
     const foundBooking = await booking.findById(bookingId);
     if (!foundBooking) {
       return res.status(404).json({ message: 'Booking not found.' });
@@ -827,29 +823,29 @@ exports.getRefundAmount = async (req, res) => {
     let refundAmount = 0;
 
     if (refundType === 'P') {
-      // P - cancelled by employee (refund all approved payments)
+
       const reservationApproved = foundBooking.reservation.status === 'Approved';
       const packageApproved = foundBooking.package.status === 'Approved';
 
       if (reservationApproved && packageApproved) {
-        // Both payments approved - refund total fee
+
         refundAmount = foundBooking.totalFee;
       } else if (reservationApproved && !packageApproved) {
-        // Only reservation approved - refund reservation fee
+
         refundAmount = foundBooking.reservationFee;
       } else {
-        // No approved payments or only package approved without reservation
+
         refundAmount = 0;
       }
     } else if (refundType === 'G') {
-      // G - requested by guest (just the package)
+
       const packageApproved = foundBooking.package.status === 'Approved';
 
       if (packageApproved) {
-        // Package approved - refund totalFee minus reservationFee
+
         refundAmount = foundBooking.totalFee - foundBooking.reservationFee;
       } else {
-        // Package not approved
+
         refundAmount = 0;
       }
     }
@@ -876,21 +872,17 @@ exports.patchRefundApproved = async (req, res) => {
       return res.status(400).json({ message: 'Booking ID is required.' });
     }
 
-    // Find the booking first to get current refund.approved status
     const foundBooking = await booking.findById(id);
     if (!foundBooking) {
       return res.status(404).json({ message: 'Booking not found.' });
     }
 
-    // Toggle the refund.approved status
     const newApprovedStatus = !foundBooking.refund.approved;
 
-    // Prepare update object
     const updateFields = {
       'refund.approved': newApprovedStatus
     };
 
-    // If refundAmount is provided, update it as well
     if (refundAmount !== undefined) {
       if (typeof refundAmount !== 'number' || refundAmount < 0) {
         return res.status(400).json({ message: 'refundAmount must be a non-negative number.' });
@@ -898,7 +890,6 @@ exports.patchRefundApproved = async (req, res) => {
       updateFields['refund.refundAmount'] = refundAmount;
     }
 
-    // Update the booking with the new values
     const updatedBooking = await booking.findByIdAndUpdate(
       id,
       {
