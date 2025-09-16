@@ -257,4 +257,8 @@ router.put('/landing/update/:id', upload.single('file'), newLandingPage.updateLa
 router.get('/landing/display/:id', newLandingPage.getLandingById);
 router.delete('/landing/delete/:id', newLandingPage.deleteLanding);
 
+// refund
+router.post('/booking/refund/calculate', bookingController.getRefundAmount);
+router.patch('/booking/refund/toggle-approval/:id', bookingController.patchRefundApproved);
+
 module.exports = router;

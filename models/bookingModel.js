@@ -27,7 +27,7 @@ const bookingSchema = new mongoose.Schema({
   package: {
     modeOfPayment: { type: String, default: 'Pending' },
     paymentNo: { type: String, default: 'Pending' },
-    status: {type: String, default: 'Pending'},
+    status: {type: String, default: 'Pending'}, // Approve or Approved | Decline or Declined
     numberBankEwallets: {type: String, default: 'N/A'}
   },
   datesOfBooking: { type: [Date], required: true },
@@ -37,7 +37,12 @@ const bookingSchema = new mongoose.Schema({
   checkOut: { type: Date, required: true },
   timeIn: { type: String, required: true },
   timeOut: { type: String, required: true },
-  rating: { type: Number, default: 0 }
+  rating: { type: Number, default: 0 },
+  refund: {
+    // P kukunin kung ano yung merong value sa reservation and package, if G kukuhnin lang si (totalFee - reservationFee if merong laman si packageFee)
+    refundAmount: { type: Number, default: 0 },
+    approved: { type: Boolean, default: false } // toggle display sa guest my bookings
+  }
 }, {
   collection: 'booking_tb',
   timestamps: true
