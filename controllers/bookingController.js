@@ -99,7 +99,8 @@ exports.createBooking = async (req, res) => {
       checkIn,
       checkOut,
       timeIn,
-      timeOut
+      timeOut,
+      status: 'Cancel'
     });
 
     await newBooking.save();
