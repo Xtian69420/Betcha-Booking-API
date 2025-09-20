@@ -99,11 +99,15 @@ exports.createBooking = async (req, res) => {
       checkIn,
       checkOut,
       timeIn,
-      timeOut,
-      status: 'Cancel'
+      timeOut
     });
 
+    // Explicitly set status to Cancel after creation
+    newBooking.status = 'Cancel';
+
+    console.log('Booking before save:', newBooking.status); // Debug log
     await newBooking.save();
+    console.log('Booking after save:', newBooking.status); // Debug log
 
     res.status(201).json({
       message: 'Booking created successfully.',
