@@ -80,7 +80,7 @@ exports.createBooking = async (req, res) => {
     }
 
     const discountedPackageFee = packageFee - (packageFee * discount / 100);
-    const totalFee = reservationFee + (discountedPackageFee * numOfDays) + (additionalPax * additionalPaxPrice);
+    const totalFee = (discountedPackageFee * numOfDays) + (additionalPax * additionalPaxPrice);
 
     const newBooking = new booking({
       transNo,
