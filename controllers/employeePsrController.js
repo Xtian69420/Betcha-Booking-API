@@ -9,6 +9,43 @@ const path = require('path');
 const { v4: uuidv4 } = require('uuid');
 const moment = require('moment-timezone');
 
+const addFooter = (doc, processedBy) => {
+  const pageHeight = doc.page.height;
+  const marginBottom = doc.page.margins.bottom;
+  const footerY = pageHeight - marginBottom - 25; 
+  
+  const currentX = doc.x;
+  const currentY = doc.y;
+  const currentFontSize = doc._fontSize;
+
+  doc.fontSize(8);
+  if (processedBy) {
+    doc.text(`Processed by: ${processedBy}`, doc.page.margins.left, footerY);
+  }
+  doc.text(`Generated on: ${moment().tz('Asia/Manila').format('MMMM D, YYYY [at] h:mm A')}`, doc.page.margins.left, footerY + 10);
+
+  const pageWidth = doc.page.width;
+  const marginRight = doc.page.margins.right;
+  const pageNumber = doc._pageBuffer.length + 1;
+  doc.text(`Page ${pageNumber}`, pageWidth - marginRight - 50, footerY + 5, { align: 'right' });
+
+  doc.x = currentX;
+  doc.y = currentY;
+  doc.fontSize(currentFontSize);
+};
+
+const setupAutoFooter = (doc, processedBy) => {
+
+  addFooter(doc, processedBy);
+
+  const originalAddPage = doc.addPage.bind(doc);
+  doc.addPage = function(options) {
+    const result = originalAddPage(options);
+    addFooter(this, processedBy);
+    return result;
+  };
+};
+
 exports.mostPeakBookingProperty = async (req, res) => {
   try {
     const now = new Date();
@@ -203,7 +240,6 @@ exports.generateWeekSummary = async (req, res) => {
       })
     ]);
 
-    // Create property lookup map
     const propertyMap = {};
     allProperties.forEach(prop => {
       propertyMap[prop.name] = {
@@ -226,8 +262,7 @@ exports.generateWeekSummary = async (req, res) => {
     bookings.forEach(booking => {
       const name = booking.propertyName;
       if (!summaryMap[name]) return;
-      
-      // Count booking dates within the week range
+
       const bookingDatesInWeek = booking.datesOfBooking.filter(date => {
         const bookingDate = new Date(date);
         return bookingDate >= startOfWeek.toDate() && bookingDate <= endOfWeek.toDate();
@@ -235,8 +270,7 @@ exports.generateWeekSummary = async (req, res) => {
       
       summaryMap[name].bookings += bookingDatesInWeek;
       summaryMap[name].addPax += booking.additionalPax || 0;
-      
-      // Calculate earnings: (booking dates * package price) + (additional pax * additional pax price)
+
       const packageEarnings = bookingDatesInWeek * summaryMap[name].price;
       const addPaxEarnings = (booking.additionalPax || 0) * summaryMap[name].addPaxPrice;
       summaryMap[name].earned += packageEarnings + addPaxEarnings;
@@ -270,46 +304,37 @@ exports.generateWeekSummary = async (req, res) => {
     const pdfPath = path.join(__dirname, `../exports/week-summary-${fileId}.pdf`);
     const excelPath = path.join(__dirname, `../exports/week-summary-${fileId}.xlsx`);
 
-    // Date range for display
     const dateRange = `${startOfWeek.format('MMMM D, YYYY')} to ${endOfWeek.format('MMMM D, YYYY')}`;
 
     // ====== PDF GENERATION ======
     const doc = new PDFDocument({ margin: 40, size: [500, 1000], layout: 'landscape' });
     doc.pipe(fs.createWriteStream(pdfPath));
 
-    // Company Header with Logo
     const logoPath = path.join(__dirname, '../icon-betcha.png');
     if (fs.existsSync(logoPath)) {
       const logoSize = 30;
       const logoX = doc.page.margins.left;
       const logoY = doc.y;
       doc.image(logoPath, logoX, logoY, { width: logoSize, height: logoSize });
-      
-      // Position text next to logo
+
       doc.fontSize(24).text("Betcha by Homie House", logoX + logoSize + 10, logoY + 5);
       doc.fontSize(12).text("betcha-booking@gmail.com", logoX + logoSize + 10, logoY + 25);
       doc.y = logoY + logoSize + 10;
     } else {
-      // Fallback without logo
+
       doc.fontSize(24).text("Betcha by Homie House", { align: 'center' });
       doc.fontSize(12).text("betcha-booking@gmail.com", { align: 'center' });
     }
     doc.moveDown(1);
-    
-    // Report Title and Date Range
+
     doc.fontSize(18).text(`Week ${week} Summary Report`, { align: 'center' });
     doc.fontSize(14).text(`${moment().month(month - 1).format('MMMM')} ${year}`, { align: 'center' });
     doc.fontSize(12).text(`Period: ${dateRange}`, { align: 'center' });
-    doc.moveDown(1);
-    
-    // Processed By
-    if (processedBy) {
-      doc.fontSize(10).text(`Processed by: ${processedBy}`, { align: 'right' });
-    }
-    doc.fontSize(10).text(`Generated on: ${moment().tz('Asia/Manila').format('MMMM D, YYYY [at] h:mm A')}`, { align: 'right' });
     doc.moveDown(2);
 
-    const columnWidths = [150, 80, 80, 80, 80, 100]; // Property Name, Bookings, Price, Add-Pax, Add-Pax Price, Earned
+    setupAutoFooter(doc, processedBy);
+
+    const columnWidths = [150, 80, 80, 80, 80, 100]; 
     const totalTableWidth = columnWidths.reduce((a, b) => a + b, 0);
     const pageWidth = doc.page.width - doc.page.margins.left - doc.page.margins.right;
     const tableX = doc.page.margins.left + (pageWidth - totalTableWidth) / 2;
@@ -322,6 +347,8 @@ exports.generateWeekSummary = async (req, res) => {
     const drawTableHeader = () => {
     let x = tableX;
     const headers = ["Property Name", "Bookings", "Price", "Add-Pax", "Add-Pax Price", "Earned"];
+
+    doc.font('Helvetica-Bold');
     
     headers.forEach((header, index) => {
         doc.rect(x, y, columnWidths[index], cellHeight).stroke();
@@ -331,6 +358,7 @@ exports.generateWeekSummary = async (req, res) => {
         x += columnWidths[index];
     });
 
+    doc.font('Helvetica');
     y += cellHeight;
     };
 
@@ -340,14 +368,13 @@ exports.generateWeekSummary = async (req, res) => {
     earningsList.forEach((row, index) => {
     if (rowCount === 10) {
         doc.addPage({ margin: 40, size: [500, 1000], layout: 'landscape' });
-        // Repeat header on new page with logo
+
         if (fs.existsSync(logoPath)) {
           const logoSize = 30;
           const logoX = doc.page.margins.left;
           const logoY = doc.y;
           doc.image(logoPath, logoX, logoY, { width: logoSize, height: logoSize });
-          
-          // Position text next to logo
+
           doc.fontSize(24).text("Betcha by Homie House", logoX + logoSize + 10, logoY + 5);
           doc.fontSize(12).text("betcha-booking@gmail.com", logoX + logoSize + 10, logoY + 25);
           doc.y = logoY + logoSize + 10;
@@ -377,6 +404,10 @@ exports.generateWeekSummary = async (req, res) => {
         `PHP ${row.earned.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`
     ];
 
+    if (row.propertyName === 'TOTAL') {
+        doc.font('Helvetica-Bold');
+    }
+
     rowData.forEach((data, colIndex) => {
         doc.rect(x, y, columnWidths[colIndex], cellHeight).stroke();
         doc.text(data, x + cellPadding, y + cellPadding, {
@@ -385,22 +416,23 @@ exports.generateWeekSummary = async (req, res) => {
         x += columnWidths[colIndex];
     });
 
+    if (row.propertyName === 'TOTAL') {
+        doc.font('Helvetica');
+    }
+
     y += cellHeight;
     rowCount++;
     });
 
-    // Add Daily Breakdown Section for Weekly Report
     doc.addPage({ margin: 40, size: [500, 1000], layout: 'landscape' });
-    
-    // Repeat header on new page with logo
+
     const weeklyPdfLogoPath = path.join(__dirname, '../icon-betcha.png');
     if (fs.existsSync(weeklyPdfLogoPath)) {
       const logoSize = 30;
       const logoX = doc.page.margins.left;
       const logoY = doc.y;
       doc.image(weeklyPdfLogoPath, logoX, logoY, { width: logoSize, height: logoSize });
-      
-      // Position text next to logo
+
       doc.fontSize(24).text("Betcha by Homie House", logoX + logoSize + 10, logoY + 5);
       doc.fontSize(12).text("betcha-booking@gmail.com", logoX + logoSize + 10, logoY + 25);
       doc.y = logoY + logoSize + 10;
@@ -414,7 +446,6 @@ exports.generateWeekSummary = async (req, res) => {
     doc.fontSize(12).text(`Period: ${dateRange}`, { align: 'center' });
     doc.moveDown(2);
 
-    // Create daily breakdown data for PDF
     const dailyBreakdownPdf = {};
     earningsList.forEach(prop => {
       if (prop.propertyName !== 'TOTAL') {
@@ -425,7 +456,6 @@ exports.generateWeekSummary = async (req, res) => {
       }
     });
 
-    // Calculate daily bookings for PDF
     const weekStartPdf = startOfWeek.clone();
     const weekEndPdf = endOfWeek.clone();
     
@@ -444,7 +474,6 @@ exports.generateWeekSummary = async (req, res) => {
       });
     });
 
-    // Daily breakdown table setup
     const dailyColumnWidths = [120, 70, 70, 70, 70, 70, 70, 70]; // Property Name + 7 days
     const dailyTableWidth = dailyColumnWidths.reduce((a, b) => a + b, 0);
     const dailyPageWidth = doc.page.width - doc.page.margins.left - doc.page.margins.right;
@@ -455,9 +484,9 @@ exports.generateWeekSummary = async (req, res) => {
     let dailyY = doc.y;
     doc.fontSize(10);
 
-    // Draw daily breakdown header
     const dailyHeadersPdf = ['Property Name', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 
+    doc.font('Helvetica-Bold');
     let dailyX = dailyTableX;
     dailyHeadersPdf.forEach((header, index) => {
       doc.rect(dailyX, dailyY, dailyColumnWidths[index], dailyCellHeight).stroke();
@@ -466,9 +495,10 @@ exports.generateWeekSummary = async (req, res) => {
       });
       dailyX += dailyColumnWidths[index];
     });
+
+    doc.font('Helvetica');
     dailyY += dailyCellHeight;
 
-    // Draw daily breakdown data
     Object.entries(dailyBreakdownPdf).forEach(([propertyName, days]) => {
       dailyX = dailyTableX;
       
@@ -494,7 +524,6 @@ exports.generateWeekSummary = async (req, res) => {
     const workbook = new ExcelJS.Workbook();
     const sheet = workbook.addWorksheet('Week Summary');
 
-    // Company Logo
     const excelLogoPath = path.join(__dirname, '../icon-betcha.png');
     if (fs.existsSync(excelLogoPath)) {
       const logoId = workbook.addImage({
@@ -507,7 +536,6 @@ exports.generateWeekSummary = async (req, res) => {
       });
     }
 
-    // Company Header (moved down to accommodate logo)
     sheet.mergeCells('A3:F3');
     sheet.getCell('A3').value = 'Betcha by Homie House';
     sheet.getCell('A3').alignment = { horizontal: 'center' };
@@ -518,7 +546,6 @@ exports.generateWeekSummary = async (req, res) => {
     sheet.getCell('A4').alignment = { horizontal: 'center' };
     sheet.getCell('A4').font = { size: 12 };
 
-    // Report Title and Date Range
     sheet.mergeCells('A6:F6');
     sheet.getCell('A6').value = `Week ${week} Summary Report`;
     sheet.getCell('A6').alignment = { horizontal: 'center' };
@@ -534,7 +561,6 @@ exports.generateWeekSummary = async (req, res) => {
     sheet.getCell('A8').alignment = { horizontal: 'center' };
     sheet.getCell('A8').font = { size: 12 };
 
-    // Processed By and Generated On
     if (processedBy) {
       sheet.getCell('F10').value = `Processed by: ${processedBy}`;
       sheet.getCell('F10').alignment = { horizontal: 'right' };
@@ -544,7 +570,6 @@ exports.generateWeekSummary = async (req, res) => {
     sheet.getCell('F11').alignment = { horizontal: 'right' };
     sheet.getCell('F11').font = { size: 10 };
 
-    // Table Headers
     const headerRow = 13;
     sheet.addRow([]);
     sheet.getCell(`A${headerRow}`).value = 'Property Name';
@@ -564,11 +589,11 @@ exports.generateWeekSummary = async (req, res) => {
         typeof row.addPaxPrice === 'number' ? row.addPaxPrice : row.addPaxPrice,
         row.earned
       ]);                                                                                                                                                                                                                                                                                                                 
-      newRow.getCell(2).numFmt = '#,##0'; // Bookings column
-      newRow.getCell(3).numFmt = '"PHP "#,##0.00'; // Price column
-      newRow.getCell(4).numFmt = '#,##0'; // Add-Pax column
-      newRow.getCell(5).numFmt = '"PHP "#,##0.00'; // Add-Pax Price column
-      newRow.getCell(6).numFmt = '"PHP "#,##0.00'; // Earned column
+      newRow.getCell(2).numFmt = '#,##0';
+      newRow.getCell(3).numFmt = '"PHP "#,##0.00'; 
+      newRow.getCell(4).numFmt = '#,##0'; 
+      newRow.getCell(5).numFmt = '"PHP "#,##0.00'; 
+      newRow.getCell(6).numFmt = '"PHP "#,##0.00'; 
     });
 
     const totalRows = sheet.rowCount;
@@ -593,18 +618,15 @@ exports.generateWeekSummary = async (req, res) => {
       { key: 'earned', width: 18 }
     ];
 
-    // Add Daily Breakdown Table for Weekly Report
     const dailyStartRow = sheet.rowCount + 3;
     sheet.addRow([]);
     sheet.addRow([]);
     
-    // Daily breakdown title
     sheet.mergeCells(`A${dailyStartRow}:H${dailyStartRow}`);
     sheet.getCell(`A${dailyStartRow}`).value = 'Daily Breakdown (Mon-Sun)';
     sheet.getCell(`A${dailyStartRow}`).alignment = { horizontal: 'center' };
     sheet.getCell(`A${dailyStartRow}`).font = { bold: true, size: 14 };
 
-    // Create daily breakdown data
     const dailyBreakdown = {};
     earningsList.forEach(prop => {
       if (prop.propertyName !== 'TOTAL') {
@@ -615,7 +637,6 @@ exports.generateWeekSummary = async (req, res) => {
       }
     });
 
-    // Calculate daily bookings for the week
     const weekStart = startOfWeek.clone();
     const weekEnd = endOfWeek.clone();
     
@@ -634,7 +655,6 @@ exports.generateWeekSummary = async (req, res) => {
       });
     });
 
-    // Daily breakdown headers
     const dailyHeaderRow = dailyStartRow + 2;
     const dailyHeadersExcel = ['Property Name', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
     const dailyHeaders = sheet.addRow(dailyHeadersExcel);
@@ -803,14 +823,10 @@ exports.generateMonthSummary = async (req, res) => {
     doc.fontSize(18).text("Monthly Summary Report", { align: 'center' });
     doc.fontSize(14).text(`${moment().month(month - 1).format('MMMM')} ${year}`, { align: 'center' });
     doc.fontSize(12).text(`Period: ${dateRange}`, { align: 'center' });
-    doc.moveDown(1);
-    
-    // Processed By
-    if (processedBy) {
-      doc.fontSize(10).text(`Processed by: ${processedBy}`, { align: 'right' });
-    }
-    doc.fontSize(10).text(`Generated on: ${moment().tz('Asia/Manila').format('MMMM D, YYYY [at] h:mm A')}`, { align: 'right' });
     doc.moveDown(2);
+    
+    // Setup automatic footer for all pages
+    setupAutoFooter(doc, processedBy);
 
     const columnWidths = [150, 80, 80, 80, 80, 100]; // Property Name, Bookings, Price, Add-Pax, Add-Pax Price, Earned
     const totalTableWidth = columnWidths.reduce((a, b) => a + b, 0);
@@ -826,6 +842,9 @@ exports.generateMonthSummary = async (req, res) => {
       let x = tableX;
       const headers = ["Property Name", "Bookings", "Price", "Add-Pax", "Add-Pax Price", "Earned"];
       
+      // Set bold font for headers
+      doc.font('Helvetica-Bold');
+      
       headers.forEach((header, index) => {
           doc.rect(x, y, columnWidths[index], cellHeight).stroke();
           doc.text(header, x + cellPadding, y + cellPadding, {
@@ -834,6 +853,8 @@ exports.generateMonthSummary = async (req, res) => {
           x += columnWidths[index];
       });
 
+      // Reset to normal font
+      doc.font('Helvetica');
       y += cellHeight;
     };
 
@@ -880,6 +901,11 @@ exports.generateMonthSummary = async (req, res) => {
           `PHP ${row.earned.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`
       ];
 
+      // Set bold font for TOTAL row
+      if (row.propertyName === 'TOTAL') {
+          doc.font('Helvetica-Bold');
+      }
+
       rowData.forEach((data, colIndex) => {
           doc.rect(x, y, columnWidths[colIndex], cellHeight).stroke();
           doc.text(data, x + cellPadding, y + cellPadding, {
@@ -887,6 +913,11 @@ exports.generateMonthSummary = async (req, res) => {
           });
           x += columnWidths[colIndex];
       });
+
+      // Reset to normal font after TOTAL row
+      if (row.propertyName === 'TOTAL') {
+          doc.font('Helvetica');
+      }
       
       y += cellHeight;
       rowCount++;
@@ -1339,14 +1370,10 @@ exports.generateQuarterSummary = async (req, res) => {
     doc.fontSize(18).text(`Quarter ${quarter} Summary Report`, { align: 'center' });
     doc.fontSize(14).text(`Year ${year}`, { align: 'center' });
     doc.fontSize(12).text(`Period: ${dateRange}`, { align: 'center' });
-    doc.moveDown(1);
-    
-    // Processed By
-    if (processedBy) {
-      doc.fontSize(10).text(`Processed by: ${processedBy}`, { align: 'right' });
-    }
-    doc.fontSize(10).text(`Generated on: ${moment().tz('Asia/Manila').format('MMMM D, YYYY [at] h:mm A')}`, { align: 'right' });
     doc.moveDown(2);
+    
+    // Setup automatic footer for all pages
+    setupAutoFooter(doc, processedBy);
 
     const columnWidths = [150, 80, 80, 80, 80, 100]; // Property Name, Bookings, Price, Add-Pax, Add-Pax Price, Earned
     const totalTableWidth = columnWidths.reduce((a, b) => a + b, 0);
@@ -1363,6 +1390,9 @@ exports.generateQuarterSummary = async (req, res) => {
       let x = tableX;
       const headers = ["Property Name", "Bookings", "Price", "Add-Pax", "Add-Pax Price", "Earned"];
       
+      // Set bold font for headers
+      doc.font('Helvetica-Bold');
+      
       headers.forEach((header, index) => {
           doc.rect(x, y, columnWidths[index], cellHeight).stroke();
           doc.text(header, x + cellPadding, y + cellPadding, {
@@ -1371,6 +1401,8 @@ exports.generateQuarterSummary = async (req, res) => {
           x += columnWidths[index];
       });
 
+      // Reset to normal font
+      doc.font('Helvetica');
       y += cellHeight;
     };
 
@@ -1417,6 +1449,11 @@ exports.generateQuarterSummary = async (req, res) => {
           `PHP ${row.earned.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`
       ];
 
+      // Set bold font for TOTAL row
+      if (row.propertyName === 'TOTAL') {
+          doc.font('Helvetica-Bold');
+      }
+
       rowData.forEach((data, colIndex) => {
           doc.rect(x, y, columnWidths[colIndex], cellHeight).stroke();
           doc.text(data, x + cellPadding, y + cellPadding, {
@@ -1424,6 +1461,11 @@ exports.generateQuarterSummary = async (req, res) => {
           });
           x += columnWidths[colIndex];
       });
+
+      // Reset to normal font after TOTAL row
+      if (row.propertyName === 'TOTAL') {
+          doc.font('Helvetica');
+      }
 
       y += cellHeight;
       rowCount++;
@@ -1887,14 +1929,10 @@ exports.generateSemiAnnualSummary = async (req, res) => {
     doc.fontSize(18).text('Semi-Annual Summary Report', { align: 'center' });
     doc.fontSize(14).text(`${year} - H${annual}`, { align: 'center' });
     doc.fontSize(12).text(`Period: ${dateRange}`, { align: 'center' });
-    doc.moveDown(1);
-    
-    // Processed By
-    if (processedBy) {
-      doc.fontSize(10).text(`Processed by: ${processedBy}`, { align: 'right' });
-    }
-    doc.fontSize(10).text(`Generated on: ${moment().tz('Asia/Manila').format('MMMM D, YYYY [at] h:mm A')}`, { align: 'right' });
     doc.moveDown(2);
+    
+    // Setup automatic footer for all pages
+    setupAutoFooter(doc, processedBy);
 
     const columnWidths = [150, 80, 80, 80, 80, 100]; // Property Name, Bookings, Price, Add-Pax, Add-Pax Price, Earned
     const totalTableWidth = columnWidths.reduce((a, b) => a + b, 0);
@@ -1910,6 +1948,9 @@ exports.generateSemiAnnualSummary = async (req, res) => {
       let x = tableX;
       const headers = ["Property Name", "Bookings", "Price", "Add-Pax", "Add-Pax Price", "Earned"];
       
+      // Set bold font for headers
+      doc.font('Helvetica-Bold');
+      
       headers.forEach((header, index) => {
           doc.rect(x, y, columnWidths[index], cellHeight).stroke();
           doc.text(header, x + cellPadding, y + cellPadding, {
@@ -1918,6 +1959,8 @@ exports.generateSemiAnnualSummary = async (req, res) => {
           x += columnWidths[index];
       });
 
+      // Reset to normal font
+      doc.font('Helvetica');
       y += cellHeight;
     };
 
@@ -2045,6 +2088,8 @@ exports.generateSemiAnnualSummary = async (req, res) => {
       monthHeadersPdf.push(monthStart.format('MMMM'));
     }
 
+    // Set bold font for breakdown headers
+    doc.font('Helvetica-Bold');
     let monthlyX = monthlyTableX;
     monthHeadersPdf.forEach((header, index) => {
       doc.rect(monthlyX, monthlyY, monthlyColumnWidths[index], monthlyCellHeight).stroke();
@@ -2053,6 +2098,8 @@ exports.generateSemiAnnualSummary = async (req, res) => {
       });
       monthlyX += monthlyColumnWidths[index];
     });
+    // Reset to normal font
+    doc.font('Helvetica');
     monthlyY += monthlyCellHeight;
 
     // Draw monthly breakdown data
@@ -2375,14 +2422,10 @@ exports.generateAnnualSummary = async (req, res) => {
     doc.fontSize(18).text('Annual Summary Report', { align: 'center' });
     doc.fontSize(14).text(`Year ${year}`, { align: 'center' });
     doc.fontSize(12).text(`Period: ${dateRange}`, { align: 'center' });
-    doc.moveDown(1);
-    
-    // Processed By
-    if (processedBy) {
-      doc.fontSize(10).text(`Processed by: ${processedBy}`, { align: 'right' });
-    }
-    doc.fontSize(10).text(`Generated on: ${moment().tz('Asia/Manila').format('MMMM D, YYYY [at] h:mm A')}`, { align: 'right' });
     doc.moveDown(2);
+    
+    // Setup automatic footer for all pages
+    setupAutoFooter(doc, processedBy);
 
     const columnWidths = [150, 80, 80, 80, 80, 100]; // Property Name, Bookings, Price, Add-Pax, Add-Pax Price, Earned
     const totalTableWidth = columnWidths.reduce((a, b) => a + b, 0);
@@ -2398,6 +2441,9 @@ exports.generateAnnualSummary = async (req, res) => {
       let x = tableX;
       const headers = ["Property Name", "Bookings", "Price", "Add-Pax", "Add-Pax Price", "Earned"];
       
+      // Set bold font for headers
+      doc.font('Helvetica-Bold');
+      
       headers.forEach((header, index) => {
           doc.rect(x, y, columnWidths[index], cellHeight).stroke();
           doc.text(header, x + cellPadding, y + cellPadding, {
@@ -2406,6 +2452,8 @@ exports.generateAnnualSummary = async (req, res) => {
           x += columnWidths[index];
       });
 
+      // Reset to normal font
+      doc.font('Helvetica');
       y += cellHeight;
     };
 
@@ -2533,6 +2581,8 @@ exports.generateAnnualSummary = async (req, res) => {
       annualHeadersPdf.push(monthStart.format('MMM')); // Jan, Feb, etc.
     }
 
+    // Set bold font for breakdown headers
+    doc.font('Helvetica-Bold');
     let annualX = annualTableX;
     annualHeadersPdf.forEach((header, index) => {
       doc.rect(annualX, annualY, annualColumnWidths[index], annualCellHeight).stroke();
@@ -2541,6 +2591,8 @@ exports.generateAnnualSummary = async (req, res) => {
       });
       annualX += annualColumnWidths[index];
     });
+    // Reset to normal font
+    doc.font('Helvetica');
     annualY += annualCellHeight;
 
     // Draw annual monthly breakdown data
