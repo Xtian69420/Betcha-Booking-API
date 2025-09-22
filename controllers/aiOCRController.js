@@ -82,27 +82,64 @@ exports.ScanIDDriversLicense = async (req, res) => {
       });
 
       if (nameLine) {
-        let words = nameLine
-          .trim()
-          .split(/\s+/)
-          .map(w => w.replace(/[^A-Za-z]/g, ""))
-          .filter(w => /^[A-Za-z]+$/.test(w));
-
-        while (words.length && (words[0].length < 2 || /^[a-z]/.test(words[0]))) {
-          words.shift();
-        }
-
-        if (words.length >= 3) {
-          lastName = words[0].charAt(0).toUpperCase() + words[0].slice(1).toLowerCase();
-          firstName = words[1].charAt(0).toUpperCase() + words[1].slice(1).toLowerCase();
-          // Capitalize each hyphenated part, preserve dashes (e.g., Nabal-I)
-          const originalWords = nameLine.trim().split(/\s+/).slice(2);
-          middleName = originalWords.map(word =>
-            word
-              .split('-')
-              .map(part => part.charAt(0).toUpperCase() + part.slice(1).toLowerCase())
-              .join('-')
+        // Split by comma to separate last name from first and middle names
+        const commaParts = nameLine.trim().split(',');
+        
+        if (commaParts.length >= 2) {
+          // Extract last name (before comma)
+          const lastNamePart = commaParts[0].trim().replace(/[^A-Za-z\s-]/g, "");
+          lastName = lastNamePart.split(/\s+/).map(word => 
+            word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
           ).join(' ');
+
+          // Extract first and middle names (after comma)
+          const firstMiddlePart = commaParts[1].trim().replace(/[^A-Za-z\s-]/g, "");
+          const nameWords = firstMiddlePart.split(/\s+/).filter(word => word.length > 0);
+
+          if (nameWords.length >= 1) {
+            // First name could be multiple words (e.g., "MARIA THERESA")
+            // Common pattern: if there are 3+ words, assume first 2 are first name, rest is middle
+            if (nameWords.length >= 3) {
+              firstName = nameWords.slice(0, 2).map(word =>
+                word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
+              ).join(' ');
+              
+              middleName = nameWords.slice(2).map(word =>
+                word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
+              ).join(' ');
+            } else if (nameWords.length === 2) {
+              // If only 2 words, first is firstName, second is middleName
+              firstName = nameWords[0].charAt(0).toUpperCase() + nameWords[0].slice(1).toLowerCase();
+              middleName = nameWords[1].charAt(0).toUpperCase() + nameWords[1].slice(1).toLowerCase();
+            } else {
+              // If only 1 word, it's the firstName
+              firstName = nameWords[0].charAt(0).toUpperCase() + nameWords[0].slice(1).toLowerCase();
+            }
+          }
+        } else {
+          // Fallback to original logic if no comma found
+          let words = nameLine
+            .trim()
+            .split(/\s+/)
+            .map(w => w.replace(/[^A-Za-z]/g, ""))
+            .filter(w => /^[A-Za-z]+$/.test(w));
+
+          while (words.length && (words[0].length < 2 || /^[a-z]/.test(words[0]))) {
+            words.shift();
+          }
+
+          if (words.length >= 3) {
+            lastName = words[0].charAt(0).toUpperCase() + words[0].slice(1).toLowerCase();
+            firstName = words[1].charAt(0).toUpperCase() + words[1].slice(1).toLowerCase();
+            // Capitalize each hyphenated part, preserve dashes (e.g., Nabal-I)
+            const originalWords = nameLine.trim().split(/\s+/).slice(2);
+            middleName = originalWords.map(word =>
+              word
+                .split('-')
+                .map(part => part.charAt(0).toUpperCase() + part.slice(1).toLowerCase())
+                .join('-')
+            ).join(' ');
+          }
         }
       }
     }
