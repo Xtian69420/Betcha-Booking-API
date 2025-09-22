@@ -1,4 +1,5 @@
 const Notification = require('../models/notificationModel'); 
+const Admin = require('../models/adminModel');
 const moment = require('moment-timezone');
 const mongoose = require('mongoose');
 
@@ -82,17 +83,21 @@ exports.cancellationNotification = async (req, res) => {
   try {
     const {
       fromId, fromName, fromRole,
-      toId, toName, toRole,
       message, transNo, bookingId, amountRefund, reasonToGuest, numberEwalletBank, modeOfRefund
     } = req.body;
 
-    if (!fromId || !fromName || !fromRole || !toId || !toName || !toRole || !message || !transNo) {
+    if (!fromId || !fromName || !fromRole || !message || !transNo) {
       return res.status(400).json({ message: 'Missing required fields for cancellation notification.' });
+    }
+
+    const adminUsers = await Admin.find({});
+    
+    if (adminUsers.length === 0) {
+      return res.status(404).json({ message: 'No admin users found to send notification to.' });
     }
 
     const dateTimePH = moment().tz('Asia/Manila').toDate();
 
-    // Convert bookingId string to ObjectId if provided
     let bookingObjectId = null;
     if (bookingId) {
       try {
@@ -102,30 +107,38 @@ exports.cancellationNotification = async (req, res) => {
       }
     }
 
-    const newNotification = new Notification({
-      from: { fromId, name: fromName, role: fromRole },
-      to: { toId, name: toName, role: toRole },
-      seen: false,
-      dateTime: dateTimePH,
-      category: 'Cancellation Request',
-      message,
-      statusRejection: 'Pending',
-      transNo,
-      bookingId: bookingObjectId,
-      amountRefund,
-      modeOfRefund,
-      reasonToGuest,
-      numberEwalletBank
-    });
+    const notifications = [];
+    for (const admin of adminUsers) {
+      const newNotification = new Notification({
+        from: { fromId, name: fromName, role: fromRole },
+        to: { 
+          toId: admin._id.toString(), 
+          name: `${admin.firstname} ${admin.lastname}`, 
+          role: admin.userType 
+        },
+        seen: false,
+        dateTime: dateTimePH,
+        category: 'Cancellation Request',
+        message,
+        statusRejection: 'Pending',
+        transNo,
+        bookingId: bookingObjectId,
+        amountRefund,
+        modeOfRefund,
+        reasonToGuest,
+        numberEwalletBank
+      });
 
-    await newNotification.save();
-
-    res.status(201).json({
-      message: 'Cancellation notification created.',
-      data: {
+      await newNotification.save();
+      notifications.push({
         ...newNotification.toObject(),
         dateTimePH: moment(newNotification.dateTime).tz('Asia/Manila').format('YYYY-MM-DD HH:mm:ss')
-      }
+      });
+    }
+
+    res.status(201).json({
+      message: `Cancellation notification sent to ${adminUsers.length} admin(s).`,
+      data: notifications
     });
   } catch (error) {
     console.error('Error creating cancellation notification:', error);
