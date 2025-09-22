@@ -79,8 +79,8 @@ exports.createBooking = async (req, res) => {
       return res.status(400).json({ message: 'Invalid booking date range.' });
     }
 
-    const discountedPackageFee = packageFee - (packageFee * discount / 100);
-    const totalFee = (discountedPackageFee * numOfDays) + (additionalPax * additionalPaxPrice);
+    const subtotal = (packageFee * numOfDays) + (additionalPax * additionalPaxPrice);
+    const totalFee = subtotal - (subtotal * discount / 100);
 
     const newBooking = new booking({
       transNo,
