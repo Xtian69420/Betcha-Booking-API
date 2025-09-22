@@ -18,7 +18,31 @@ exports.scanImageUpload = async (req, res) => {
     fs.unlinkSync(imagePath);
 
     let result = 'Reference number not found';
+    let amount = null;
 
+    // Extract amount first
+    const amountPatterns = [
+      /Amount\s+(?:PHP\s*)?(\d{1,3}(?:,\d{3})*(?:\.\d{2})?)/i,
+      /Amount\s+(?:₱\s*)?(\d{1,3}(?:,\d{3})*(?:\.\d{2})?)/i,
+      /PHP\s+(\d{1,3}(?:,\d{3})*(?:\.\d{2})?)/i,
+      /₱\s*(\d{1,3}(?:,\d{3})*(?:\.\d{2})?)/i,
+      /Sent\s+(?:PHP\s*)?(\d{1,3}(?:,\d{3})*(?:\.\d{2})?)/i,
+      /Total\s+Amount\s+Sent\s+[£₱]?(\d{1,3}(?:,\d{3})*(?:\.\d{2})?)/i
+    ];
+
+    for (const regex of amountPatterns) {
+      const match = text.match(regex);
+      if (match && match[1]) {
+        // Remove commas and convert to number
+        const extractedAmount = match[1].replace(/,/g, '');
+        if (!isNaN(parseFloat(extractedAmount))) {
+          amount = parseFloat(extractedAmount);
+          break;
+        }
+      }
+    }
+
+    // Extract reference number
     const patterns = [
       /Ref(?:erence)?\.?\s*No\.?\s*[:\-]?\s*([A-Z0-9 ]{6,})/i,
       /Ref(?:erence)?\.?\s*ID\s*[:\-]?\s*([A-Z0-9 ]{6,})/i
@@ -41,8 +65,7 @@ exports.scanImageUpload = async (req, res) => {
       }
     }
 
-
-    res.json({ result, fullText: text });
+    res.json({ result, amount, fullText: text });
 
   } catch (error) {
     console.error('OCR upload error:', error);
