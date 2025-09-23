@@ -261,4 +261,4 @@ router.delete('/landing/delete/:id', newLandingPage.deleteLanding);
 router.post('/booking/refund/calculate', bookingController.getRefundAmount);
 router.patch('/booking/refund/toggle-approval/:id', bookingController.patchRefundApproved);
 
-aodule.exports = router;
+module.exports = router;
