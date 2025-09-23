@@ -63,6 +63,24 @@ exports.createEmployee = async (req, res) => {
       fs.unlinkSync(req.file.path);
     }
 
+    // Parse and clean up properties data
+    let cleanedProperties;
+    try {
+      if (typeof properties === 'string') {
+        // Handle stringified array
+        cleanedProperties = JSON.parse(properties);
+        // Handle nested array if needed
+        if (Array.isArray(cleanedProperties[0])) {
+          cleanedProperties = cleanedProperties[0];
+        }
+      } else {
+        cleanedProperties = Array.isArray(properties) ? properties : [properties];
+      }
+    } catch (error) {
+      console.error('Properties parsing error:', error);
+      cleanedProperties = [];
+    }
+
     const newEmployee = new employee({
       firstname,
       minitial,
@@ -71,7 +89,7 @@ exports.createEmployee = async (req, res) => {
       password: hashedPassword,
       pfplink,
       role: Array.isArray(role) ? role : [role],
-      properties: Array.isArray(properties) ? properties : [properties]
+      properties: cleanedProperties
     });
 
     await newEmployee.save();
@@ -132,7 +150,6 @@ exports.updateEmployee = async (req, res) => {
     res.status(500).json({ message: 'Internal server error' });
   }
 };
-
 
 exports.getAllEmployees = async (req, res) => {
   try {
