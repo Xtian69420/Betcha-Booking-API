@@ -148,7 +148,7 @@ router.patch('/booking/paymentChecking/package/:id', bookingController.updatePac
 router.patch('/booking/paymentChecking/fully-payment/:id', bookingController.updateFullPaymentStatus);
 
 // booking guest
-router.put('/booking/rate/:id', bookingController.rateBooking);
+router.patch('/booking/rate/:id', bookingController.rateBooking);
 router.get('/booking/guest/:guestId', bookingController.getBookingsByGuestId);
 
 // email generator
@@ -261,4 +261,4 @@ router.delete('/landing/delete/:id', newLandingPage.deleteLanding);
 router.post('/booking/refund/calculate', bookingController.getRefundAmount);
 router.patch('/booking/refund/toggle-approval/:id', bookingController.patchRefundApproved);
 
-module.exports = router;
+aodule.exports = router;
