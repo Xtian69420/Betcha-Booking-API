@@ -9,45 +9,78 @@ exports.createAudit = async (req, res) => {
   try {
     const { userId, userType, activity } = req.body;
 
-    if (!userId || !userType || !activity) {
-      return res.status(400).json({ message: 'Missing required fields.' });
+    // Detailed validation
+    if (!userId) {
+      return res.status(400).json({ message: 'userId is required.' });
+    }
+    if (!userType) {
+      return res.status(400).json({ message: 'userType is required.' });
+    }
+    if (!activity) {
+      return res.status(400).json({ message: 'activity is required.' });
+    }
+
+    // Validate userType format
+    if (!['Guest', 'Admin', 'Employee'].includes(userType)) {
+      return res.status(400).json({ 
+        message: 'Invalid userType. Must be one of: Guest, Admin, Employee' 
+      });
+    }
+
+    // Validate userId format
+    if (!/^[0-9a-fA-F]{24}$/.test(userId)) {
+      return res.status(400).json({ 
+        message: 'Invalid userId format. Must be a valid MongoDB ObjectId.' 
+      });
     }
 
     let userModel;
     if (userType === 'Guest') userModel = Guest;
     else if (userType === 'Admin') userModel = Admin;
     else if (userType === 'Employee') userModel = Employee;
-    else return res.status(400).json({ message: 'Invalid userType.' });
 
-    const user = await userModel.findById(userId);
-    if (!user) {
-      return res.status(404).json({ message: 'User not found.' });
+    try {
+      const user = await userModel.findById(userId);
+      if (!user) {
+        return res.status(404).json({ 
+          message: `${userType} with id ${userId} not found.` 
+        });
+      }
+
+      const fullName = `${user.firstname} ${user.lastname}`;
+      const count = await AuditTrail.countDocuments();
+
+      const newAudit = new AuditTrail({
+        refNo: count + 1,
+        userId,
+        userType,
+        activity,
+        name: fullName,
+        dateTime: moment().tz('Asia/Manila').toDate() 
+      });
+
+      await newAudit.save();
+
+      res.status(201).json({
+        message: 'Audit created successfully.',
+        audit: {
+          ...newAudit.toObject(),
+          dateTimePH: moment(newAudit.dateTime).tz('Asia/Manila').format('YYYY-MM-DD HH:mm:ss')
+        }
+      });
+    } catch (dbError) {
+      console.error('Database operation error:', dbError);
+      return res.status(500).json({ 
+        message: 'Database operation failed.',
+        error: dbError.message 
+      });
     }
-
-    const fullName = `${user.firstname} ${user.lastname}`;
-    const count = await AuditTrail.countDocuments();
-
-    const newAudit = new AuditTrail({
-      refNo: count + 1,
-      userId,
-      userType,
-      activity,
-      name: fullName,
-      dateTime: moment().tz('Asia/Manila').toDate() 
-    });
-
-    await newAudit.save();
-
-    res.status(201).json({
-    message: 'Audit created.',
-    audit: {
-      ...newAudit.toObject(),
-      dateTimePH: moment(newAudit.dateTime).tz('Asia/Manila').format('YYYY-MM-DD HH:mm:ss')
-    }
-  });
   } catch (error) {
     console.error('Create Audit Error:', error);
-    res.status(500).json({ message: 'Internal Server Error.' });
+    res.status(500).json({ 
+      message: 'Internal Server Error.',
+      error: error.message
+    });
   }
 };
 
