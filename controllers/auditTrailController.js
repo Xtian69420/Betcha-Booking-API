@@ -2,6 +2,7 @@ const AuditTrail = require('../models/auditTrailModel');
 const Guest = require('../models/guestModel');
 const Admin = require('../models/adminModel');
 const Employee = require('../models/employeeModel');
+const mongoose = require('mongoose');
 
 const moment = require('moment-timezone');
 
@@ -27,11 +28,14 @@ exports.createAudit = async (req, res) => {
       });
     }
 
-    // Validate userId format
-    if (!/^[0-9a-fA-F]{24}$/.test(userId)) {
-      return res.status(400).json({ 
-        message: 'Invalid userId format. Must be a valid MongoDB ObjectId.' 
-      });
+    // Handle both string IDs and ObjectIds
+    let validUserId = userId;
+    if (typeof userId === 'string' && userId.trim() !== '') {
+      // If it's a non-empty string, use it as is
+      validUserId = userId.trim();
+    } else if (mongoose.Types.ObjectId.isValid(userId)) {
+      // If it's a valid ObjectId, convert it
+      validUserId = new mongoose.Types.ObjectId(userId);
     }
 
     let userModel;
@@ -40,7 +44,7 @@ exports.createAudit = async (req, res) => {
     else if (userType === 'Employee') userModel = Employee;
 
     try {
-      const user = await userModel.findById(userId);
+      const user = await userModel.findById(validUserId);
       if (!user) {
         return res.status(404).json({ 
           message: `${userType} with id ${userId} not found.` 
