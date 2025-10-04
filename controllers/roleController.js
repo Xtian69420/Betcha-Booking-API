@@ -13,7 +13,8 @@ exports.createRoles = async (req, res) => {
 
     const newRole = new roles({
       name,
-      privileges: Array.isArray(privileges) ? privileges : [privileges]
+      privileges: Array.isArray(privileges) ? privileges : [privileges],
+      active: true
     });
 
     await newRole.save();

@@ -4,7 +4,7 @@ const paymentSchema = new mongoose.Schema({
     paymentName : { type: String },
     category : { type: String },
     qrPhotoLink : { type: String },
-    active: { type : Boolean, deafult: true }
+    active: { type : Boolean, default: true }
 },{
     collection: 'payment_tb',
     timestamps: true

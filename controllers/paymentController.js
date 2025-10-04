@@ -70,6 +70,7 @@ exports.createPayment = async (req, res) => {
       paymentName,
       category,
       qrPhotoLink,
+      active: true
     });
 
     await newPayment.save();

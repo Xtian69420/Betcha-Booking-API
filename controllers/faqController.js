@@ -7,7 +7,8 @@ exports.createFAQ = async (req, res) => {
 
         const newFaq = new Faq ({
             question,
-            answer
+            answer,
+            active: true
         });
 
         await newFaq.save();
