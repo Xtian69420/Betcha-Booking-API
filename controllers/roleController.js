@@ -1,5 +1,6 @@
 const roles = require('../models/rolesModel');
 const employee = require('../models/employeeModel');
+const mongoose = require('mongoose');
 
 exports.createRoles = async (req, res) => {
   try {
