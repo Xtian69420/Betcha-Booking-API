@@ -20,7 +20,6 @@ exports.scanImageUpload = async (req, res) => {
     let result = 'Reference number not found';
     let amount = null;
 
-    // Extract amount first
     const amountPatterns = [
       /Amount\s+(?:PHP\s*)?(\d{1,3}(?:,\d{3})*(?:\.\d{2})?)/i,
       /Amount\s+(?:₱\s*)?(\d{1,3}(?:,\d{3})*(?:\.\d{2})?)/i,
@@ -33,7 +32,6 @@ exports.scanImageUpload = async (req, res) => {
     for (const regex of amountPatterns) {
       const match = text.match(regex);
       if (match && match[1]) {
-        // Remove commas and convert to number
         const extractedAmount = match[1].replace(/,/g, '');
         if (!isNaN(parseFloat(extractedAmount))) {
           amount = parseFloat(extractedAmount);
@@ -42,7 +40,6 @@ exports.scanImageUpload = async (req, res) => {
       }
     }
 
-    // Extract reference number
     const patterns = [
       /Ref(?:erence)?\.?\s*No\.?\s*[:\-]?\s*([A-Z0-9 ]{6,})/i,
       /Ref(?:erence)?\.?\s*ID\s*[:\-]?\s*([A-Z0-9 ]{6,})/i
@@ -105,23 +102,18 @@ exports.ScanIDDriversLicense = async (req, res) => {
       });
 
       if (nameLine) {
-        // Split by comma to separate last name from first and middle names
         const commaParts = nameLine.trim().split(',');
         
         if (commaParts.length >= 2) {
-          // Extract last name (before comma)
           const lastNamePart = commaParts[0].trim().replace(/[^A-Za-z\s-]/g, "");
           lastName = lastNamePart.split(/\s+/).map(word => 
             word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
           ).join(' ');
 
-          // Extract first and middle names (after comma)
           const firstMiddlePart = commaParts[1].trim().replace(/[^A-Za-z\s-]/g, "");
           const nameWords = firstMiddlePart.split(/\s+/).filter(word => word.length > 0);
 
           if (nameWords.length >= 1) {
-            // First name could be multiple words (e.g., "MARIA THERESA")
-            // Common pattern: if there are 3+ words, assume first 2 are first name, rest is middle
             if (nameWords.length >= 3) {
               firstName = nameWords.slice(0, 2).map(word =>
                 word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
@@ -131,16 +123,13 @@ exports.ScanIDDriversLicense = async (req, res) => {
                 word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
               ).join(' ');
             } else if (nameWords.length === 2) {
-              // If only 2 words, first is firstName, second is middleName
               firstName = nameWords[0].charAt(0).toUpperCase() + nameWords[0].slice(1).toLowerCase();
               middleName = nameWords[1].charAt(0).toUpperCase() + nameWords[1].slice(1).toLowerCase();
             } else {
-              // If only 1 word, it's the firstName
               firstName = nameWords[0].charAt(0).toUpperCase() + nameWords[0].slice(1).toLowerCase();
             }
           }
         } else {
-          // Fallback to original logic if no comma found
           let words = nameLine
             .trim()
             .split(/\s+/)
@@ -154,7 +143,6 @@ exports.ScanIDDriversLicense = async (req, res) => {
           if (words.length >= 3) {
             lastName = words[0].charAt(0).toUpperCase() + words[0].slice(1).toLowerCase();
             firstName = words[1].charAt(0).toUpperCase() + words[1].slice(1).toLowerCase();
-            // Capitalize each hyphenated part, preserve dashes (e.g., Nabal-I)
             const originalWords = nameLine.trim().split(/\s+/).slice(2);
             middleName = originalWords.map(word =>
               word
@@ -183,7 +171,6 @@ exports.ScanIDDriversLicense = async (req, res) => {
       }
     }
 
-    // Extract gender/sex information
     const sexMatch = text.match(/Sex\s+([MF])\s/i) || text.match(/\bSex\s*[:\-]?\s*([MF])\b/i) || text.match(/\b([MF])\s+\d{4}\/\d{1,2}\/\d{1,2}/);
     if (sexMatch) {
       const sexCode = sexMatch[1].toUpperCase();
@@ -215,7 +202,7 @@ exports.ScanIDPassport = async (req, res) => {
 
     const imagePath = path.resolve(__dirname, '..', req.file.path);
     const imageBase64 = fs.readFileSync(imagePath, { encoding: 'base64' });
-    fs.unlinkSync(imagePath); // delete after reading
+    fs.unlinkSync(imagePath); 
 
     const formData = new FormData();
     formData.append('apikey', 'K85666349088957');

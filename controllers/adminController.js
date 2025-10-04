@@ -1,19 +1,3 @@
-exports.getAdminById = async (req, res) => {
-  try {
-    const { id } = req.params;
-    if (!id) {
-      return res.status(400).json({ message: 'Admin ID is required' });
-    }
-    const adminUser = await admin.findById(id);
-    if (!adminUser) {
-      return res.status(404).json({ message: 'Admin not found' });
-    }
-    res.status(200).json(adminUser);
-  } catch (error) {
-    console.error('Get Admin By ID Error:', error);
-    res.status(500).json({ message: 'Internal server error' });
-  }
-};
 const admin = require('../models/adminModel');
 const guest = require('../models/guestModel')
 const employee = require ('../models/employeeModel');
@@ -76,7 +60,7 @@ exports.createAdmin = async (req, res) => {
 
         pfplink = `https://drive.google.com/thumbnail?id=${fileId}&sz=w1920-h1080`;
 
-        fs.unlinkSync(req.file.path); // delete temp file
+        fs.unlinkSync(req.file.path); 
       } catch (uploadErr) {
         console.error('Google Drive Upload Error:', uploadErr);
         return res.status(500).json({ message: 'Failed to upload profile picture' });
@@ -102,6 +86,23 @@ exports.createAdmin = async (req, res) => {
 
   } catch (error) {
     console.error('Create Admin Error:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+};
+
+exports.getAdminById = async (req, res) => {
+  try {
+    const { id } = req.params;
+    if (!id) {
+      return res.status(400).json({ message: 'Admin ID is required' });
+    }
+    const adminUser = await admin.findById(id);
+    if (!adminUser) {
+      return res.status(404).json({ message: 'Admin not found' });
+    }
+    res.status(200).json(adminUser);
+  } catch (error) {
+    console.error('Get Admin By ID Error:', error);
     res.status(500).json({ message: 'Internal server error' });
   }
 };
