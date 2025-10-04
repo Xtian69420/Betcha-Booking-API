@@ -178,3 +178,27 @@ exports.deletePaymentById = async (req, res) => {
     res.status(500).json({ message: 'Internal server error.' });
   }
 };
+
+exports.updateActive = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const payment = await Payment.findById(id);
+    
+    if (!payment) {
+      return res.status(404).json({ message: 'Payment method not found' });
+    }
+
+    // Toggle the active status
+    payment.active = !payment.active;
+    await payment.save();
+
+    res.status(200).json({ 
+      message: "Payment method active status updated successfully", 
+      active: payment.active 
+    });
+  } catch (error) {
+    console.error('Update Payment Active Status Error:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+}

@@ -116,3 +116,39 @@ exports.getRoleById = async (req, res) => {
     res.status(500).json({ message: 'Internal server error' });
   }
 };
+
+exports.updateActive = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ message: 'Invalid role ID format' });
+    }
+
+    const roleId = new mongoose.Types.ObjectId(id);
+    const role = await roles.findById(roleId);
+    
+    if (!role) {
+      return res.status(404).json({ message: 'Role not found' });
+    }
+
+    role.active = !role.active;
+    await role.save();
+
+    if (!role.active) {
+
+      await employee.updateMany(
+        { role: id },
+        { $pull: { role: id } }
+      );
+    }
+
+    res.status(200).json({ 
+      message: `Role ${role.active ? 'activated' : 'deactivated'} successfully${!role.active ? ' and removed from all employees' : ''}`,
+      active: role.active 
+    });
+  } catch (error) {
+    console.error('Update Role Active Status Error:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+}

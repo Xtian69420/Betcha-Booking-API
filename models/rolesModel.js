@@ -5,8 +5,9 @@ const rolesSchema = new mongoose.Schema({
     privileges: {
         type: [String],
         required: true,
-        default: ['default']
-    }
+        default: ['default'],
+    },
+    active : { type: Boolean, default: true }
 },{
     collection: 'roles_tb',
     timestamps: true

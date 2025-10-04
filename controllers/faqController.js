@@ -67,13 +67,13 @@ exports.deleteFAQbyId = async (req, res) => {
 
 exports.getAllFAQ = async (req, res) => {
     try {
-        const allFAQ = await Faq.find();
+        const allFAQ = await Faq.find({ });
 
-        if (allFAQ === 0) {
-            return res.status(404).json({ message: "There is no FAQ on the DB"})
+        if (allFAQ.length === 0) {
+            return res.status(404).json({ message: "There are no active FAQs in the DB" })
         }
 
-        res.status(200).json({message: "Get All FAQ success", allFAQ})
+        res.status(200).json({message: "Get All Active FAQ success", allFAQ})
     } catch(error) {
         console.error('Get All FAQ Error:', error);
         res.status(500).json({ message: 'Internal server error' });
@@ -82,15 +82,42 @@ exports.getAllFAQ = async (req, res) => {
 
 exports.get5Faq = async (req, res) => {
   try {
-    const listFiveFaq = await Faq.find().limit(5); 
+    const listFiveFaq = await Faq.find({ active: true }).limit(5); 
 
     if (!listFiveFaq || listFiveFaq.length === 0) {
-      return res.status(404).json({ message: "No FAQ Found" });
+      return res.status(404).json({ message: "No Active FAQ Found" });
     }
 
-    res.status(200).json({ message: "Five FAQs", Faq: listFiveFaq });
+    res.status(200).json({ message: "Five Active FAQs", Faq: listFiveFaq });
   } catch (error) {
     console.error('Error fetching FAQs:', error);
     res.status(500).json({ message: 'Internal server error' });
   }
 };
+
+exports.updateActive = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ message: 'Invalid ID format.' });
+    }
+
+    const faq = await Faq.findById(id);
+    
+    if (!faq) {
+      return res.status(404).json({ message: 'FAQ not found' });
+    }
+
+    faq.active = !faq.active;
+    await faq.save();
+
+    res.status(200).json({ 
+      message: "FAQ active status updated successfully", 
+      active: faq.active 
+    });
+  } catch (error) {
+    console.error('Update FAQ Active Status Error:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+}

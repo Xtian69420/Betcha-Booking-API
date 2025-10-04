@@ -81,6 +81,7 @@ router.delete('/roles/delete/:id', rolesController.deleteRoles);
 router.get('/roles/employees/:name', rolesController.displayEmployeeByRoles);
 router.get('/roles/display', rolesController.getAllRoles);
 router.get('/roles/display/:id', rolesController.getRoleById);
+router.patch('/roles/toggle-active/:id', rolesController.updateActive);
 
 // OTP routes
 router.post('/otp/register', otpController.sendOtpRegistration);
@@ -123,7 +124,8 @@ router.post('/paymentPlatform/create', upload.single('qrPicture'), paymentContro
 router.get('/payments/display', paymentController.displayAllPayment);
 router.get('/payments/display/:id', paymentController.displayByIdPayment);
 router.put('/payments/update/:id', upload.single('qrPicture'),paymentController.updatePayment);
-router.delete('/payments/delete/:id',paymentController.deletePaymentById)
+router.delete('/payments/delete/:id',paymentController.deletePaymentById);
+router.patch('/payments/toggle-active/:id', paymentController.updateActive);
 
 // booking routes
 router.post('/booking/create', bookingController.createBooking);
@@ -171,6 +173,7 @@ router.get('/faq/getAll', faqController.getAllFAQ);
 router.put('/faq/update/:id', faqController.updateFAQbyId);
 router.delete('/faq/delete/:id', faqController.deleteFAQbyId);
 router.get('/faq/five', faqController.get5Faq);
+router.patch('/faq/toggle-active/:id', faqController.updateActive);
 
 // Admin Dashboard
 router.get('/dashboard/admin/summary', adminDashboardController.summary);
@@ -260,5 +263,7 @@ router.delete('/landing/delete/:id', newLandingPage.deleteLanding);
 // refund
 router.post('/booking/refund/calculate', bookingController.getRefundAmount);
 router.patch('/booking/refund/toggle-approval/:id', bookingController.patchRefundApproved);
+
+// active routes
 
 module.exports = router;
