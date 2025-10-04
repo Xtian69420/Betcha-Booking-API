@@ -39,14 +39,14 @@ exports.createBooking = async (req, res) => {
 
     const existingBookings = await booking.find({ 
       propertyId,
-      status: { $nin: ['Cancel', 'cancel', 'Cancelled'] } // Exclude cancelled bookings
+      status: { $nin: ['Cancel', 'cancel', 'Cancelled'] } 
     });
 
     const allBookedDates = existingBookings.flatMap(b =>
       b.datesOfBooking.map(d => d.toISOString().slice(0, 10))
     );
     const allMaintenanceDates = maintenance
-      .filter(m => m.status !== 'Deactivated') // Exclude deactivated maintenance
+      .filter(m => m.status !== 'Deactivated')
       .flatMap(m => m.dates.map(d => d.toISOString().slice(0, 10)));
 
     const conflictDates = datesOfBooking.filter(date =>
@@ -104,12 +104,11 @@ exports.createBooking = async (req, res) => {
       timeOut
     });
 
-    // Explicitly set status to Cancel after creation
     newBooking.status = 'Cancel';
 
-    console.log('Booking before save:', newBooking.status); // Debug log
+    console.log('Booking before save:', newBooking.status); 
     await newBooking.save();
-    console.log('Booking after save:', newBooking.status); // Debug log
+    console.log('Booking after save:', newBooking.status);
 
     res.status(201).json({
       message: 'Booking created successfully.',
@@ -230,7 +229,7 @@ exports.getBookingsByPropertyId = async (req, res) => {
 };
 
 const guest = require('../models/guestModel');
-// Reservation Payment
+
 exports.reservationPayment = async (req, res) => {
   try {
     const { id } = req.params;
@@ -270,7 +269,6 @@ exports.reservationPayment = async (req, res) => {
   }
 };
 
-// Package Payment
 exports.packagePayment = async (req, res) => {
   try {
     const { id } = req.params;
@@ -310,7 +308,6 @@ exports.packagePayment = async (req, res) => {
   }
 };
 
-// Full Payment
 exports.fullPayment = async (req, res) => {
   try {
     const { id } = req.params;

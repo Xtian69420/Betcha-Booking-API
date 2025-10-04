@@ -191,7 +191,6 @@ exports.updateActive = async (req, res) => {
       return res.status(404).json({ message: 'Payment method not found' });
     }
 
-    // Toggle the active status
     payment.active = !payment.active;
     await payment.save();
 

@@ -163,7 +163,7 @@ exports.createMessageInTicket = async (req, res) => {
 
     const userName = `${user.firstname} ${user.lastname}`;
 
-    const ticket = await Tk.findById(id); // fix here
+    const ticket = await Tk.findById(id); 
     if (!ticket) {
       return res.status(404).json({ message: 'Ticket not found.' });
     }

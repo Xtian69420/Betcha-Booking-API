@@ -474,7 +474,7 @@ exports.generateWeekSummary = async (req, res) => {
       });
     });
 
-    const dailyColumnWidths = [120, 70, 70, 70, 70, 70, 70, 70]; // Property Name + 7 days
+    const dailyColumnWidths = [120, 70, 70, 70, 70, 70, 70, 70]; 
     const dailyTableWidth = dailyColumnWidths.reduce((a, b) => a + b, 0);
     const dailyPageWidth = doc.page.width - doc.page.margins.left - doc.page.margins.right;
     const dailyTableX = doc.page.margins.left + (dailyPageWidth - dailyTableWidth) / 2;

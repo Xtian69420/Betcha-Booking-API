@@ -126,7 +126,6 @@ exports.updateGuest = async (req, res) => {
       }
     }
 
-    // Hash password if it's being updated
     if (updateFields.password) {
       updateFields.password = await bcrypt.hash(updateFields.password, 10);
     }
@@ -141,7 +140,6 @@ exports.updateGuest = async (req, res) => {
       return res.status(404).json({ message: 'Guest not found' });
     }
 
-    // Remove password from response for security
     const { password: _, ...safeGuest } = updatedGuest.toObject();
 
     res.status(200).json({ message: 'Guest updated successfully', guest: safeGuest });

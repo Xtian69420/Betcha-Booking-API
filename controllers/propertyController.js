@@ -531,13 +531,11 @@ exports.updateMaintenanceByDates = async (req, res) => {
       return res.status(404).json({ message: 'Property not found.' });
     }
 
-    // Normalize date strings to yyyy-mm-dd
     const normalize = dateArr => dateArr.map(d => new Date(d).toISOString().split('T')[0]);
 
     const formattedOriginal = normalize(originalDates);
     const formattedNew = normalize(newDates);
 
-    // Find the target maintenance entry
     const targetIndex = property.maintenance.findIndex(entry => {
       const entryDates = normalize(entry.dates);
       return entryDates.length === formattedOriginal.length &&
@@ -548,7 +546,6 @@ exports.updateMaintenanceByDates = async (req, res) => {
       return res.status(404).json({ message: 'Maintenance entry with the specified dates not found.' });
     }
 
-    // Check for booking conflicts
     const bookings = await Booking.find({ propertyId });
     const bookedDates = bookings.flatMap(b =>
       b.datesOfBooking.map(d => new Date(d).toISOString().split('T')[0])
@@ -562,7 +559,6 @@ exports.updateMaintenanceByDates = async (req, res) => {
       });
     }
 
-    // Update maintenance entry
     property.maintenance[targetIndex].dates = newDates;
     if (status) property.maintenance[targetIndex].status = status;
 

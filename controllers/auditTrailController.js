@@ -10,7 +10,6 @@ exports.createAudit = async (req, res) => {
   try {
     const { userId, userType, activity } = req.body;
 
-    // Detailed validation
     if (!userId) {
       return res.status(400).json({ message: 'userId is required.' });
     }
@@ -21,20 +20,17 @@ exports.createAudit = async (req, res) => {
       return res.status(400).json({ message: 'activity is required.' });
     }
 
-    // Validate userType format
     if (!['Guest', 'Admin', 'Employee'].includes(userType)) {
       return res.status(400).json({ 
         message: 'Invalid userType. Must be one of: Guest, Admin, Employee' 
       });
     }
 
-    // Handle both string IDs and ObjectIds
     let validUserId = userId;
     if (typeof userId === 'string' && userId.trim() !== '') {
-      // If it's a non-empty string, use it as is
+
       validUserId = userId.trim();
     } else if (mongoose.Types.ObjectId.isValid(userId)) {
-      // If it's a valid ObjectId, convert it
       validUserId = new mongoose.Types.ObjectId(userId);
     }
 

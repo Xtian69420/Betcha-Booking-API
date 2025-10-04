@@ -63,13 +63,12 @@ exports.createEmployee = async (req, res) => {
       fs.unlinkSync(req.file.path);
     }
 
-    // Parse and clean up properties data
     let cleanedProperties;
     try {
       if (typeof properties === 'string') {
-        // Handle stringified array
+
         cleanedProperties = JSON.parse(properties);
-        // Handle nested array if needed
+
         if (Array.isArray(cleanedProperties[0])) {
           cleanedProperties = cleanedProperties[0];
         }
@@ -127,7 +126,6 @@ exports.updateEmployee = async (req, res) => {
       }
     }
 
-    // Hash password if it's being updated
     if (updateFields.password) {
       updateFields.password = await bcrypt.hash(updateFields.password, 10);
     }
@@ -140,7 +138,6 @@ exports.updateEmployee = async (req, res) => {
 
     if (!updatedEmployee) return res.status(404).json({ message: 'Employee not found' });
 
-    // Remove password from response for security
     const { password: _, ...safeEmployee } = updatedEmployee.toObject();
 
     res.status(200).json({ message: 'Employee updated successfully', employee: safeEmployee });

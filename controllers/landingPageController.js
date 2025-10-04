@@ -59,7 +59,6 @@ exports.createLanding = async (req, res) => {
       return res.status(400).json({ message: 'Image is required.' });
     }
 
-    // ✅ Handle featured field properly (parse JSON if stringified)
     let parsedFeatured = [];
     if (featured) {
       try {

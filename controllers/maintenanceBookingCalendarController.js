@@ -109,7 +109,7 @@ exports.getCalendarForMultiplePropertyById = async (req, res) => {
 
 exports.getAllCalendarForAllProperties = async (req, res) => {
   try {
-    const allProperties = await Property.find(); // get all properties
+    const allProperties = await Property.find(); 
 
     const calendar = [];
 
