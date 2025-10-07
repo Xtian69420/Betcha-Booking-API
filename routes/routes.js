@@ -264,6 +264,13 @@ router.delete('/landing/delete/:id', newLandingPage.deleteLanding);
 router.post('/booking/refund/calculate', bookingController.getRefundAmount);
 router.patch('/booking/refund/toggle-approval/:id', bookingController.patchRefundApproved);
 
-// active routes
+
+const newPsrController = require('../controllers/newEmployeePsr');
+// new psr methods
+router.post('/new-psr/week-summary', newPsrController.generateWeekSummary);
+router.post('/new-psr/month-summary', newPsrController.generateMonthSummary);
+router.post('/new-psr/quarter-summary', newPsrController.generateQuarterSummary);
+router.post('/new-psr/semi-annual-summary', newPsrController.generateSemiAnnualSummary);
+router.post('/new-psr/annual-summary', newPsrController.generateAnnualSummary);
 
 module.exports = router;
