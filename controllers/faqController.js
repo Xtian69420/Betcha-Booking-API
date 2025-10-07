@@ -83,7 +83,13 @@ exports.getAllFAQ = async (req, res) => {
 
 exports.get5Faq = async (req, res) => {
   try {
-    const listFiveFaq = await Faq.find({ active: true }).limit(5); 
+    // Query for FAQs where active is true OR undefined (for backwards compatibility)
+    const listFiveFaq = await Faq.find({ 
+      $or: [
+        { active: true },
+        { active: { $exists: false } }
+      ]
+    }).limit(5); 
 
     if (!listFiveFaq || listFiveFaq.length === 0) {
       return res.status(404).json({ message: "No Active FAQ Found" });
