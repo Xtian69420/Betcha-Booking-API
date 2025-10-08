@@ -233,6 +233,7 @@ router.post('/ts/transactionsByProperties', tsController.getAllPendingAndComplet
 // PM
 router.post('/pm/bookings/byDateAndProperties', employeePMController.getBookingSpecificDateAndProperties);
 router.post('/pm/bookings/checkinToday', employeePMController.getCheckInToday);
+router.post('/pm/bookings/checkoutToday', employeePMController.getCheckOutToday);
 router.patch('/guest/addWarning/:id', guestController.addWarning);
 
 // chat bot
