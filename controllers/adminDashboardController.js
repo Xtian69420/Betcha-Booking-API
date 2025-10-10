@@ -73,13 +73,13 @@ exports.rankProperty = async (req, res) => {
       }
     ]);
 
-    const topProperty = {};
+    const topProperty = [];
 
     for (let entry of earnings) {
       const propertyInfo = await Property.findById(entry._id).lean(); 
       if (propertyInfo) {
         propertyInfo.earned = entry.earned;
-        topProperty[`${propertyInfo.propertyName}`] = propertyInfo;
+        topProperty.push(propertyInfo);
       }
     }
 
