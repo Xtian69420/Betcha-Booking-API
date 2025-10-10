@@ -58,8 +58,15 @@ exports.rankProperty = async (req, res) => {
     const earnings = await Booking.aggregate([
       {
         $match: {
-          status: { $nin: ['Cancel', 'Pending Payment'] },
-          createdAt: { $gte: startDate, $lte: endDate }
+          status: 'Completed',
+          $or: [
+            { checkIn: { $gte: startDate, $lte: endDate } },
+            { checkOut: { $gte: startDate, $lte: endDate } },
+            { 
+              checkIn: { $lte: startDate },
+              checkOut: { $gte: endDate }
+            }
+          ]
         }
       },
       {
