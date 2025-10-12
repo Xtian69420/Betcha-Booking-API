@@ -199,7 +199,7 @@ exports.updateStatusById = async (req, res) => {
       return res.status(400).json({ message: 'Status is required.' });
     }
 
-    const validStatuses = ['queue', 'ongoing', 'resolved', 'closed'];
+    const validStatuses = ['queue', 'ongoing', 'resolved', 'closed', 'requesting refund'];
     if (!validStatuses.includes(status.toLowerCase())) {
       return res.status(400).json({ message: `Invalid status. Valid statuses: ${validStatuses.join(', ')}` });
     }
