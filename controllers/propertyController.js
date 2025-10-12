@@ -590,31 +590,31 @@ exports.deleteMaintenanceByDates = async (req, res) => {
 
     const normalizedToDelete = dates.map(d => new Date(d).toISOString().split('T')[0]);
 
-    // Option 1: Exact match (all dates must match exactly)
-    let index = property.maintenance.findIndex(entry => {
+    // Find the maintenance entry that contains the dates to delete
+    const index = property.maintenance.findIndex(entry => {
       const entryDates = entry.dates.map(d => new Date(d).toISOString().split('T')[0]);
-      return entryDates.length === normalizedToDelete.length &&
-             entryDates.every(d => normalizedToDelete.includes(d)) &&
-             normalizedToDelete.every(d => entryDates.includes(d));
+      return normalizedToDelete.some(d => entryDates.includes(d));
     });
-
-    // Option 2: If no exact match, find entry that contains any of the provided dates
-    if (index === -1) {
-      index = property.maintenance.findIndex(entry => {
-        const entryDates = entry.dates.map(d => new Date(d).toISOString().split('T')[0]);
-        return normalizedToDelete.some(d => entryDates.includes(d));
-      });
-    }
 
     if (index === -1) {
       return res.status(404).json({ message: 'Matching maintenance entry not found.' });
     }
 
-    property.maintenance.splice(index, 1);
+    // Remove only the specific dates from the entry
+    property.maintenance[index].dates = property.maintenance[index].dates.filter(date => {
+      const normalizedDate = new Date(date).toISOString().split('T')[0];
+      return !normalizedToDelete.includes(normalizedDate);
+    });
+
+    // If all dates are removed, delete the entire entry
+    if (property.maintenance[index].dates.length === 0) {
+      property.maintenance.splice(index, 1);
+    }
+
     await property.save();
 
     res.status(200).json({
-      message: 'Maintenance entry deleted successfully.',
+      message: 'Maintenance date(s) deleted successfully.',
       maintenance: property.maintenance
     });
 
