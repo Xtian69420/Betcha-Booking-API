@@ -6,7 +6,7 @@ const TKSchema = new mongoose.Schema({
   customerServiceAgentId: { type: String, required: true },
   status: {
     type: String,
-    enum: ['queue', 'in-progress', 'resolved', 'closed'],
+    enum: ['queue', 'in-progress', 'requesting refund', 'resolved', 'closed'],
     default: 'queue'
   },
   senderId: { type: String, required: true },
