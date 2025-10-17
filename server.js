@@ -11,20 +11,17 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Ensure upload directory exists
 const uploadDir = path.join(__dirname, 'uploads');
 if (!fs.existsSync(uploadDir)) {
   fs.mkdirSync(uploadDir);
 }
 
-// Serve exports directory statically
 const exportsDir = path.join(__dirname, 'exports');
 if (!fs.existsSync(exportsDir)) {
   fs.mkdirSync(exportsDir);
 }
 app.use('/exports', express.static(exportsDir));
 
-// Connect to MongoDB
 const dburl = process.env.DATABASE_URL;
 mongoose.connect(dburl, {
   useNewUrlParser: true,
