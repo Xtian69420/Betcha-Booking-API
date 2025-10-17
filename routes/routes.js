@@ -216,6 +216,7 @@ router.get('/audit/search', auditTrailController.getAuditBySearchQuery);
 router.get('/calendar/byProperty/:propertyId', maintenanceBookingCalendarController.getCalendarByPropertyId);
 router.post('/calendar/byProperties', maintenanceBookingCalendarController.getCalendarForMultiplePropertyById);
 router.get('/calendar/getAllProperties', maintenanceBookingCalendarController.getAllCalendarForAllProperties);
+router.post('/getProperty/filter/citydate', maintenanceBookingCalendarController.getAllPropertiesAvailableOn);
 
 // PSR
 router.get('/psr/peakBooking', psrController.mostPeakBookingProperty);
@@ -264,6 +265,9 @@ router.delete('/landing/delete/:id', newLandingPage.deleteLanding);
 // refund
 router.post('/booking/refund/calculate', bookingController.getRefundAmount);
 router.patch('/booking/refund/toggle-approval/:id', bookingController.patchRefundApproved);
+
+// transfer property
+router.patch('/booking/transfer-property', bookingController.transferProperty);
 
 
 const newPsrController = require('../controllers/newEmployeePsr');

@@ -4,11 +4,16 @@ const bookingSchema = new mongoose.Schema({
   transNo: { type: String, required: true },
   propertyName: { type: String, required: true },
   propertyId: { type: String, required: true },
+  transfer: {
+    isTransferred: { type: Boolean, default: false },
+    propertyId: { type: String },
+    propertyName : { type: String},
+  },
   guestId: { type: String, required: true },
   guestName: { type: String, required: true },
   status: {
     type: String,
-    enum: ['Pending Payment', 'Reserved', 'Fully-Paid', 'Checked-In', 'Checked-Out', 'Completed', 'Cancel'],
+    enum: ['Pending Payment', 'Reserved', 'Fully-Paid', 'Checked-In', 'Checked-Out', 'Completed', 'Cancel', 'Transferred'],
     default: 'Cancel'
   },
   paymentCategory: { type: String, default: ''},

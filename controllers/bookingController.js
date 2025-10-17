@@ -419,7 +419,8 @@ exports.getBookingsByGuestId = async (req, res) => {
       'Reserved',
       'Fully-Paid',
       'Checked-In',
-      'Checked-Out'
+      'Checked-Out',
+      'Transferred'
     ];
     const completedStatuses = ['Completed', 'Cancel'];
 
@@ -460,7 +461,7 @@ exports.updateReservationPaymentStatus = async (req, res) => {
 
     const validBookingStatuses = [
       'Pending Payment', 'Reserved', 'Fully-Paid',
-      'Checked-In', 'Checked-Out', 'Completed', 'Cancel'
+      'Checked-In', 'Transferred', 'Checked-Out', 'Completed', 'Cancel'
     ];
     if (!validBookingStatuses.includes(bookingStatus)) {
       return res.status(400).json({ message: 'Invalid bookingStatus value.' });
@@ -506,7 +507,7 @@ exports.updatePackagePaymentStatus = async (req, res) => {
 
     const validBookingStatuses = [
       'Pending Payment', 'Reserved', 'Fully-Paid',
-      'Checked-In', 'Checked-Out', 'Completed', 'Cancel'
+      'Checked-In', 'Transferred', 'Checked-Out', 'Completed', 'Cancel'
     ];
     if (!validBookingStatuses.includes(bookingStatus)) {
       return res.status(400).json({ message: 'Invalid bookingStatus value.' });
@@ -552,7 +553,7 @@ exports.updateFullPaymentStatus = async (req, res) => {
 
     const validBookingStatuses = [
       'Pending Payment', 'Reserved', 'Fully-Paid',
-      'Checked-In', 'Checked-Out', 'Completed', 'Cancel'
+      'Checked-In', 'Transferred', 'Checked-Out', 'Completed', 'Cancel'
     ];
     if (!validBookingStatuses.includes(bookingStatus)) {
       return res.status(400).json({ message: 'Invalid bookingStatus value.' });
@@ -602,9 +603,18 @@ exports.getBookingById = async (req, res) => {
       return res.status(404).json({ message: 'Booking not found.' });
     }
 
+    // Get property details to include city and address
+    const property = await Property.findById(foundBooking.propertyId);
+
+    const bookingWithPropertyDetails = {
+      ...foundBooking.toObject(),
+      propertyCity: property?.city || 'N/A',
+      propertyAddress: property?.address || 'N/A'
+    };
+
     res.status(200).json({
       message: 'Booking retrieved successfully.',
-      booking: foundBooking
+      booking: bookingWithPropertyDetails
     });
     
   } catch (error) {
@@ -913,5 +923,166 @@ exports.patchRefundApproved = async (req, res) => {
   } catch (error) {
     console.error('Error updating refund approval status:', error);
     res.status(500).json({ message: 'Internal server error.' });
+  }
+}
+
+exports.transferProperty = async (req, res) => {
+  try {
+    const { bookingId, transferToPropertyId, checkOut } = req.body;
+
+    if (!bookingId) {
+      return res.status(400).json({ message: 'bookingId is required.' });
+    }
+
+    if (!transferToPropertyId) {
+      return res.status(400).json({ message: 'transferToPropertyId is required.' });
+    }
+
+    if (!checkOut) {
+      return res.status(400).json({ message: 'checkOut date is required.' });
+    }
+
+    const checkOutDate = new Date(checkOut);
+    if (isNaN(checkOutDate.getTime())) {
+      return res.status(400).json({ message: 'Invalid checkOut date format.' });
+    }
+
+    const moment = require('moment-timezone');
+    const today = moment.tz('Asia/Manila').startOf('day').toDate();
+
+    if (checkOutDate < today) {
+      return res.status(400).json({ message: 'checkOut date cannot be in the past.' });
+    }
+
+    const foundBooking = await booking.findById(bookingId);
+    if (!foundBooking) {
+      return res.status(404).json({ message: 'Booking not found.' });
+    }
+
+    if (foundBooking.transfer.isTransferred) {
+      return res.status(400).json({ 
+        message: 'This booking has already been transferred.',
+        transferredTo: {
+          propertyId: foundBooking.transfer.propertyId,
+          propertyName: foundBooking.transfer.propertyName
+        }
+      });
+    }
+
+    const transferProperty = await Property.findById(transferToPropertyId);
+    if (!transferProperty) {
+      return res.status(404).json({ message: 'Transfer property not found.' });
+    }
+
+    if (transferProperty.status !== 'Active') {
+      return res.status(400).json({ 
+        message: `Cannot transfer to this property. Property status is ${transferProperty.status}.` 
+      });
+    }
+
+    const dateRange = [];
+    let currentDate = new Date(today);
+    const endDate = new Date(checkOutDate);
+
+    while (currentDate <= endDate) {
+      dateRange.push(new Date(currentDate));
+      currentDate.setDate(currentDate.getDate() + 1);
+    }
+
+    // Normalize dates to YYYY-MM-DD format for comparison
+    const dateRangeNormalized = dateRange.map(date => date.toISOString().slice(0, 10));
+
+    // Get ALL existing maintenance dates to prevent duplicates
+    const existingMaintenanceDates = transferProperty.maintenance
+      .flatMap(m => m.dates.map(d => d.toISOString().slice(0, 10)));
+
+    // Check for duplicate maintenance dates
+    const duplicateMaintenance = dateRangeNormalized.filter(date =>
+      existingMaintenanceDates.includes(date)
+    );
+
+    if (duplicateMaintenance.length > 0) {
+      return res.status(400).json({
+        message: 'Some of the dates already exist in the transfer property maintenance.',
+        duplicateDates: duplicateMaintenance
+      });
+    }
+
+    // Check for conflicts with existing bookings
+    const transferPropertyBookings = await booking.find({
+      propertyId: transferToPropertyId,
+      status: { $nin: ['Cancel', 'Cancelled', 'Transferred'] }
+    });
+
+    const transferPropertyBookedDates = transferPropertyBookings.flatMap(b =>
+      b.datesOfBooking.map(d => d.toISOString().slice(0, 10))
+    );
+
+    const bookingConflicts = dateRangeNormalized.filter(date =>
+      transferPropertyBookedDates.includes(date)
+    );
+
+    if (bookingConflicts.length > 0) {
+      return res.status(400).json({
+        message: 'The transfer property has conflicting bookings during the specified date range.',
+        conflictDates: bookingConflicts
+      });
+    }
+
+    const updatedBooking = await booking.findByIdAndUpdate(
+      bookingId,
+      {
+        $set: {
+          'transfer.isTransferred': true,
+          'transfer.propertyId': transferToPropertyId,
+          'transfer.propertyName': transferProperty.name,
+          status: 'Transferred'
+        }
+      },
+      { new: true, runValidators: true }
+    );
+
+    const maintenanceEntry = {
+      dates: dateRange,
+      status: 'Active'
+    };
+
+    const updatedProperty = await Property.findByIdAndUpdate(
+      transferToPropertyId,
+      {
+        $push: {
+          maintenance: maintenanceEntry
+        }
+      },
+      { new: true, runValidators: true }
+    );
+
+    const todayFormatted = moment(today).format('YYYY-MM-DD');
+    const checkOutFormatted = moment(checkOutDate).format('YYYY-MM-DD');
+
+    res.status(200).json({
+      message: 'Booking transferred successfully.',
+      booking: {
+        transNo: updatedBooking.transNo,
+        originalProperty: {
+          propertyId: updatedBooking.propertyId,
+          propertyName: updatedBooking.propertyName
+        },
+        transferredTo: {
+          propertyId: updatedBooking.transfer.propertyId,
+          propertyName: updatedBooking.transfer.propertyName
+        },
+        status: updatedBooking.status,
+        maintenancePeriod: {
+          from: todayFormatted,
+          to: checkOutFormatted,
+          totalDays: dateRange.length
+        }
+      }
+    });
+
+  } catch (error) {
+    console.error('Error transferring property:', error);
+    res.status(500).json({ message: 'Internal server error.', error: error.message });
   }
 }
