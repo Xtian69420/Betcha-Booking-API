@@ -14,7 +14,7 @@ exports.getAllPendingAndCompletedTransactionByProperties = async (req, res) => {
 
     const bookings = await Booking.find({ propertyId: { $in: ids } }).lean();
 
-    const pendingStatuses = ['Pending Payment', 'Reserved', 'Fully-Paid', 'Checked-In', 'Checked-Out'];
+    const pendingStatuses = ['Pending Payment', 'Reserved', 'Fully-Paid', 'Checked-In', 'Checked-Out', 'Transferred'];
     const completedStatuses = ['Completed', 'Cancel'];
 
     const formatBooking = (booking) => ({
