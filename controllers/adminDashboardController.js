@@ -18,23 +18,45 @@ exports.summary = async (req, res) => {
     const [weekIncome, monthIncome, yearIncome] = await Promise.all([
       Booking.aggregate([
         { $match: { ...matchCondition, createdAt: { $gte: startOfWeek } } },
-        { $group: { _id: null, total: { $sum: "$totalFee" } } }
+        { 
+          $group: { 
+            _id: null, 
+            totalEarnings: { $sum: "$totalFee" },
+            totalRefunds: { $sum: "$refund.refundAmount" }
+          } 
+        }
       ]),
       Booking.aggregate([
         { $match: { ...matchCondition, createdAt: { $gte: startOfMonth } } },
-        { $group: { _id: null, total: { $sum: "$totalFee" } } }
+        { 
+          $group: { 
+            _id: null, 
+            totalEarnings: { $sum: "$totalFee" },
+            totalRefunds: { $sum: "$refund.refundAmount" }
+          } 
+        }
       ]),
       Booking.aggregate([
         { $match: { ...matchCondition, createdAt: { $gte: startOfYear } } },
-        { $group: { _id: null, total: { $sum: "$totalFee" } } }
+        { 
+          $group: { 
+            _id: null, 
+            totalEarnings: { $sum: "$totalFee" },
+            totalRefunds: { $sum: "$refund.refundAmount" }
+          } 
+        }
       ])
     ]);
 
+    const weekNet = (weekIncome[0]?.totalEarnings || 0) - (weekIncome[0]?.totalRefunds || 0);
+    const monthNet = (monthIncome[0]?.totalEarnings || 0) - (monthIncome[0]?.totalRefunds || 0);
+    const yearNet = (yearIncome[0]?.totalEarnings || 0) - (yearIncome[0]?.totalRefunds || 0);
+
     res.status(200).json({
       summary: {
-        TotalEarningsThisWeek: weekIncome[0]?.total || 0,
-        TotalEarningsThisMonth: monthIncome[0]?.total || 0,
-        TotalEarningsThisYear: yearIncome[0]?.total || 0
+        TotalEarningsThisWeek: weekNet,
+        TotalEarningsThisMonth: monthNet,
+        TotalEarningsThisYear: yearNet
       }
     });
   } catch (error) {
