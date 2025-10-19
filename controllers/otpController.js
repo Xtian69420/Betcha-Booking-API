@@ -554,3 +554,96 @@ exports.CheckInTodayMessage = async (req, res) => {
     res.status(500).json({ message: 'Failed to send check-in reminder email', error: error.message });
   }
 };
+
+exports.testMail = async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    if (!email) {
+      return res.status(400).json({ message: 'Email is required' });
+    }
+
+    // Email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return res.status(400).json({ message: 'Invalid email format' });
+    }
+
+    await sgMail.send({
+      to: email,
+      from: {
+        name: 'Betcha Booking',
+        email: 'betcha-booking@outlook.com'
+      },
+      subject: 'Test Email - Betcha Booking System',
+      html: `
+        <html>
+          <body style="font-family: Arial, sans-serif; background-color: #f4f7fa; margin: 0; padding: 0;">
+            <table role="presentation" style="width: 100%; padding: 20px; background-color: #ffffff; border-radius: 8px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); max-width: 600px; margin: 30px auto;">
+              <tr>
+                <td style="padding: 20px; text-align: center; border-bottom: 2px solid #f0f0f0;">
+                  <h2 style="font-size: 24px; color: #333333; margin: 0;">Betcha Booking</h2>
+                  <p style="font-size: 16px; color: #777777; margin-top: 5px;">Email Test Successful! ✅</p>
+                </td>
+              </tr>
+              <tr>
+                <td style="padding: 20px; text-align: center;">
+                  <h3 style="font-size: 22px; color: #4CAF50; margin-bottom: 20px;">Email System Working Perfectly!</h3>
+                  <p style="font-size: 16px; color: #555555; margin: 0;">
+                    This is a test email from Betcha Booking System.
+                  </p>
+                  <p style="font-size: 16px; color: #555555; margin-top: 15px;">
+                    If you received this message, it means your email configuration is working correctly.
+                  </p>
+                  <div style="margin: 30px 0; padding: 20px; background-color: #f9f9f9; border-radius: 8px;">
+                    <p style="font-size: 14px; color: #666; margin: 5px 0;">
+                      <strong>Sent to:</strong> ${email}
+                    </p>
+                    <p style="font-size: 14px; color: #666; margin: 5px 0;">
+                      <strong>Date:</strong> ${new Date().toLocaleString('en-US', { 
+                        weekday: 'long', 
+                        year: 'numeric', 
+                        month: 'long', 
+                        day: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                      })}
+                    </p>
+                    <p style="font-size: 14px; color: #666; margin: 5px 0;">
+                      <strong>Status:</strong> <span style="color: #4CAF50;">✓ Delivered</span>
+                    </p>
+                  </div>
+                  <p style="font-size: 14px; color: #777777; margin-top: 20px;">
+                    This is an automated test message. No action is required.
+                  </p>
+                </td>
+              </tr>
+              <tr>
+                <td style="padding: 20px; text-align: center; background-color: #f4f7fa; border-top: 2px solid #f0f0f0;">
+                  <p style="font-size: 12px; color: #777777; margin: 0;">Betcha Booking © 2025</p>
+                  <p style="font-size: 12px; color: #777777; margin: 5px 0;">
+                    <a href="https://beta-betcha-booking.netlify.app/" style="color: #4CAF50; text-decoration: none;">Visit Our Website</a>
+                  </p>
+                </td>
+              </tr>
+            </table>
+          </body>
+        </html>
+      `
+    });
+
+    res.status(200).json({ 
+      message: 'Test email sent successfully!',
+      sentTo: email,
+      timestamp: new Date().toISOString()
+    });
+    
+    console.log('Test email sent to:', email);
+  } catch (error) {
+    console.error('Test Email Error:', error);
+    res.status(500).json({ 
+      message: 'Failed to send test email', 
+      error: error.message 
+    });
+  }
+}

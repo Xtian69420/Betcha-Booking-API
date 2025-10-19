@@ -89,6 +89,7 @@ router.post('/otp/register', otpController.sendOtpRegistration);
 router.post('/otp/forgot-password', otpController.sendOtpForgotPassword);
 router.post('/otp/verify', otpController.verifyOtp);
 router.post('/otp/resend', otpController.resendOtp);
+router.post('/test-mail', otpController.testMail);
 
 // Auth routes
 router.post('/auth/login', authenticationController.Login);
