@@ -253,7 +253,8 @@ exports.AIAnalyticsData = async (req, res) => {
       topProperties,
       recentBookings,
       upcomingCheckIns,
-      activeBookingsNow
+      activeBookingsNow,
+      bookedDatesByProperty
     ] = await Promise.all([
       // Guest Statistics
       Guest.aggregate([
@@ -400,7 +401,48 @@ exports.AIAnalyticsData = async (req, res) => {
         status: { $nin: ['Cancel', 'Completed', 'Pending Payment'] },
         checkIn: { $lte: now },
         checkOut: { $gte: now }
-      })
+      }),
+
+      // Booked Dates per Property (excluding Cancel and Completed)
+      Booking.aggregate([
+        {
+          $match: {
+            status: { $nin: ['Cancel', 'Completed'] }
+          }
+        },
+        {
+          $group: {
+            _id: '$propertyId',
+            propertyName: { $first: '$propertyName' },
+            bookings: {
+              $push: {
+                transNo: '$transNo',
+                guestName: '$guestName',
+                status: '$status',
+                checkIn: '$checkIn',
+                checkOut: '$checkOut',
+                datesOfBooking: '$datesOfBooking'
+              }
+            },
+            allBookedDates: { $push: '$datesOfBooking' }
+          }
+        },
+        {
+          $project: {
+            _id: 1,
+            propertyName: 1,
+            bookings: 1,
+            bookedDates: {
+              $reduce: {
+                input: '$allBookedDates',
+                initialValue: [],
+                in: { $concatArrays: ['$$value', '$$this'] }
+              }
+            }
+          }
+        },
+        { $sort: { propertyName: 1 } }
+      ])
     ]);
 
     // Format earnings
@@ -472,6 +514,13 @@ exports.AIAnalyticsData = async (req, res) => {
         recentBookings: recentBookings,
         upcomingCheckIns: upcomingCheckIns
       },
+      propertyAvailability: bookedDatesByProperty.map(property => ({
+        propertyId: property._id,
+        propertyName: property.propertyName,
+        totalActiveBookings: property.bookings.length,
+        bookedDates: property.bookedDates,
+        bookingDetails: property.bookings
+      })),
       metadata: {
         dateRanges: {
           week: { start: startOfWeek, end: now },
