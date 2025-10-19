@@ -21,8 +21,7 @@ exports.summary = async (req, res) => {
         { 
           $group: { 
             _id: null, 
-            totalEarnings: { $sum: "$totalFee" },
-            totalRefunds: { $sum: "$refund.refundAmount" }
+            totalEarnings: { $sum: "$totalFee" }
           } 
         }
       ]),
@@ -31,8 +30,7 @@ exports.summary = async (req, res) => {
         { 
           $group: { 
             _id: null, 
-            totalEarnings: { $sum: "$totalFee" },
-            totalRefunds: { $sum: "$refund.refundAmount" }
+            totalEarnings: { $sum: "$totalFee" }
           } 
         }
       ]),
@@ -41,22 +39,17 @@ exports.summary = async (req, res) => {
         { 
           $group: { 
             _id: null, 
-            totalEarnings: { $sum: "$totalFee" },
-            totalRefunds: { $sum: "$refund.refundAmount" }
+            totalEarnings: { $sum: "$totalFee" }
           } 
         }
       ])
     ]);
 
-    const weekNet = (weekIncome[0]?.totalEarnings || 0) - (weekIncome[0]?.totalRefunds || 0);
-    const monthNet = (monthIncome[0]?.totalEarnings || 0) - (monthIncome[0]?.totalRefunds || 0);
-    const yearNet = (yearIncome[0]?.totalEarnings || 0) - (yearIncome[0]?.totalRefunds || 0);
-
     res.status(200).json({
       summary: {
-        TotalEarningsThisWeek: weekNet,
-        TotalEarningsThisMonth: monthNet,
-        TotalEarningsThisYear: yearNet
+        TotalEarningsThisWeek: weekIncome[0]?.totalEarnings || 0,
+        TotalEarningsThisMonth: monthIncome[0]?.totalEarnings || 0,
+        TotalEarningsThisYear: yearIncome[0]?.totalEarnings || 0
       }
     });
   } catch (error) {
