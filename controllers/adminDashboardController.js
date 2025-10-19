@@ -248,7 +248,8 @@ exports.AIAnalyticsData = async (req, res) => {
       upcomingCheckIns,
       activeBookingsNow,
       bookedDatesByProperty,
-      allPropertiesEarnings
+      allPropertiesEarnings,
+      employeeStats
     ] = await Promise.all([
       // Guest Statistics
       Guest.aggregate([
@@ -494,6 +495,73 @@ exports.AIAnalyticsData = async (req, res) => {
           }
         },
         { $sort: { netEarnings: -1 } }
+      ]),
+
+      // Employee Statistics and Productivity
+      Employee.aggregate([
+        {
+          $facet: {
+            total: [{ $count: 'count' }],
+            active: [
+              { $match: { status: { $in: ['active', 'Active'] } } },
+              { $count: 'count' }
+            ],
+            inactive: [
+              { $match: { status: { $nin: ['active', 'Active'] } } },
+              { $count: 'count' }
+            ],
+            newThisWeek: [
+              { $match: { createdAt: { $gte: startOfWeek } } },
+              { $count: 'count' }
+            ],
+            newThisMonth: [
+              { $match: { createdAt: { $gte: startOfMonth } } },
+              { $count: 'count' }
+            ],
+            byPropertyCount: [
+              {
+                $project: {
+                  firstname: 1,
+                  lastname: 1,
+                  email: 1,
+                  status: 1,
+                  propertyCount: { $size: { $ifNull: ['$properties', []] } }
+                }
+              },
+              {
+                $group: {
+                  _id: null,
+                  avgPropertiesPerEmployee: { $avg: '$propertyCount' },
+                  maxProperties: { $max: '$propertyCount' },
+                  minProperties: { $min: '$propertyCount' }
+                }
+              }
+            ],
+            topEmployees: [
+              { $match: { status: { $in: ['active', 'Active'] } } },
+              {
+                $lookup: {
+                  from: 'roles_tb',
+                  localField: 'role',
+                  foreignField: '_id',
+                  as: 'roleDetails'
+                }
+              },
+              {
+                $project: {
+                  _id: 1,
+                  firstname: 1,
+                  lastname: 1,
+                  email: 1,
+                  propertyCount: { $size: { $ifNull: ['$properties', []] } },
+                  roles: '$roleDetails.name'
+                }
+              },
+              { $sort: { propertyCount: -1 } },
+              { $limit: 5 }
+            ]
+          }
+        }
       ])
     ]);
 
@@ -575,6 +643,19 @@ exports.AIAnalyticsData = async (req, res) => {
             totalAmount: refundData[0].totalAmount[0]?.total || 0,
             thisMonth: refundData[0].thisMonth[0]?.count || 0,
             thisMonthAmount: refundData[0].thisMonthAmount[0]?.total || 0
+          },
+          employees: {
+            total: employeeStats[0].total[0]?.count || 0,
+            active: employeeStats[0].active[0]?.count || 0,
+            inactive: employeeStats[0].inactive[0]?.count || 0,
+            newThisWeek: employeeStats[0].newThisWeek[0]?.count || 0,
+            newThisMonth: employeeStats[0].newThisMonth[0]?.count || 0,
+            productivity: {
+              avgPropertiesPerEmployee: employeeStats[0].byPropertyCount[0]?.avgPropertiesPerEmployee || 0,
+              maxPropertiesAssigned: employeeStats[0].byPropertyCount[0]?.maxProperties || 0,
+              minPropertiesAssigned: employeeStats[0].byPropertyCount[0]?.minProperties || 0
+            },
+            topPerformers: employeeStats[0].topEmployees || []
           }
         },
         insights: {
