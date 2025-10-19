@@ -189,6 +189,9 @@ router.get('/dashboard/admin/booking/activeCount', adminDashboardController.Book
 router.get('/dashboard/admin/booking/todayCount', adminDashboardController.BookingCountToday);
 router.get('/dashboard/admin/property/availableToday', adminDashboardController.AvailableRoomToday);
 
+// AI Analytics - Comprehensive data feed for AI chat
+router.get('/analytics/ai-feed', adminDashboardController.AIAnalyticsData);
+
 // Landing page
 //router.post('/landing/create', upload.single('file'), landingController.createLanding);
 //router.put('/landing/update/:id', upload.single('file'), landingController.updateLanding);
