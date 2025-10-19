@@ -453,79 +453,81 @@ exports.AIAnalyticsData = async (req, res) => {
 
     // Build comprehensive response
     const analyticsData = {
-      generatedAt: now,
-      summary: {
-        guests: {
-          total: guestStats[0].total[0]?.count || 0,
-          active: guestStats[0].active[0]?.count || 0,
-          archived: guestStats[0].archived[0]?.count || 0,
-          withWarnings: guestStats[0].withWarnings[0]?.count || 0,
-          newThisWeek: guestStats[0].newThisWeek[0]?.count || 0,
-          newThisMonth: guestStats[0].newThisMonth[0]?.count || 0
-        },
-        properties: {
-          total: propertyStats[0].total[0]?.count || 0,
-          active: propertyStats[0].active[0]?.count || 0,
-          inactive: propertyStats[0].inactive[0]?.count || 0,
-          averageRating: propertyStats[0].averageRating[0]?.avgRating || 0,
-          byCategory: propertyStats[0].byCategory,
-          byCity: propertyStats[0].byCity
-        },
-        bookings: {
-          total: bookingStats[0].total[0]?.count || 0,
-          byStatus: bookingStats[0].byStatus,
-          thisWeek: bookingStats[0].thisWeek[0]?.count || 0,
-          thisMonth: bookingStats[0].thisMonth[0]?.count || 0,
-          thisYear: bookingStats[0].thisYear[0]?.count || 0,
-          cancelledThisMonth: bookingStats[0].cancelledThisMonth[0]?.count || 0,
-          activeNow: activeBookingsNow
-        },
-        earnings: {
-          week: {
-            gross: weekEarnings.gross,
-            refunds: weekEarnings.refunds,
-            net: weekEarnings.gross - weekEarnings.refunds
+      data: {
+        generatedAt: now,
+        summary: {
+          guests: {
+            total: guestStats[0].total[0]?.count || 0,
+            active: guestStats[0].active[0]?.count || 0,
+            archived: guestStats[0].archived[0]?.count || 0,
+            withWarnings: guestStats[0].withWarnings[0]?.count || 0,
+            newThisWeek: guestStats[0].newThisWeek[0]?.count || 0,
+            newThisMonth: guestStats[0].newThisMonth[0]?.count || 0
           },
-          month: {
-            gross: monthEarnings.gross,
-            refunds: monthEarnings.refunds,
-            net: monthEarnings.gross - monthEarnings.refunds
+          properties: {
+            total: propertyStats[0].total[0]?.count || 0,
+            active: propertyStats[0].active[0]?.count || 0,
+            inactive: propertyStats[0].inactive[0]?.count || 0,
+            averageRating: propertyStats[0].averageRating[0]?.avgRating || 0,
+            byCategory: propertyStats[0].byCategory,
+            byCity: propertyStats[0].byCity
           },
-          year: {
-            gross: yearEarnings.gross,
-            refunds: yearEarnings.refunds,
-            net: yearEarnings.gross - yearEarnings.refunds
+          bookings: {
+            total: bookingStats[0].total[0]?.count || 0,
+            byStatus: bookingStats[0].byStatus,
+            thisWeek: bookingStats[0].thisWeek[0]?.count || 0,
+            thisMonth: bookingStats[0].thisMonth[0]?.count || 0,
+            thisYear: bookingStats[0].thisYear[0]?.count || 0,
+            cancelledThisMonth: bookingStats[0].cancelledThisMonth[0]?.count || 0,
+            activeNow: activeBookingsNow
           },
-          allTime: {
-            gross: allTimeEarnings.gross,
-            refunds: allTimeEarnings.refunds,
-            net: allTimeEarnings.gross - allTimeEarnings.refunds
+          earnings: {
+            week: {
+              gross: weekEarnings.gross,
+              refunds: weekEarnings.refunds,
+              net: weekEarnings.gross - weekEarnings.refunds
+            },
+            month: {
+              gross: monthEarnings.gross,
+              refunds: monthEarnings.refunds,
+              net: monthEarnings.gross - monthEarnings.refunds
+            },
+            year: {
+              gross: yearEarnings.gross,
+              refunds: yearEarnings.refunds,
+              net: yearEarnings.gross - yearEarnings.refunds
+            },
+            allTime: {
+              gross: allTimeEarnings.gross,
+              refunds: allTimeEarnings.refunds,
+              net: allTimeEarnings.gross - allTimeEarnings.refunds
+            }
+          },
+          refunds: {
+            totalRequests: refundData[0].total[0]?.count || 0,
+            totalAmount: refundData[0].totalAmount[0]?.total || 0,
+            thisMonth: refundData[0].thisMonth[0]?.count || 0,
+            thisMonthAmount: refundData[0].thisMonthAmount[0]?.total || 0
           }
         },
-        refunds: {
-          totalRequests: refundData[0].total[0]?.count || 0,
-          totalAmount: refundData[0].totalAmount[0]?.total || 0,
-          thisMonth: refundData[0].thisMonth[0]?.count || 0,
-          thisMonthAmount: refundData[0].thisMonthAmount[0]?.total || 0
-        }
-      },
-      insights: {
-        topProperties: topProperties,
-        recentBookings: recentBookings,
-        upcomingCheckIns: upcomingCheckIns
-      },
-      propertyAvailability: bookedDatesByProperty.map(property => ({
-        propertyId: property._id,
-        propertyName: property.propertyName,
-        totalActiveBookings: property.bookings.length,
-        bookedDates: property.bookedDates,
-        bookingDetails: property.bookings
-      })),
-      metadata: {
-        dateRanges: {
-          week: { start: startOfWeek, end: now },
-          month: { start: startOfMonth, end: now },
-          year: { start: startOfYear, end: now }
+        insights: {
+          topProperties: topProperties,
+          recentBookings: recentBookings,
+          upcomingCheckIns: upcomingCheckIns
+        },
+        propertyAvailability: bookedDatesByProperty.map(property => ({
+          propertyId: property._id,
+          propertyName: property.propertyName,
+          totalActiveBookings: property.bookings.length,
+          bookedDates: property.bookedDates,
+          bookingDetails: property.bookings
+        })),
+        metadata: {
+          dateRanges: {
+            week: { start: startOfWeek, end: now },
+            month: { start: startOfMonth, end: now },
+            year: { start: startOfYear, end: now }
+          }
         }
       }
     };
