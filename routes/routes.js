@@ -25,6 +25,7 @@ const chatBotController = require('../controllers/chatBotController');
 const OCRController = require('../controllers/aiOCRController');
 const guestWarningController = require('../controllers/guestWarningController');
 const newLandingPage = require('../controllers/landingPageController');
+const refundController = require('../controllers/refundController');
 
 const multer = require('multer');
 const path = require('path');
@@ -269,6 +270,11 @@ router.patch('/booking/refund/toggle-approval/:id', bookingController.patchRefun
 // transfer property
 router.patch('/booking/transfer-property', bookingController.transferProperty);
 
+// refund routes
+router.post('/refund/create', upload.single('image'), refundController.createRefund);
+router.get('/refund/all', refundController.getAllRefund);
+router.get('/refund/guest/:guestId', refundController.getRefundByGuest);
+router.get('/refund/:id', refundController.getRefundById);
 
 const newPsrController = require('../controllers/newEmployeePsr');
 // new psr methods
