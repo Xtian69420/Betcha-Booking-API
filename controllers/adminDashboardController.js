@@ -254,7 +254,8 @@ exports.AIAnalyticsData = async (req, res) => {
       recentBookings,
       upcomingCheckIns,
       activeBookingsNow,
-      bookedDatesByProperty
+      bookedDatesByProperty,
+      allPropertiesEarnings
     ] = await Promise.all([
       // Guest Statistics
       Guest.aggregate([
@@ -300,15 +301,36 @@ exports.AIAnalyticsData = async (req, res) => {
             ],
             thisWeek: [
               { $match: { createdAt: { $gte: startOfWeek }, status: { $nin: ['Cancel', 'Pending Payment'] } } },
-              { $count: 'count' }
+              { 
+                $group: { 
+                  _id: null, 
+                  count: { $sum: 1 },
+                  totalFee: { $sum: '$totalFee' },
+                  totalRefunds: { $sum: '$refund.refundAmount' }
+                } 
+              }
             ],
             thisMonth: [
               { $match: { createdAt: { $gte: startOfMonth }, status: { $nin: ['Cancel', 'Pending Payment'] } } },
-              { $count: 'count' }
+              { 
+                $group: { 
+                  _id: null, 
+                  count: { $sum: 1 },
+                  totalFee: { $sum: '$totalFee' },
+                  totalRefunds: { $sum: '$refund.refundAmount' }
+                } 
+              }
             ],
             thisYear: [
               { $match: { createdAt: { $gte: startOfYear }, status: { $nin: ['Cancel', 'Pending Payment'] } } },
-              { $count: 'count' }
+              { 
+                $group: { 
+                  _id: null, 
+                  count: { $sum: 1 },
+                  totalFee: { $sum: '$totalFee' },
+                  totalRefunds: { $sum: '$refund.refundAmount' }
+                } 
+              }
             ],
             cancelledThisMonth: [
               { $match: { createdAt: { $gte: startOfMonth }, status: 'Cancel' } },
@@ -442,6 +464,43 @@ exports.AIAnalyticsData = async (req, res) => {
           }
         },
         { $sort: { propertyName: 1 } }
+      ]),
+
+      // All Properties with Earnings and Refunds
+      Booking.aggregate([
+        {
+          $match: {
+            status: { $nin: ['Cancel', 'Pending Payment'] }
+          }
+        },
+        {
+          $group: {
+            _id: '$propertyId',
+            propertyName: { $first: '$propertyName' },
+            totalBookings: { $sum: 1 },
+            totalEarnings: { $sum: '$totalFee' },
+            totalRefunds: { $sum: '$refund.refundAmount' },
+            completedBookings: {
+              $sum: { $cond: [{ $eq: ['$status', 'Completed'] }, 1, 0] }
+            },
+            activeBookings: {
+              $sum: { $cond: [{ $in: ['$status', ['Reserved', 'Fully-Paid', 'Checked-In', 'Checked-Out']] }, 1, 0] }
+            }
+          }
+        },
+        {
+          $project: {
+            _id: 1,
+            propertyName: 1,
+            totalBookings: 1,
+            completedBookings: 1,
+            activeBookings: 1,
+            totalEarnings: 1,
+            totalRefunds: 1,
+            netEarnings: { $subtract: ['$totalEarnings', '$totalRefunds'] }
+          }
+        },
+        { $sort: { netEarnings: -1 } }
       ])
     ]);
 
@@ -475,9 +534,24 @@ exports.AIAnalyticsData = async (req, res) => {
           bookings: {
             total: bookingStats[0].total[0]?.count || 0,
             byStatus: bookingStats[0].byStatus,
-            thisWeek: bookingStats[0].thisWeek[0]?.count || 0,
-            thisMonth: bookingStats[0].thisMonth[0]?.count || 0,
-            thisYear: bookingStats[0].thisYear[0]?.count || 0,
+            thisWeek: {
+              count: bookingStats[0].thisWeek[0]?.count || 0,
+              totalFee: bookingStats[0].thisWeek[0]?.totalFee || 0,
+              refunds: bookingStats[0].thisWeek[0]?.totalRefunds || 0,
+              netRevenue: (bookingStats[0].thisWeek[0]?.totalFee || 0) - (bookingStats[0].thisWeek[0]?.totalRefunds || 0)
+            },
+            thisMonth: {
+              count: bookingStats[0].thisMonth[0]?.count || 0,
+              totalFee: bookingStats[0].thisMonth[0]?.totalFee || 0,
+              refunds: bookingStats[0].thisMonth[0]?.totalRefunds || 0,
+              netRevenue: (bookingStats[0].thisMonth[0]?.totalFee || 0) - (bookingStats[0].thisMonth[0]?.totalRefunds || 0)
+            },
+            thisYear: {
+              count: bookingStats[0].thisYear[0]?.count || 0,
+              totalFee: bookingStats[0].thisYear[0]?.totalFee || 0,
+              refunds: bookingStats[0].thisYear[0]?.totalRefunds || 0,
+              netRevenue: (bookingStats[0].thisYear[0]?.totalFee || 0) - (bookingStats[0].thisYear[0]?.totalRefunds || 0)
+            },
             cancelledThisMonth: bookingStats[0].cancelledThisMonth[0]?.count || 0,
             activeNow: activeBookingsNow
           },
@@ -521,6 +595,20 @@ exports.AIAnalyticsData = async (req, res) => {
           totalActiveBookings: property.bookings.length,
           bookedDates: property.bookedDates,
           bookingDetails: property.bookings
+        })),
+        propertiesFinancials: allPropertiesEarnings.map(property => ({
+          propertyId: property._id,
+          propertyName: property.propertyName,
+          bookingStats: {
+            total: property.totalBookings,
+            completed: property.completedBookings,
+            active: property.activeBookings
+          },
+          financials: {
+            totalEarnings: property.totalEarnings,
+            totalRefunds: property.totalRefunds,
+            netEarnings: property.netEarnings
+          }
         })),
         metadata: {
           dateRanges: {
