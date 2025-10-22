@@ -30,7 +30,7 @@ exports.createAdmin = async (req, res) => {
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    let pfplink = '';
+    let pfplink;
     if (req.file) {
       try {
         const fileMetadata = {
@@ -66,14 +66,20 @@ exports.createAdmin = async (req, res) => {
         return res.status(500).json({ message: 'Failed to upload profile picture' });
       }
     }
-    const newAdmin = new admin({
+    
+    const adminData = {
       firstname,
       minitial,
       lastname,
       email,
-      password: hashedPassword,
-      pfplink
-    });
+      password: hashedPassword
+    };
+
+    if (pfplink) {
+      adminData.pfplink = pfplink;
+    }
+    
+    const newAdmin = new admin(adminData);
 
     await newAdmin.save();
 

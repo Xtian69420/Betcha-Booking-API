@@ -32,7 +32,7 @@ exports.createEmployee = async (req, res) => {
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    let pfplink = '';
+    let pfplink;
     if (req.file) {
       const fileMetadata = {
         name: `${Date.now()}-${req.file.originalname}`,
@@ -80,16 +80,21 @@ exports.createEmployee = async (req, res) => {
       cleanedProperties = [];
     }
 
-    const newEmployee = new employee({
+    const employeeData = {
       firstname,
       minitial,
       lastname,
       email,
       password: hashedPassword,
-      pfplink,
       role: Array.isArray(role) ? role : [role],
       properties: cleanedProperties
-    });
+    };
+
+    if (pfplink) {
+      employeeData.pfplink = pfplink;
+    }
+
+    const newEmployee = new employee(employeeData);
 
     await newEmployee.save();
 

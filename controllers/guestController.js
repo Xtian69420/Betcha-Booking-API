@@ -39,7 +39,7 @@ exports.createGuest = async (req, res) => {
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    let pfplink = '';
+    let pfplink;
     if (req.file) {
       try {
         const fileMetadata = {
@@ -76,7 +76,7 @@ exports.createGuest = async (req, res) => {
       }
     }
 
-    const newGuest = new guest({
+    const guestData = {
       firstname,
       minitial,
       lastname,
@@ -84,9 +84,14 @@ exports.createGuest = async (req, res) => {
       password: hashedPassword,
       phoneNumber,
       birthday: new Date(birthday), 
-      sex,
-      pfplink
-    });
+      sex
+    };
+
+    if (pfplink) {
+      guestData.pfplink = pfplink;
+    }
+
+    const newGuest = new guest(guestData);
 
     await newGuest.save();
 
